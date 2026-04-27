@@ -1,3 +1,4 @@
+"use client";
 export default function StatsBand() {
   const stats = [
     { n: "4,200+", l: "CVs generados" },

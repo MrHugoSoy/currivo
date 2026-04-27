@@ -1,3 +1,4 @@
+"use client";
 // Reusable CV preview card (light/paper style)
 interface CVPreviewProps {
   compact?: boolean;
