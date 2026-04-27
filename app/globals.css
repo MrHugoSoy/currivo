@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Nunito+Sans:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+:root {
+  --cream: #f8f5ef;
+  --paper: #fffefb;
+  --warm: #f0ebe0;
+  --border: #e4ddd0;
+  --border2: #cfc7b8;
+  --ink: #1c1a16;
+  --body: #4a453e;
+  --muted: #8a8278;
+  --hint: #b5afa6;
+  --green: #2d5a3d;
+  --green2: #3d7a54;
+  --green-bg: #eef4f0;
+  --green-mid: #4a9462;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,148,98,0); }
+  50%       { opacity: .7; box-shadow: 0 0 0 4px rgba(74,148,98,0.15); }
+}
+
+.animate-fade-up   { animation: fadeUp .65s ease both; }
+.animate-fade-up-2 { animation: fadeUp .65s ease .1s both; }
+.animate-fade-up-3 { animation: fadeUp .65s ease .2s both; }
+.animate-fade-up-4 { animation: fadeUp .65s ease .3s both; }
+.animate-spin-slow { animation: spin .65s linear infinite; }
+.animate-glow      { animation: glow 2.5s ease infinite; }
