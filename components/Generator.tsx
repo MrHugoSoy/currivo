@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import CVPreview from "./CVPreview";
 
 const TONES = ["Profesional", "Creativo", "Formal", "Moderno"];
-const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas"];
+const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas", "Construcción", "Manufactura", "Logística", "Ventas", "Recursos Humanos", "Legal", "Gastronomía", "Turismo", "Medios"];
 
 const LEVELS_ES = ["Nativo", "Fluido", "Avanzado (C1)", "Intermedio (B2)", "Básico (B1)", "Elemental (A2)"];
 const LEVELS_EN = ["Native", "Fluent", "Advanced (C1)", "Intermediate (B2)", "Basic (B1)", "Elementary (A2)"];
