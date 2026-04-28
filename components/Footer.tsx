@@ -7,9 +7,9 @@ export default function Footer() {
           curr<span style={{ color: "var(--green)" }}>ivo</span>
         </span>
         <div style={{ display: "flex", gap: 24 }}>
-          {["Términos", "Privacidad", "Contacto"].map(l => (
-            <a key={l} href="#" style={{ fontSize: 12, color: "var(--hint)", textDecoration: "none" }}>{l}</a>
-          ))}
+          <a href="/terminos"   style={{ fontSize: 12, color: "var(--hint)", textDecoration: "none" }}>Términos</a>
+          <a href="/privacidad" style={{ fontSize: 12, color: "var(--hint)", textDecoration: "none" }}>Privacidad</a>
+          <a href="mailto:hola@currivo.mx" style={{ fontSize: 12, color: "var(--hint)", textDecoration: "none" }}>Contacto</a>
         </div>
         <span style={{ fontSize: 11, color: "var(--hint)" }}>© 2026 currivo · México</span>
       </div>
