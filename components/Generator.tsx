@@ -301,7 +301,7 @@ export default function Generator() {
               </>
             ) : (
               <>
-                <CVPreview market={form.mercado} photoUrl={form.photoUrl} templateId={form.templateId} />
+                <CVPreview market={form.mercado} photoUrl={form.photoUrl} templateId={form.templateId} formData={form} />
                 {loading && (
                   <div style={{ position: "absolute", inset: 0, borderRadius: 8, background: "rgba(28,26,22,.88)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
                     <Spinner large />
