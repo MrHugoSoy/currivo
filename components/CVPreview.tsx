@@ -114,21 +114,20 @@ function buildLiveText(form: LiveFormData, market: "mx" | "us" | "ca"): string {
   const isMx = market === "mx";
   const lines: string[] = [];
 
-  // Header
-  lines.push(form.nombre || (isMx ? "Tu Nombre Completo" : "Your Full Name"));
-  lines.push(form.puesto || (isMx ? "Puesto deseado" : "Desired Position"));
+  // Header — only include filled fields
+  if (form.nombre) lines.push(form.nombre);
+  if (form.puesto)  lines.push(form.puesto);
 
   const contacts: string[] = [];
   if (form.ciudad) contacts.push(isMx ? `📍 ${form.ciudad}` : form.ciudad);
   if (form.email)  contacts.push(isMx ? `✉ ${form.email}` : form.email);
-  if (form.redesSociales?.length) {
+  if (form.redesSociales?.length)
     contacts.push(...form.redesSociales.filter(r => r.url).map(r => r.url));
-  }
   if (contacts.length) lines.push(contacts.join(" · "));
 
-  lines.push("");
+  if (lines.length) lines.push("");
 
-  // Experience
+  // Experience — only if at least one entry has any data
   if (!form.sinExperiencia) {
     const validExp = (form.experiencias ?? []).filter(e => e.puesto || e.empresa || e.descripcion);
     if (validExp.length > 0) {
@@ -136,7 +135,7 @@ function buildLiveText(form: LiveFormData, market: "mx" | "us" | "ca"): string {
       lines.push("");
       for (const exp of validExp) {
         const parts = [exp.puesto, exp.empresa, exp.periodo].filter(Boolean);
-        lines.push(parts.join(" | "));
+        if (parts.length) lines.push(parts.join(" | "));
         if (exp.descripcion) {
           const bullets = exp.descripcion
             .split(/(?<=[.!?])\s+|\n+/)
@@ -147,10 +146,6 @@ function buildLiveText(form: LiveFormData, market: "mx" | "us" | "ca"): string {
         lines.push("");
       }
     }
-  } else {
-    lines.push(isMx ? "EDUCACIÓN" : "EDUCATION");
-    lines.push(isMx ? "Agrega tu educación y proyectos personales" : "Add your education and personal projects");
-    lines.push("");
   }
 
   // Volunteer (Canada)
@@ -161,7 +156,7 @@ function buildLiveText(form: LiveFormData, market: "mx" | "us" | "ca"): string {
     lines.push("");
   }
 
-  // Languages
+  // Languages — only filled entries
   const validLangs = (form.languages ?? []).filter(l => l.language);
   if (validLangs.length > 0) {
     lines.push(isMx ? "IDIOMAS" : "LANGUAGES");
@@ -182,8 +177,8 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
 
   const cvData = hasLiveData && formData
     ? {
-        nombre: formData.nombre || (market === "mx" ? "Tu Nombre" : "Your Name"),
-        puesto:  formData.puesto  || (market === "mx" ? "Puesto deseado" : "Desired Position"),
+        nombre:  formData.nombre  || "",
+        puesto:  formData.puesto  || "",
         ciudad:  formData.ciudad  || undefined,
         email:   formData.email   || undefined,
         mercado: market,
