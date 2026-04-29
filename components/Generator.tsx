@@ -124,7 +124,7 @@ export default function Generator() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 32, alignItems: "start" }}>
 
           {/* FORM */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
