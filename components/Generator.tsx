@@ -10,6 +10,12 @@ const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 const TONES = ["Profesional", "Creativo", "Formal", "Moderno"];
 const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas", "Construcción", "Manufactura", "Logística", "Ventas", "Recursos Humanos", "Legal", "Gastronomía", "Turismo", "Medios"];
 
+const COMMON_LANGUAGES = [
+  "Español", "English", "Français", "Português", "Deutsch", "Italiano",
+  "中文 (Mandarín)", "日本語", "한국어", "العربية", "Русский", "Nederlands",
+  "Polski", "Türkçe", "हिन्दी", "Tagalog", "Vietnamese",
+];
+
 const LEVELS_ES = ["Nativo", "Fluido", "Avanzado (C1)", "Intermedio (B2)", "Básico (B1)", "Elemental (A2)"];
 const LEVELS_EN = ["Native", "Fluent", "Advanced (C1)", "Intermediate (B2)", "Basic (B1)", "Elementary (A2)"];
 
@@ -44,21 +50,37 @@ const DIFF_NOTES: Record<Market, { bg: string; border: string; color: string; ic
   ca: { bg: "#fef8ec", border: "rgba(138,74,0,.15)", color: "#5a3000", icon: "🍁", text: "<strong>Canadian Resume:</strong> Sin foto ni datos personales. El voluntariado tiene mucho peso. Bilingüismo inglés/francés es una ventaja enorme." },
 };
 
+export interface ExperienciaEntry {
+  puesto: string;
+  empresa: string;
+  periodo: string;
+  descripcion: string;
+}
+
+export interface RedSocial {
+  tipo: string;
+  url: string;
+}
+
 export interface FormData {
   nombre: string; puesto: string; ciudad: string; email: string;
-  ultimoPuesto: string; empresa: string; descripcion: string;
   tono: string; industria: string; mercado: Market;
   edad?: string; estadoCivil?: string; voluntariado?: string; photoUrl?: string;
   languages?: Array<{ language: string; level: string }>;
   templateId: TemplateId;
+  sinExperiencia?: boolean;
+  experiencias: ExperienciaEntry[];
+  redesSociales?: RedSocial[];
 }
 
 export default function Generator() {
   const [form, setForm] = useState<FormData>({
     nombre: "", puesto: "", ciudad: "", email: "",
-    ultimoPuesto: "", empresa: "", descripcion: "",
     tono: "Profesional", industria: "Diseño", mercado: "mx", templateId: "clasico",
     languages: [{ language: "Spanish", level: "Nativo" }],
+    sinExperiencia: false,
+    experiencias: [{ puesto: "", empresa: "", periodo: "", descripcion: "" }],
+    redesSociales: [],
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -89,8 +111,12 @@ export default function Generator() {
   };
 
   const handleGenerate = async () => {
-    if (!form.nombre || !form.puesto || !form.descripcion) {
-      setError("Por favor completa nombre, puesto y descripción.");
+    if (!form.nombre || !form.puesto) {
+      setError("Por favor completa nombre y puesto deseado.");
+      return;
+    }
+    if (!form.sinExperiencia && form.experiencias.every(e => !e.descripcion.trim())) {
+      setError("Describe al menos una experiencia, o marca que no tienes experiencia.");
       return;
     }
     setError(null);
@@ -165,16 +191,48 @@ export default function Generator() {
             </FormBlock>
 
             <FormBlock title={FORM_LABELS.blocks.experience[form.mercado]}>
-              <FieldRow>
-                <Field label={FORM_LABELS.fields.ultimoPuesto[form.mercado]} placeholder={form.mercado === "us" ? "Junior Designer" : "Diseñadora Junior"} value={form.ultimoPuesto} onChange={set("ultimoPuesto")} />
-                <Field label={FORM_LABELS.fields.empresa[form.mercado]} placeholder="Agencia Creativa" value={form.empresa} onChange={set("empresa")} />
-              </FieldRow>
-              <Field label={FORM_LABELS.fields.descripcion[form.mercado]}
-                placeholder={form.mercado === "mx" ? "Ej. Diseñé identidades de marca, materiales para redes..." : form.mercado === "us" ? "e.g. Led rebranding for 5 clients, increased engagement by 35%..." : "Ej. Diseñé materiales, lideré equipo de 3 personas..."}
-                value={form.descripcion} onChange={set("descripcion")} textarea />
-              {form.mercado === "ca" && (
-                <Field label={FORM_LABELS.fields.voluntariado.ca} placeholder="Ej. Voluntario en banco de alimentos, diseñé materiales..." value={form.voluntariado ?? ""} onChange={set("voluntariado")} textarea />
+              <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={form.sinExperiencia ?? false}
+                  onChange={e => setForm(f => ({ ...f, sinExperiencia: e.target.checked }))}
+                  style={{ accentColor: "var(--green-mid)", width: 14, height: 14 }}
+                />
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>
+                  {form.mercado === "us" ? "I have no work experience" : "No tengo experiencia laboral"}
+                </span>
+              </label>
+              {!form.sinExperiencia && (
+                <ExperienceSelector
+                  experiencias={form.experiencias}
+                  onChange={exp => setForm(f => ({ ...f, experiencias: exp }))}
+                  market={form.mercado}
+                />
               )}
+              {form.sinExperiencia && (
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,.3)", lineHeight: 1.6, marginBottom: 4 }}>
+                  {form.mercado === "us"
+                    ? "The AI will focus on your education, skills, and personal projects — no invented work history."
+                    : "La IA se enfocará en educación, habilidades y proyectos — sin inventar experiencia laboral."}
+                </p>
+              )}
+              {form.mercado === "ca" && (
+                <div style={{ marginTop: 12 }}>
+                  <Field label={FORM_LABELS.fields.voluntariado.ca} placeholder="Ej. Voluntario en banco de alimentos, diseñé materiales..." value={form.voluntariado ?? ""} onChange={e => setForm(f => ({ ...f, voluntariado: e.target.value }))} textarea />
+                </div>
+              )}
+            </FormBlock>
+
+            <FormBlock title={
+              form.mercado === "mx" ? "Redes y perfiles" :
+              form.mercado === "us" ? "Links & Profiles" :
+              "Links & Profiles / Réseaux et profils"
+            }>
+              <SocialLinksSelector
+                links={form.redesSociales ?? []}
+                onChange={links => setForm(f => ({ ...f, redesSociales: links }))}
+                market={form.mercado}
+              />
             </FormBlock>
 
             <FormBlock title={FORM_LABELS.blocks.languages[form.mercado]}>
@@ -188,11 +246,37 @@ export default function Generator() {
             <FormBlock title="Preferencias de IA">
               <div style={{ marginBottom: 14 }}>
                 <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>Tono</label>
-                <PillGroup options={TONES} selected={form.tono} onSelect={v => setForm(f => ({ ...f, tono: v }))} />
+                <PillGroup
+                  options={[...TONES, "Otro"]}
+                  selected={TONES.includes(form.tono) ? form.tono : "Otro"}
+                  onSelect={v => setForm(f => ({ ...f, tono: v === "Otro" ? "" : v }))}
+                />
+                {!TONES.includes(form.tono) && (
+                  <input
+                    type="text" autoFocus
+                    placeholder="Ej. Emprendedor, Técnico, Académico..."
+                    value={form.tono}
+                    onChange={e => setForm(f => ({ ...f, tono: e.target.value }))}
+                    style={{ marginTop: 8, width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(74,144,96,.35)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }}
+                  />
+                )}
               </div>
               <div style={{ marginBottom: 14 }}>
                 <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>Industria</label>
-                <PillGroup options={INDUSTRIES} selected={form.industria} onSelect={v => setForm(f => ({ ...f, industria: v }))} />
+                <PillGroup
+                  options={[...INDUSTRIES, "Otra"]}
+                  selected={INDUSTRIES.includes(form.industria) ? form.industria : "Otra"}
+                  onSelect={v => setForm(f => ({ ...f, industria: v === "Otra" ? "" : v }))}
+                />
+                {!INDUSTRIES.includes(form.industria) && (
+                  <input
+                    type="text" autoFocus
+                    placeholder="Ej. Agricultura, Minería, Deportes..."
+                    value={form.industria}
+                    onChange={e => setForm(f => ({ ...f, industria: e.target.value }))}
+                    style={{ marginTop: 8, width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(74,144,96,.35)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }}
+                  />
+                )}
               </div>
               <TemplateSelector
                 selected={form.templateId}
@@ -310,6 +394,124 @@ function PhotoUpload({ value, onChange }: { value?: string; onChange: (url: stri
     </div>
   );
 }
+const SOCIAL_TYPES = ["LinkedIn", "GitHub", "Portfolio", "Behance", "Twitter/X", "Dribbble", "Otro"];
+
+function ExperienceSelector({ experiencias, onChange, market }: {
+  experiencias: ExperienciaEntry[];
+  onChange: (exp: ExperienciaEntry[]) => void;
+  market: Market;
+}) {
+  const isMx = market === "mx";
+  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
+  const update = (i: number, field: keyof ExperienciaEntry, val: string) =>
+    onChange(experiencias.map((e, j) => j === i ? { ...e, [field]: val } : e));
+  const remove = (i: number) => onChange(experiencias.filter((_, j) => j !== i));
+  const add = () => onChange([...experiencias, { puesto: "", empresa: "", periodo: "", descripcion: "" }]);
+
+  return (
+    <div>
+      {experiencias.map((exp, i) => (
+        <div key={i} style={{ marginBottom: 16, padding: 14, background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span style={{ fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,.22)" }}>
+              {isMx ? `Experiencia ${i + 1}` : `Experience ${i + 1}`}
+            </span>
+            {experiencias.length > 1 && (
+              <button type="button" onClick={() => remove(i)}
+                style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
+            )}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+            <div>
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+                {isMx ? "Puesto" : market === "us" ? "Job Title" : "Position"}
+              </label>
+              <input type="text" value={exp.puesto} onChange={e => update(i, "puesto", e.target.value)}
+                placeholder={isMx ? "Diseñadora Gráfica" : "Graphic Designer"} style={base} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+                {isMx ? "Empresa" : "Company"}
+              </label>
+              <input type="text" value={exp.empresa} onChange={e => update(i, "empresa", e.target.value)}
+                placeholder="Agencia Creativa" style={base} />
+            </div>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+              {isMx ? "Período" : "Period"}
+            </label>
+            <input type="text" value={exp.periodo} onChange={e => update(i, "periodo", e.target.value)}
+              placeholder={isMx ? "Ej. Ene 2020 – Presente" : "e.g. Jan 2020 – Present"} style={base} />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+              {market === "mx" ? "¿Qué hacías? Descríbelo brevemente" : market === "us" ? "Achievements (with numbers)" : "Work description"}
+            </label>
+            <textarea value={exp.descripcion} onChange={e => update(i, "descripcion", e.target.value)} rows={3}
+              placeholder={market === "mx" ? "Ej. Diseñé identidades de marca, reduje tiempos en 30%..." : market === "us" ? "e.g. Led rebranding for 5 clients, increased engagement by 35%..." : "Ej. Diseñé materiales, lideré equipo de 3 personas..."}
+              style={{ ...base, resize: "none" }} />
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={add}
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+        + {isMx ? "Agregar otra experiencia" : "Add another experience"}
+      </button>
+    </div>
+  );
+}
+
+function SocialLinksSelector({ links, onChange, market }: {
+  links: RedSocial[];
+  onChange: (links: RedSocial[]) => void;
+  market: Market;
+}) {
+  const base: React.CSSProperties = { background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", width: "100%" };
+  const update = (i: number, field: keyof RedSocial, val: string) =>
+    onChange(links.map((l, j) => j === i ? { ...l, [field]: val } : l));
+  const remove = (i: number) => onChange(links.filter((_, j) => j !== i));
+  const add = () => onChange([...links, { tipo: "LinkedIn", url: "" }]);
+
+  const emptyText = market === "mx"
+    ? "Agrega tu LinkedIn, portafolio u otras redes para incluirlos en el CV."
+    : market === "us"
+    ? "Add your LinkedIn, portfolio or other profiles to include them in your resume."
+    : "Ajoutez LinkedIn, portfolio ou autres profils / Add your LinkedIn, portfolio or other profiles.";
+
+  const addLabel = market === "mx" ? "+ Agregar link" : market === "us" ? "+ Add link" : "+ Ajouter / Add link";
+
+  const placeholder = market === "mx"
+    ? "https://linkedin.com/in/tu-perfil"
+    : "https://linkedin.com/in/your-profile";
+
+  return (
+    <div>
+      {links.length === 0 && (
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,.25)", marginBottom: 10, lineHeight: 1.5 }}>
+          {emptyText}
+        </p>
+      )}
+      {links.map((link, i) => (
+        <div key={i} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 8, marginBottom: 8, alignItems: "center" }}>
+          <select value={link.tipo} onChange={e => update(i, "tipo", e.target.value)}
+            style={{ ...base, width: "auto", cursor: "pointer" }}>
+            {SOCIAL_TYPES.map(t => <option key={t} value={t} style={{ background: "#1c1a16" }}>{t}</option>)}
+          </select>
+          <input type="text" value={link.url} onChange={e => update(i, "url", e.target.value)}
+            placeholder={placeholder} style={base} />
+          <button type="button" onClick={() => remove(i)}
+            style={{ fontSize: 16, color: "rgba(255,255,255,.3)", background: "none", border: "none", cursor: "pointer", padding: "0 4px", lineHeight: 1 }}>×</button>
+        </div>
+      ))}
+      <button type="button" onClick={add}
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+        {addLabel}
+      </button>
+    </div>
+  );
+}
+
 function LanguageSelector({ languages, onChange, market }: {
   languages: Array<{ language: string; level: string }>;
   onChange: (langs: Array<{ language: string; level: string }>) => void;
@@ -322,9 +524,18 @@ function LanguageSelector({ languages, onChange, market }: {
     <div>
       {languages.map((l, i) => (
         <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, marginBottom: 8, alignItems: "center" }}>
-          <input type="text" placeholder={isMx ? "Ej. Inglés" : "e.g. French"} value={l.language}
-            onChange={e => onChange(languages.map((x, j) => j === i ? { ...x, language: e.target.value } : x))}
-            style={inputBase} />
+          <div>
+            <input
+              list={`lang-list-${i}`}
+              placeholder={isMx ? "Ej. Inglés" : "e.g. French"}
+              value={l.language}
+              onChange={e => onChange(languages.map((x, j) => j === i ? { ...x, language: e.target.value } : x))}
+              style={inputBase}
+            />
+            <datalist id={`lang-list-${i}`}>
+              {COMMON_LANGUAGES.map(lang => <option key={lang} value={lang} />)}
+            </datalist>
+          </div>
           <select value={l.level}
             onChange={e => onChange(languages.map((x, j) => j === i ? { ...x, level: e.target.value } : x))}
             style={{ ...inputBase, cursor: "pointer" }}>

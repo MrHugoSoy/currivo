@@ -19,9 +19,41 @@ function generateSlug(nombre: string): string {
   return `${words.join("-")}-${random}`;
 }
 
-function buildPrompt(data: Record<string, string>): string {
-  const { nombre, puesto, ciudad, email, ultimoPuesto, empresa, descripcion, tono, industria, mercado, edad, estadoCivil, voluntariado, languages } = data;
+interface ExperienciaEntry { puesto: string; empresa: string; periodo: string; descripcion: string; }
+interface RedSocial { tipo: string; url: string; }
+
+function formatExperiencias(experiencias: ExperienciaEntry[], mercado: string): string {
+  if (!experiencias?.length) return "No especificada";
+  return experiencias.map((e, i) =>
+    `Experiencia ${i + 1}:\n- Puesto: ${e.puesto || "No especificado"}\n- Empresa: ${e.empresa || "No especificada"}\n- Período: ${e.periodo || "No especificado"}\n- Descripción: ${e.descripcion || "No especificada"}`
+  ).join("\n\n");
+}
+
+function formatRedes(redes: RedSocial[]): string {
+  if (!redes?.length) return "";
+  return redes.filter(r => r.url).map(r => `${r.tipo}: ${r.url}`).join(" · ");
+}
+
+function buildPrompt(data: Record<string, unknown>): string {
+  const nombre = data.nombre as string;
+  const puesto = data.puesto as string;
+  const ciudad = data.ciudad as string;
+  const email = data.email as string;
+  const tono = data.tono as string;
+  const industria = data.industria as string;
+  const mercado = data.mercado as string;
+  const edad = data.edad as string | undefined;
+  const estadoCivil = data.estadoCivil as string | undefined;
+  const voluntariado = data.voluntariado as string | undefined;
+  const languages = data.languages as string;
+  const sinExperiencia = data.sinExperiencia as boolean | undefined;
+  const experiencias = (data.experiencias as ExperienciaEntry[]) ?? [];
+  const redesSociales = (data.redesSociales as RedSocial[]) ?? [];
   const langList = languages;
+  const redesStr = formatRedes(redesSociales);
+  const expStr = sinExperiencia
+    ? "SIN EXPERIENCIA LABORAL — no inventar trabajos anteriores."
+    : formatExperiencias(experiencias, mercado);
 
   const toneDesc: Record<string, string> = {
     Profesional: "formal y ejecutivo, verbos de acción fuertes",
@@ -41,17 +73,19 @@ Genera un currículum vitae completo en español (México) con estos datos:
 - Email: ${email || "No especificado"}
 - Edad: ${edad || "No especificada"}
 - Estado civil: ${estadoCivil || "No especificado"}
-- Último puesto: ${ultimoPuesto || "No especificado"}
-- Empresa: ${empresa || "No especificada"}
-- Actividades: ${descripcion}
+${redesStr ? `- Perfiles/Redes: ${redesStr}` : ""}
 - Tono: ${tono} — ${toneDesc[tono] || tono}
 - Industria: ${industria}
 ${languages ? `- Idiomas: ${languages}` : ""}
 
+EXPERIENCIA LABORAL:
+${expStr}
+
 REGLAS PARA CV MEXICANO:
 - Incluye sección de DATOS PERSONALES al inicio (nombre, ciudad, email, edad si se dio, estado civil si se dio)
+${redesStr ? "- Incluye los perfiles/redes proporcionados en la sección de datos personales o contacto" : ""}
 - Incluye OBJETIVO PROFESIONAL (2-3 líneas)
-- Sección EXPERIENCIA LABORAL con logros concretos
+${sinExperiencia ? "- El candidato NO tiene experiencia laboral. NO inventes trabajos. Enfócate en EDUCACIÓN, HABILIDADES, PROYECTOS PERSONALES o CURSOS relevantes para " + puesto + "." : "- Sección EXPERIENCIA LABORAL con los puestos proporcionados y logros concretos"}
 - Sección HABILIDADES relevantes para ${industria}
 - Sección EDUCACIÓN (genera algo plausible si no se proporcionó)
 - Máximo 2 páginas de contenido
@@ -72,21 +106,22 @@ Generate a professional, ATS-optimized resume in English with the following info
 - Target Position: ${puesto}
 - Location: ${ciudad || "Not specified"}
 - Email: ${email || "Not specified"}
-- Last Position: ${ultimoPuesto || "Not specified"}
-- Company: ${empresa || "Not specified"}
-- Work Description: ${descripcion}
+${redesStr ? `- Profiles/Links: ${redesStr}` : ""}
 - Tone: ${tono} — ${toneDesc[tono] || tono}
 - Industry: ${industria}
+
+WORK EXPERIENCE:
+${expStr}
 
 US RESUME RULES (CRITICAL):
 - NO photo, NO age, NO marital status, NO nationality — these are illegal to include
 - Maximum 1 page
 - Start with a strong PROFESSIONAL SUMMARY (2-3 lines)
-- EXPERIENCE section: use bullet points with quantified achievements ("Increased sales by 40%", "Managed team of 8")
+${redesStr ? "- Include provided profile links in the header section" : "- Include LinkedIn placeholder and location (City, State) but NOT full address"}
+${sinExperiencia ? "- Candidate has NO work experience. Do NOT invent jobs. Focus on EDUCATION, SKILLS, PERSONAL PROJECTS, or CERTIFICATIONS relevant to " + puesto + "." : "- EXPERIENCE section: use bullet points with quantified achievements (\"Increased sales by 40%\", \"Managed team of 8\")"}
 - Use strong action verbs: Led, Developed, Implemented, Optimized, Delivered, Achieved...
 - SKILLS section with ATS-friendly keywords for ${industria}
 - EDUCATION section
-- Include LinkedIn and location (City, State) but NOT full address
 - Use American English
 
 Generate ONLY the resume content, no additional comments.`;
@@ -101,13 +136,14 @@ Name: ${nombre}
 Target Position: ${puesto}
 Location: ${ciudad || "Canada"}
 Email: ${email || "Not specified"}
-Last Position: ${ultimoPuesto || "Not specified"}
-Company: ${empresa || "Not specified"}
-Work Description: ${descripcion}
+${redesStr ? `Profiles/Links: ${redesStr}` : ""}
 Volunteer Work: ${voluntariado || "Not specified"}
 Languages: ${langList || "English (Fluent)"}
 Tone: ${tono} — ${toneDesc[tono] || tono}
 Industry: ${industria}
+
+WORK EXPERIENCE:
+${expStr}
 
 CANADIAN RESUME RULES — FOLLOW STRICTLY:
 
@@ -146,7 +182,9 @@ STRUCTURE (in this exact order):
    Cross-cultural Communication | Bilingual | Agile
 
 4. PROFESSIONAL EXPERIENCE
-   - Reverse chronological order
+${sinExperiencia
+  ? "   - Candidate has NO work experience. Do NOT invent jobs. Instead, include an ACADEMIC PROJECTS or PERSONAL PROJECTS section relevant to " + puesto + ". Focus on transferable skills."
+  : `   - Reverse chronological order
    - Format: Job Title | Company Name | City, Province | Month Year – Month Year
    - 3-5 bullet points per position
    - EVERY bullet must start with a strong past-tense action verb
@@ -154,7 +192,7 @@ STRUCTURE (in this exact order):
    - QUANTIFY everything possible: numbers, %, $, team sizes, timelines
    - Bad example: "Managed social media accounts"
    - Good example: "Grew Instagram following from 2K to 18K in 8 months, increasing engagement rate by 340% and driving 25% more website traffic"
-   - Highlight collaboration, leadership and cross-cultural work
+   - Highlight collaboration, leadership and cross-cultural work`}
 
 5. VOLUNTEER WORK (very important in Canada)
    - Shows community integration — critical for immigrants
@@ -210,9 +248,9 @@ Use plain text formatting with clear section headers in ALL CAPS.`;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { nombre, puesto, descripcion } = body;
+    const { nombre, puesto } = body;
 
-    if (!nombre || !puesto || !descripcion) {
+    if (!nombre || !puesto) {
       return NextResponse.json({ error: "Faltan campos obligatorios." }, { status: 400 });
     }
 
@@ -235,7 +273,7 @@ export async function POST(req: NextRequest) {
       .join("\n");
 
     const slug = generateSlug(nombre);
-    const { photoUrl: _photo, ...formDataToStore } = body;
+    const { photoUrl: _photo, redesSociales: _redes, ...formDataToStore } = body;
 
     await supabase.from("cvs").insert({
       slug,
