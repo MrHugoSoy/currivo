@@ -23,16 +23,18 @@ interface CVPreviewProps {
   formData?: LiveFormData;
 }
 
-// ── Mock data (shown when form is empty) ───────────────────────────────────
+// ── Mock sections (fallback for unfilled fields) ──────────────────────────
 
-const MOCK_MX = `María García López
-Diseñadora Gráfica Senior
-📍 León, Gto. · ✉ maria@correo.com · ☎ +52 477 123 4567
-
-OBJETIVO PROFESIONAL
-Diseñadora con más de 5 años de experiencia en identidades corporativas y estrategia visual digital, busca empresa innovadora donde aportar expertise en branding.
-
-EXPERIENCIA LABORAL
+const MOCK = {
+  mx: {
+    nombre: "María García López",
+    puesto: "Diseñadora Gráfica Senior",
+    ciudad: "León, Gto.",
+    email: "maria@correo.com",
+    extra: "☎ +52 477 123 4567",
+    summary: `OBJETIVO PROFESIONAL
+Diseñadora con más de 5 años de experiencia en identidades corporativas y estrategia visual digital, busca empresa innovadora donde aportar expertise en branding.`,
+    experience: `EXPERIENCIA LABORAL
 
 Diseñadora Gráfica Senior | Agencia Creativa MX | León, Gto. | 2020 – Presente
 • Desarrollé +30 identidades corporativas con 95% de satisfacción
@@ -40,26 +42,23 @@ Diseñadora Gráfica Senior | Agencia Creativa MX | León, Gto. | 2020 – Prese
 • Lideré 3 campañas de rebranding aumentando ingresos en 25%
 
 Diseñadora Freelance | Independiente | León, Gto. | 2018 – 2020
-• Atendí a 15+ clientes en retail, restaurantes y servicios profesionales
+• Atendí a 15+ clientes en retail, restaurantes y servicios profesionales`,
+    skills: `HABILIDADES
+Photoshop | Figma | Illustrator | CorelDRAW | Branding | UX Design`,
+    education: `EDUCACIÓN
 
-HABILIDADES
-Photoshop | Figma | Illustrator | CorelDRAW | Branding | UX Design
-
-EDUCACIÓN
-
-Lic. en Diseño Gráfico | Universidad de Guanajuato | León, Gto. | 2014 – 2018
-
-IDIOMAS
-Español (Nativo) | Inglés (Avanzado B2)`;
-
-const MOCK_US = `María García López
-Graphic Designer
-Austin, TX · maria@email.com · linkedin.com/in/mariagl
-
-PROFESSIONAL SUMMARY
-Results-driven Graphic Designer with 5+ years delivering high-impact brand identities. Proven track record reducing delivery timelines by 40% through systematic design processes.
-
-EXPERIENCE
+Lic. en Diseño Gráfico | Universidad de Guanajuato | León, Gto. | 2014 – 2018`,
+    languages: `IDIOMAS\nEspañol (Nativo) | Inglés (Avanzado B2)`,
+  },
+  us: {
+    nombre: "María García López",
+    puesto: "Graphic Designer",
+    ciudad: "Austin, TX",
+    email: "maria@email.com",
+    extra: "linkedin.com/in/mariagl",
+    summary: `PROFESSIONAL SUMMARY
+Results-driven Graphic Designer with 5+ years delivering high-impact brand identities. Proven track record reducing delivery timelines by 40% through systematic design processes.`,
+    experience: `EXPERIENCE
 
 Senior Graphic Designer | Creative Agency MX | Austin, TX | 2020 – Present
 • Delivered 30+ corporate brand identities achieving 95% client satisfaction
@@ -67,22 +66,22 @@ Senior Graphic Designer | Creative Agency MX | Austin, TX | 2020 – Present
 • Led 3 rebranding campaigns increasing client revenue by 25%
 
 Freelance Designer | Self-employed | Remote | 2018 – 2020
-• Served 15+ clients across retail, restaurants, and professional services
-
-SKILLS
-Adobe Photoshop | Figma | Illustrator | Brand Strategy | UX Design
-
-EDUCATION
-B.A. Graphic Design | University of Guanajuato | 2018`;
-
-const MOCK_CA = `María García López
-Graphic Designer
-Toronto, ON · maria@email.com · linkedin.com/in/mariagl
-
-PROFESSIONAL SUMMARY
-Collaborative Graphic Designer with 5+ years building brand identities. Known for cross-cultural communication and delivering results in multicultural environments.
-
-PROFESSIONAL EXPERIENCE
+• Served 15+ clients across retail, restaurants, and professional services`,
+    skills: `SKILLS
+Adobe Photoshop | Figma | Illustrator | Brand Strategy | UX Design`,
+    education: `EDUCATION
+B.A. Graphic Design | University of Guanajuato | 2018`,
+    languages: `LANGUAGES\nEnglish (Native) | Spanish (Fluent)`,
+  },
+  ca: {
+    nombre: "María García López",
+    puesto: "Graphic Designer",
+    ciudad: "Toronto, ON",
+    email: "maria@email.com",
+    extra: "linkedin.com/in/mariagl",
+    summary: `PROFESSIONAL SUMMARY
+Collaborative Graphic Designer with 5+ years building brand identities. Known for cross-cultural communication and delivering results in multicultural environments.`,
+    experience: `PROFESSIONAL EXPERIENCE
 
 Senior Graphic Designer | Creative Agency | Toronto, ON | 2020 – Present
 • Delivered 30+ brand identities achieving 95% client satisfaction rate
@@ -90,78 +89,91 @@ Senior Graphic Designer | Creative Agency | Toronto, ON | 2020 – Present
 • Mentored 2 junior designers in a collaborative team environment
 
 Freelance Designer | Self-employed | Remote | 2018 – 2020
-• Served 15+ clients across retail, hospitality, and professional services
-
-VOLUNTEER WORK
+• Served 15+ clients across retail, hospitality, and professional services`,
+    skills: `CORE COMPETENCIES
+Adobe Suite | Figma | Brand Strategy | Team Leadership | Cross-cultural Communication | Bilingual`,
+    education: `EDUCATION
+B.A. Graphic Design | University of Guanajuato | 2018`,
+    languages: `LANGUAGES\nEnglish (Native) | French (Intermediate B1) | Spanish (Native)`,
+    volunteer: `VOLUNTEER WORK
 
 Design Volunteer | Toronto Food Bank | Toronto, ON | 2021 – Present
-• Designed fundraising materials contributing 8 hrs per month
+• Designed fundraising materials contributing 8 hrs per month`,
+  },
+} as const;
 
-CORE COMPETENCIES
-Adobe Suite | Figma | Brand Strategy | Team Leadership | Cross-cultural Communication | Bilingual
+// ── Hybrid cv_text builder ─────────────────────────────────────────────────
+// Uses user data for filled fields, mock data for everything else.
 
-EDUCATION
-B.A. Graphic Design | University of Guanajuato | 2018
-
-LANGUAGES
-English — Native | French — Intermediate (B1) | Spanish — Native`;
-
-const MOCK_TEXT: Record<"mx" | "us" | "ca", string> = { mx: MOCK_MX, us: MOCK_US, ca: MOCK_CA };
-
-// ── Live cv_text builder ───────────────────────────────────────────────────
-
-function buildLiveText(form: LiveFormData, market: "mx" | "us" | "ca"): string {
+function buildHybridText(form: LiveFormData, market: "mx" | "us" | "ca"): string {
+  const m = MOCK[market];
   const isMx = market === "mx";
   const lines: string[] = [];
 
-  // Header — only include filled fields
-  if (form.nombre) lines.push(form.nombre);
-  if (form.puesto)  lines.push(form.puesto);
+  // Header: replace each contact field individually if filled
+  lines.push(form.nombre || m.nombre);
+  lines.push(form.puesto  || m.puesto);
 
   const contacts: string[] = [];
-  if (form.ciudad) contacts.push(isMx ? `📍 ${form.ciudad}` : form.ciudad);
-  if (form.email)  contacts.push(isMx ? `✉ ${form.email}` : form.email);
-  if (form.redesSociales?.length)
-    contacts.push(...form.redesSociales.filter(r => r.url).map(r => r.url));
-  if (contacts.length) lines.push(contacts.join(" · "));
+  contacts.push(form.ciudad || m.ciudad);
+  contacts.push(form.email  || m.email);
+  const socialUrls = (form.redesSociales ?? []).filter(r => r.url).map(r => r.url);
+  contacts.push(...(socialUrls.length ? socialUrls : [m.extra]));
+  lines.push(contacts.join(isMx ? " · ✉ " : " · ").replace(` · ✉ `, " · ✉ "));
+  // simpler join:
+  lines[lines.length - 1] = [
+    form.ciudad || m.ciudad,
+    form.email  || m.email,
+    ...(socialUrls.length ? socialUrls : [m.extra]),
+  ].join(" · ");
 
-  if (lines.length) lines.push("");
+  lines.push("");
+  lines.push(m.summary);
+  lines.push("");
 
-  // Experience — only if at least one entry has any data
-  if (!form.sinExperiencia) {
-    const validExp = (form.experiencias ?? []).filter(e => e.puesto || e.empresa || e.descripcion);
-    if (validExp.length > 0) {
-      lines.push(isMx ? "EXPERIENCIA LABORAL" : market === "us" ? "EXPERIENCE" : "PROFESSIONAL EXPERIENCE");
-      lines.push("");
-      for (const exp of validExp) {
-        const parts = [exp.puesto, exp.empresa, exp.periodo].filter(Boolean);
-        if (parts.length) lines.push(parts.join(" | "));
-        if (exp.descripcion) {
-          const bullets = exp.descripcion
-            .split(/(?<=[.!?])\s+|\n+/)
-            .map(s => s.replace(/^[•·\-\*]\s*/, "").trim())
-            .filter(s => s.length > 4);
-          for (const b of bullets.slice(0, 4)) lines.push(`• ${b}`);
-        }
-        lines.push("");
+  // Experience: replace entire block if user has any entry with data
+  const userExps = (form.experiencias ?? []).filter(e => e.puesto || e.empresa || e.descripcion);
+  if (form.sinExperiencia) {
+    // no experience block
+  } else if (userExps.length > 0) {
+    lines.push(isMx ? "EXPERIENCIA LABORAL" : market === "us" ? "EXPERIENCE" : "PROFESSIONAL EXPERIENCE");
+    lines.push("");
+    for (const exp of userExps) {
+      const parts = [exp.puesto, exp.empresa, exp.periodo].filter(Boolean);
+      if (parts.length) lines.push(parts.join(" | "));
+      if (exp.descripcion) {
+        const bullets = exp.descripcion
+          .split(/(?<=[.!?])\s+|\n+/)
+          .map(s => s.replace(/^[•·\-\*]\s*/, "").trim())
+          .filter(s => s.length > 4);
+        for (const b of bullets.slice(0, 4)) lines.push(`• ${b}`);
       }
+      lines.push("");
     }
+  } else {
+    lines.push(m.experience);
+    lines.push("");
   }
 
   // Volunteer (Canada)
-  if (market === "ca" && form.voluntariado) {
-    lines.push("VOLUNTEER WORK");
-    lines.push("");
-    lines.push(form.voluntariado);
+  if (market === "ca") {
+    const caMock = MOCK.ca;
+    lines.push(form.voluntariado ? `VOLUNTEER WORK\n\n${form.voluntariado}` : caMock.volunteer);
     lines.push("");
   }
 
-  // Languages — only filled entries
+  lines.push(m.skills);
+  lines.push("");
+  lines.push(m.education);
+  lines.push("");
+
+  // Languages: replace if user has filled any
   const validLangs = (form.languages ?? []).filter(l => l.language);
   if (validLangs.length > 0) {
     lines.push(isMx ? "IDIOMAS" : "LANGUAGES");
     lines.push(validLangs.map(l => `${l.language} (${l.level})`).join(" | "));
-    lines.push("");
+  } else {
+    lines.push(m.languages);
   }
 
   return lines.join("\n");
@@ -172,26 +184,18 @@ function buildLiveText(form: LiveFormData, market: "mx" | "us" | "ca"): string {
 export default function CVPreview({ market = "mx", photoUrl, templateId = "clasico", formData }: CVPreviewProps) {
   const Preview = PREVIEW_TEMPLATES[templateId];
 
-  const hasLiveData = !!(formData?.nombre || formData?.puesto || formData?.ciudad ||
-    formData?.experiencias?.some(e => e.puesto || e.empresa || e.descripcion));
+  const m = MOCK[market];
+  const hasUserData = !!(formData?.nombre || formData?.puesto || formData?.ciudad ||
+    formData?.email || formData?.experiencias?.some(e => e.puesto || e.empresa || e.descripcion));
 
-  const cvData = hasLiveData && formData
-    ? {
-        nombre:  formData.nombre  || "",
-        puesto:  formData.puesto  || "",
-        ciudad:  formData.ciudad  || undefined,
-        email:   formData.email   || undefined,
-        mercado: market,
-        cv_text: buildLiveText(formData, market),
-      }
-    : {
-        nombre: "María García López",
-        puesto:  market === "mx" ? "Diseñadora Gráfica Senior" : "Graphic Designer",
-        ciudad:  market === "mx" ? "León, Gto." : market === "us" ? "Austin, TX" : "Toronto, ON",
-        email:   "maria@email.com",
-        mercado: market,
-        cv_text: MOCK_TEXT[market],
-      };
+  const cvData = {
+    nombre:  formData?.nombre  || m.nombre,
+    puesto:  formData?.puesto  || m.puesto,
+    ciudad:  formData?.ciudad  || m.ciudad,
+    email:   formData?.email   || m.email,
+    mercado: market,
+    cv_text: formData ? buildHybridText(formData, market) : [m.nombre, m.puesto, m.ciudad, "", m.summary, "", m.experience, "", m.skills, "", m.education, "", m.languages].join("\n"),
+  };
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.7);
@@ -206,7 +210,7 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
     return () => obs.disconnect();
   }, []);
 
-  const filename = hasLiveData && formData?.nombre
+  const filename = hasUserData && formData?.nombre
     ? `${formData.nombre.toLowerCase().replace(/\s+/g, "_")}_cv.pdf`
     : market === "mx" ? "currivo_cv_mexico.pdf"
     : market === "us" ? "maria_garcia_resume.pdf"
@@ -236,7 +240,7 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
       <div style={{ padding: "8px 14px", background: "var(--warm)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 8, color: "var(--hint)", letterSpacing: "0.5px" }}>
           currivo.mx · {templateId}
-          {hasLiveData && <span style={{ marginLeft: 6, color: "var(--green)", fontWeight: 500 }}>● en vivo</span>}
+          {hasUserData && <span style={{ marginLeft: 6, color: "var(--green)", fontWeight: 500 }}>● en vivo</span>}
         </span>
         <div style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--green-mid)" }} />
       </div>
