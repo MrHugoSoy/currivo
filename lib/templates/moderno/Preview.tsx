@@ -105,6 +105,27 @@ export default function ModernoPreview({ data }: { data: CVData }) {
 }
 
 function ModernoItem({ item }: { item: CVItem }) {
+  if (item.type === "education") {
+    return (
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.primario }}>{item.title}</div>
+          {item.date && <div style={{ fontSize: 10, color: C.hint }}>{item.date}</div>}
+        </div>
+        {item.subtitle && <div style={{ fontSize: 10, color: C.hint, marginTop: 2 }}>{item.subtitle}</div>}
+      </div>
+    );
+  }
+  if (item.type === "skills") {
+    const tags = (item.content ?? "").split(" | ").map((t) => t.trim()).filter(Boolean);
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 4 }}>
+        {tags.map((tag, i) => (
+          <span key={i} style={{ fontSize: 10, color: C.texto, marginRight: 4 }}>{tag}</span>
+        ))}
+      </div>
+    );
+  }
   if (item.type === "job") {
     return (
       <div style={{ marginBottom: 12 }}>

@@ -46,7 +46,7 @@ export default function MinimalistaPDF({ data }: { data: CVData }) {
 
   return (
     <Document>
-      <Page size="A4" style={s.page}>
+      <Page size={data.mercado === "mx" ? "A4" : "LETTER"} style={s.page}>
         <Text style={s.name}>{name}</Text>
         {subtitle ? <Text style={s.sub}>{subtitle}</Text> : null}
         {contacts.length ? <Text style={s.contact}>{contacts.join("  ·  ")}</Text> : null}
@@ -66,9 +66,24 @@ export default function MinimalistaPDF({ data }: { data: CVData }) {
 }
 
 function MinPDFItem({ item, isSkill }: { item: CVItem; isSkill: boolean }) {
+  if (item.type === "education") {
+    return (
+      <View wrap={false} style={{ marginBottom: 10 }}>
+        <View style={s.jRow}>
+          <Text style={s.jTitle}>{item.title ?? ""}</Text>
+          {item.date ? <Text style={s.jDate}>{item.date}</Text> : null}
+        </View>
+        {item.subtitle ? <Text style={s.jMeta}>{item.subtitle}</Text> : null}
+      </View>
+    );
+  }
+  if (item.type === "skills") {
+    const parts = (item.content ?? "").split(" | ").map((t) => t.trim()).filter(Boolean);
+    return <Text style={{ ...s.para, color: C.muted }}>{parts.join("  ·  ")}</Text>;
+  }
   if (item.type === "job") {
     return (
-      <View style={{ marginBottom: 12 }}>
+      <View wrap={false} style={{ marginBottom: 12 }}>
         <View style={s.jRow}>
           <Text style={s.jTitle}>{item.title ?? ""}</Text>
           {item.date ? <Text style={s.jDate}>{item.date}</Text> : null}

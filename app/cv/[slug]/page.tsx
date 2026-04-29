@@ -46,13 +46,16 @@ export default async function CVPage({ params }: PageProps) {
     <>
       <style>{`
         @media print {
-          .cv-topbar, .cv-hero-actions, .cv-footer { display: none !important; }
+          @page { size: A4; margin: 0; }
+          .cv-topbar, .cv-hero-actions, .cv-footer, nav, button, header { display: none !important; }
           .cv-hero { background: #fff !important; color: #1c1a16 !important; padding: 16px 0 !important; }
           .cv-hero h1 { color: #1c1a16 !important; }
           .cv-hero-sub { color: #4a453e !important; }
-          .cv-card { box-shadow: none !important; border: none !important; padding: 0 !important; }
-          body { background: #fff !important; }
+          .cv-card { box-shadow: none !important; border: none !important; }
+          .cv-content { padding: 40px; }
+          body { background: white !important; }
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
       <div style={{ minHeight: "100vh", background: "var(--cream)" }}>
@@ -90,12 +93,12 @@ export default async function CVPage({ params }: PageProps) {
           </div>
 
           <div className="cv-hero-actions">
-            <CVPageActions />
+            <CVPageActions slug={slug} mercado={data.mercado} />
           </div>
         </div>
 
         {/* CV card */}
-        <div style={{ maxWidth: 740, margin: "0 auto", padding: "40px 24px 72px" }}>
+        <div className="cv-content" style={{ maxWidth: 680, margin: "0 auto", padding: "40px 24px 72px" }}>
           <div className="cv-card" style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "48px 52px", boxShadow: "0 4px 24px rgba(0,0,0,.06)" }}>
             <pre style={{ fontFamily: "'Nunito Sans', sans-serif", fontSize: 13, color: "var(--body)", lineHeight: 1.85, whiteSpace: "pre-wrap", wordBreak: "break-word", margin: 0 }}>
               {data.cv_text}

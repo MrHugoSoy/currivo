@@ -4,7 +4,7 @@ export interface CVSection {
 }
 
 export interface CVItem {
-  type: "paragraph" | "bullet" | "job" | "education";
+  type: "paragraph" | "bullet" | "job" | "education" | "skills";
   title?: string;
   subtitle?: string;
   date?: string;
@@ -15,7 +15,9 @@ export interface CVItem {
 
 function isAllCaps(line: string): boolean {
   const letters = line.replace(/[^a-zA-ZÀ-ÿ]/g, "");
-  return letters.length >= 2 && letters === letters.toUpperCase();
+  // Require at least 4 letters to exclude short abbreviations like MBA, GTO, CV
+  if (letters.length < 4) return false;
+  return letters === letters.toUpperCase();
 }
 
 function isBullet(line: string): boolean {
@@ -26,12 +28,12 @@ function cleanBullet(line: string): string {
   return line.replace(/^[•·▸►\-\*]\s*/, "").replace(/^\d+[.)]\s*/, "").trim();
 }
 
-function isJobLine(line: string): boolean {
-  return line.includes(" | ") && line.split(" | ").length >= 2 && !isBullet(line);
-}
-
+// Matches date ranges: "2020 – Present", "Jan 2020 – Dec 2022", "Ene 2020 – Presente"
 const DATE_RE =
-  /\b(?:(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+)?\d{4}\s*[–\-]\s*(?:(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+)?(?:\d{4}|Present|Presente|Actual|Current)\b/i;
+  /\b\d{4}\s*[–\-]\s*(?:\d{4}|Present|Presente|Actual|Actualmente|Current)\b/i;
+
+// Matches a standalone 4-digit year (e.g. education graduation year)
+const YEAR_RE = /^\d{4}$/;
 
 function extractDate(s: string): string | undefined {
   const m = s.match(DATE_RE);
@@ -52,6 +54,9 @@ export function parseCVText(text: string): CVSection[] {
     }
   }
 
+  const isEduSection = () =>
+    current !== null && /educ/i.test(current.title);
+
   for (const raw of text.split("\n")) {
     const line = raw.trim();
 
@@ -60,7 +65,8 @@ export function parseCVText(text: string): CVSection[] {
       continue;
     }
 
-    if (isAllCaps(line) && !isJobLine(line)) {
+    // Section header: all-caps letters, length >= 4 letters
+    if (isAllCaps(line) && !isBullet(line)) {
       pushJob();
       current = { title: line, items: [] };
       sections.push(current);
@@ -72,24 +78,67 @@ export function parseCVText(text: string): CVSection[] {
       sections.push(current);
     }
 
-    if (isJobLine(line)) {
-      pushJob();
-      const parts = line.split(" | ").map((p) => p.trim());
-      let location: string | undefined;
-      let date: string | undefined;
-      for (const part of parts.slice(2)) {
-        if (DATE_RE.test(part)) date = part;
-        else if (!location) location = part;
+    // Pipe-separated lines: job, education, or skills
+    if (line.includes(" | ")) {
+      const parts = line.split(" | ").map((p) => p.trim()).filter(Boolean);
+
+      if (parts.length >= 2) {
+        // Education section: parse as education entry regardless of content
+        if (isEduSection()) {
+          pushJob();
+          let date: string | undefined;
+          let subtitle: string | undefined;
+          for (const part of parts.slice(1)) {
+            if (!date && (DATE_RE.test(part) || YEAR_RE.test(part.trim()))) {
+              date = part.trim();
+            } else if (!subtitle) {
+              subtitle = part;
+            }
+          }
+          current.items.push({
+            type: "education",
+            title: parts[0],
+            subtitle,
+            date,
+          });
+          continue;
+        }
+
+        // Detect whether this is a job line or a skills line:
+        // Job lines have a date range; skills lines are all short items with no date
+        const hasDateRange = parts.some((p) => DATE_RE.test(p));
+        const allShort = parts.every((p) => p.length < 35);
+
+        if (!hasDateRange && allShort) {
+          // Skills / competencies line
+          pushJob();
+          current.items.push({ type: "skills", content: line });
+          continue;
+        }
+
+        // Job line
+        pushJob();
+        let date: string | undefined;
+        let location: string | undefined;
+        for (const part of parts.slice(2)) {
+          if (!date && DATE_RE.test(part)) date = part;
+          else if (!location) location = part;
+        }
+        // Fallback: check last part for date range
+        if (!date && DATE_RE.test(parts[parts.length - 1])) {
+          date = parts[parts.length - 1];
+          if (parts.length >= 4) location = parts[2];
+        }
+        lastJob = {
+          type: "job",
+          title: parts[0],
+          subtitle: parts[1],
+          location,
+          date,
+          bullets: [],
+        };
+        continue;
       }
-      lastJob = {
-        type: "job",
-        title: parts[0],
-        subtitle: parts[1],
-        location,
-        date,
-        bullets: [],
-      };
-      continue;
     }
 
     if (isBullet(line)) {
@@ -107,7 +156,24 @@ export function parseCVText(text: string): CVSection[] {
   }
 
   pushJob();
-  return sections.filter((s) => s.title || s.items.length > 0);
+
+  const result = sections.filter((s) => s.title || s.items.length > 0);
+
+  // Fallback: if no titled sections were found, return a single plain-text section
+  if (result.every((s) => !s.title)) {
+    const items = text
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((l) => ({ type: "paragraph" as const, content: l }));
+    return [{ title: "", items }];
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("[parseCVText]", JSON.stringify(result, null, 2));
+  }
+
+  return result;
 }
 
 export function extractHeader(cvText: string): {
@@ -119,7 +185,7 @@ export function extractHeader(cvText: string): {
   for (const raw of cvText.split("\n")) {
     const line = raw.trim();
     if (!line) continue;
-    if (isAllCaps(line) && !isJobLine(line) && line.length > 2) break;
+    if (isAllCaps(line) && !isBullet(line) && line.length > 2) break;
     if (!result.name) {
       result.name = line;
     } else if (
@@ -132,7 +198,9 @@ export function extractHeader(cvText: string): {
     ) {
       result.subtitle = line;
     } else {
-      result.contacts.push(...line.split("·").map((c) => c.trim()).filter(Boolean));
+      result.contacts.push(
+        ...line.split("·").map((c) => c.trim()).filter(Boolean)
+      );
     }
   }
   return result;
@@ -144,7 +212,7 @@ export function extractSkills(sections: CVSection[]): string[] {
   );
   if (!skillSection) return [];
   const raw = skillSection.items
-    .filter((i) => i.type === "paragraph")
+    .filter((i) => i.type === "paragraph" || i.type === "skills")
     .map((i) => i.content ?? "")
     .join(" | ");
   return raw
@@ -160,7 +228,7 @@ export function extractLanguages(sections: CVSection[]): string[] {
   );
   if (!langSection) return [];
   return langSection.items
-    .filter((i) => i.type === "paragraph")
+    .filter((i) => i.type === "paragraph" || i.type === "skills")
     .map((i) => i.content ?? "")
     .flatMap((s) => s.split(/[|,]/).map((l) => l.trim()))
     .filter(Boolean);
@@ -168,7 +236,8 @@ export function extractLanguages(sections: CVSection[]): string[] {
 
 function hashNum(s: string): number {
   let h = 0;
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  for (let i = 0; i < s.length; i++)
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
 

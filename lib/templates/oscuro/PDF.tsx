@@ -47,7 +47,7 @@ export default function OscuroPDF({ data }: { data: CVData }) {
 
   return (
     <Document>
-      <Page size="A4" style={s.page}>
+      <Page size={data.mercado === "mx" ? "A4" : "LETTER"} style={s.page}>
         <Text style={s.name}>{name}</Text>
         {subtitle ? <Text style={s.sub}>{subtitle}</Text> : null}
         {contacts.length ? <Text style={s.contact}>{contacts.join(" · ")}</Text> : null}
@@ -67,9 +67,28 @@ export default function OscuroPDF({ data }: { data: CVData }) {
 }
 
 function DarkPDFItem({ item }: { item: CVItem }) {
+  if (item.type === "education") {
+    return (
+      <View wrap={false} style={{ marginBottom: 8 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={s.jTitle}>{item.title ?? ""}</Text>
+          {item.date ? <Text style={{ fontSize: 8.5, color: C.hint }}>{item.date}</Text> : null}
+        </View>
+        {item.subtitle ? <Text style={s.jMeta}>{item.subtitle}</Text> : null}
+      </View>
+    );
+  }
+  if (item.type === "skills") {
+    const tags = (item.content ?? "").split(" | ").map((t) => t.trim()).filter(Boolean);
+    return (
+      <View style={s.tagRow}>
+        {tags.map((tag, i) => <Text key={i} style={s.tag}>{tag}</Text>)}
+      </View>
+    );
+  }
   if (item.type === "job") {
     return (
-      <View style={{ marginBottom: 9 }}>
+      <View wrap={false} style={{ marginBottom: 9 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={s.jTitle}>{item.title ?? ""}</Text>
           {item.date ? <Text style={{ fontSize: 8.5, color: C.hint }}>{item.date}</Text> : null}

@@ -53,7 +53,7 @@ export default function ModernoPDF({ data }: { data: CVData }) {
 
   return (
     <Document>
-      <Page size="A4" style={s.page}>
+      <Page size={data.mercado === "mx" ? "A4" : "LETTER"} style={s.page}>
         {/* Sidebar */}
         <View style={s.sidebar}>
           <Text style={s.name}>{name}</Text>
@@ -100,9 +100,30 @@ export default function ModernoPDF({ data }: { data: CVData }) {
 }
 
 function MPDFItem({ item }: { item: CVItem }) {
+  if (item.type === "education") {
+    return (
+      <View wrap={false} style={{ marginBottom: 8 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={s.jTitle}>{item.title ?? ""}</Text>
+          {item.date ? <Text style={{ fontSize: 8.5, color: C.hint }}>{item.date}</Text> : null}
+        </View>
+        {item.subtitle ? <Text style={s.jMeta}>{item.subtitle}</Text> : null}
+      </View>
+    );
+  }
+  if (item.type === "skills") {
+    const tags = (item.content ?? "").split(" | ").map((t) => t.trim()).filter(Boolean);
+    return (
+      <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 4 }}>
+        {tags.map((tag, i) => (
+          <Text key={i} style={{ fontSize: 8.5, color: C.texto, marginRight: 8, marginBottom: 3 }}>{tag}</Text>
+        ))}
+      </View>
+    );
+  }
   if (item.type === "job") {
     return (
-      <View style={{ marginBottom: 8 }}>
+      <View wrap={false} style={{ marginBottom: 8 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={s.jTitle}>{item.title ?? ""}</Text>
           {item.date ? <Text style={{ fontSize: 8.5, color: C.hint }}>{item.date}</Text> : null}

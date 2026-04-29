@@ -97,6 +97,7 @@ export default function Generator() {
   const [slug, setSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -141,6 +142,9 @@ export default function Generator() {
       if (!res.ok) throw new Error(data.error || "Error generando CV");
       setResult(data.cv);
       setSlug(data.slug ?? null);
+      setTimeout(() => {
+        previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Error inesperado");
     } finally {
@@ -327,7 +331,7 @@ export default function Generator() {
           </div>
 
           {/* PREVIEW */}
-          <div style={{ position: "relative" }}>
+          <div ref={previewRef} style={{ position: "relative" }}>
             {result ? (
               <>
                 <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} />

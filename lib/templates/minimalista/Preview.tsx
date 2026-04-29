@@ -58,6 +58,21 @@ export default function MinimalistaPreview({ data }: { data: CVData }) {
 }
 
 function MinItem({ item, isSkillSection, skills }: { item: CVItem; isSkillSection: boolean; skills: string[] }) {
+  if (item.type === "education") {
+    return (
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <div style={{ fontSize: 12, color: C.primario, fontWeight: 500 }}>{item.title}</div>
+          {item.date && <div style={{ fontSize: 10, color: C.hint }}>{item.date}</div>}
+        </div>
+        {item.subtitle && <div style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>{item.subtitle}</div>}
+      </div>
+    );
+  }
+  if (item.type === "skills") {
+    const parts = (item.content ?? "").split(" | ").map((t) => t.trim()).filter(Boolean);
+    return <div style={{ fontSize: 11, color: C.muted, lineHeight: 2 }}>{parts.join("  ·  ")}</div>;
+  }
   if (item.type === "job") {
     return (
       <div style={{ marginBottom: 16 }}>

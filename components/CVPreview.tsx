@@ -215,7 +215,9 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
   };
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.7);
+  const [contentHeight, setContentHeight] = useState(880);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -224,6 +226,16 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
       if (w > 0) setScale(w / 680);
     });
     obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const obs = new ResizeObserver(entries => {
+      const h = entries[0].contentRect.height;
+      if (h > 0) setContentHeight(h);
+    });
+    obs.observe(contentRef.current);
     return () => obs.disconnect();
   }, []);
 
@@ -247,8 +259,8 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
       </div>
 
       {/* Scaled preview */}
-      <div ref={containerRef} style={{ overflow: "hidden", height: Math.round(680 * 0.97 * scale) }}>
-        <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: 680, pointerEvents: "none" }}>
+      <div ref={containerRef} style={{ overflow: "hidden", height: Math.round(contentHeight * scale) }}>
+        <div ref={contentRef} style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: 680, pointerEvents: "none" }}>
           <Preview data={cvData} />
         </div>
       </div>

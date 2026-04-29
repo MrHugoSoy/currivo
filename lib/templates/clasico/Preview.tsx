@@ -58,6 +58,29 @@ export default function ClasicoPreview({ data }: { data: CVData }) {
 }
 
 function Item({ item }: { item: CVItem }) {
+  if (item.type === "education") {
+    return (
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.primario }}>{item.title}</div>
+          {item.date && <div style={{ fontSize: 10, color: C.hint, flexShrink: 0 }}>{item.date}</div>}
+        </div>
+        {item.subtitle && <div style={{ fontSize: 11, color: C.hint, marginTop: 2 }}>{item.subtitle}</div>}
+      </div>
+    );
+  }
+  if (item.type === "skills") {
+    const tags = (item.content ?? "").split(" | ").map((t) => t.trim()).filter(Boolean);
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 4 }}>
+        {tags.map((tag, i) => (
+          <span key={i} style={{ fontSize: 10, padding: "3px 9px", background: C.greenBg, color: C.acento, borderRadius: 3, fontWeight: 500, border: "1px solid rgba(42,82,54,.15)" }}>
+            {tag}
+          </span>
+        ))}
+      </div>
+    );
+  }
   if (item.type === "job") {
     return (
       <div style={{ marginBottom: 12 }}>
