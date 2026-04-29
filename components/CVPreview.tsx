@@ -90,8 +90,7 @@ Senior Graphic Designer | Creative Agency | Toronto, ON | 2020 – Present
 
 Freelance Designer | Self-employed | Remote | 2018 – 2020
 • Served 15+ clients across retail, hospitality, and professional services`,
-    skills: `CORE COMPETENCIES
-Adobe Suite | Figma | Brand Strategy | Team Leadership | Cross-cultural Communication | Bilingual`,
+    skills: "",
     education: `EDUCATION
 B.A. Graphic Design | University of Guanajuato | 2018`,
     languages: `LANGUAGES\nEnglish (Native) | French (Intermediate B1) | Spanish (Native)`,
@@ -162,8 +161,7 @@ function buildHybridText(form: LiveFormData, market: "mx" | "us" | "ca"): string
     lines.push("");
   }
 
-  lines.push(m.skills);
-  lines.push("");
+  if (m.skills) { lines.push(m.skills); lines.push(""); }
   lines.push(m.education);
   lines.push("");
 
