@@ -45,7 +45,7 @@ Diseñadora Gráfica Senior | Agencia Creativa MX | León, Gto. | 2020 – Prese
 Diseñadora Freelance | Independiente | León, Gto. | 2018 – 2020
 • Atendí a 15+ clientes en retail, restaurantes y servicios profesionales`,
     skills: `HABILIDADES
-Photoshop | Figma | Illustrator | CorelDRAW | Branding | UX Design`,
+Photoshop, Figma, Illustrator, CorelDRAW, Branding, UX Design`,
     education: `EDUCACIÓN
 
 Lic. en Diseño Gráfico | Universidad de Guanajuato | León, Gto. | 2014 – 2018`,
@@ -69,7 +69,7 @@ Senior Graphic Designer | Creative Agency MX | Austin, TX | 2020 – Present
 Freelance Designer | Self-employed | Remote | 2018 – 2020
 • Served 15+ clients across retail, restaurants, and professional services`,
     skills: `SKILLS
-Adobe Photoshop | Figma | Illustrator | Brand Strategy | UX Design`,
+Adobe Photoshop, Figma, Illustrator, Brand Strategy, UX Design`,
     education: `EDUCATION
 B.A. Graphic Design | University of Guanajuato | 2018`,
     languages: `LANGUAGES\nEnglish (Native) | Spanish (Fluent)`,
@@ -91,7 +91,7 @@ Senior Graphic Designer | Creative Agency | Toronto, ON | 2020 – Present
 
 Freelance Designer | Self-employed | Remote | 2018 – 2020
 • Served 15+ clients across retail, hospitality, and professional services`,
-    skills: `CORE COMPETENCIES\nAdobe Suite | Figma | Brand Strategy | Team Leadership | Cross-cultural Communication | Bilingual`,
+    skills: `CORE COMPETENCIES\nAdobe Suite, Figma, Brand Strategy, Team Leadership, Cross-cultural Communication, Bilingual`,
     education: `EDUCATION
 B.A. Graphic Design | University of Guanajuato | 2018`,
     languages: `LANGUAGES\nEnglish (Native) | French (Intermediate B1) | Spanish (Native)`,
@@ -164,7 +164,7 @@ function buildHybridText(form: LiveFormData, market: "mx" | "us" | "ca"): string
 
   if (form.habilidades && form.habilidades.length > 0) {
     const header = market === "mx" ? "HABILIDADES" : market === "us" ? "SKILLS" : "CORE COMPETENCIES";
-    lines.push(`${header}\n${form.habilidades.join(" | ")}`);
+    lines.push(`${header}\n${form.habilidades.join(", ")}`);
   } else if (m.skills) {
     lines.push(m.skills);
   }
