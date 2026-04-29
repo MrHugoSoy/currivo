@@ -25,10 +25,6 @@ export default function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
@@ -96,12 +92,12 @@ export default function Navbar() {
               </button>
             </>
           )}
-          <button
-            onClick={() => scrollTo("generador")}
-            style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "8px 18px", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: "pointer" }}
+          <a
+            href="/crear"
+            style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "8px 18px", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: "pointer", textDecoration: "none" }}
           >
             Crear mi CV →
-          </button>
+          </a>
         </div>
       </nav>
 

@@ -2,8 +2,6 @@
 import CVPreview from "./CVPreview";
 
 export default function Hero() {
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-
   return (
     <section style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 48px 80px", display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 64, alignItems: "center" }}>
       {/* LEFT */}
@@ -26,9 +24,9 @@ export default function Hero() {
 
         {/* CTAs */}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <button onClick={() => scrollTo("generador")} style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "13px 26px", fontSize: 14, fontWeight: 500, fontFamily: "inherit", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+          <a href="/crear" style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "13px 26px", fontSize: 14, fontWeight: 500, fontFamily: "inherit", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
             ✦ Generar mi CV gratis
-          </button>
+          </a>
           <button style={{ background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: "13px 26px", fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>
             Ver plantillas
           </button>
