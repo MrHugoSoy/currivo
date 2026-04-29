@@ -31,10 +31,10 @@ export default function ModernoPreview({ data }: { data: CVData }) {
   );
 
   return (
-    <div style={{ width: 680, display: "flex", fontFamily: "'DM Sans','Nunito Sans',sans-serif", fontSize: 12, lineHeight: 1.5, boxSizing: "border-box" }}>
+    <div style={{ width: 680, display: "flex", background: C.sidebar, fontFamily: "'DM Sans','Nunito Sans',sans-serif", fontSize: 12, lineHeight: 1.5, boxSizing: "border-box" }}>
 
       {/* Sidebar */}
-      <div style={{ width: "30%", background: C.sidebar, padding: "36px 22px", flexShrink: 0 }}>
+      <div style={{ width: "30%", padding: "36px 22px", flexShrink: 0 }}>
         <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 24, fontWeight: 600, color: "#fff", letterSpacing: "-0.5px", lineHeight: 1.15, marginBottom: 6 }}>
           {name}
         </div>

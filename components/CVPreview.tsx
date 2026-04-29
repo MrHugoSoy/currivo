@@ -1,4 +1,5 @@
 "use client";
+import { useRef, useState, useEffect } from "react";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/index";
 import type { TemplateId } from "@/lib/templates/types";
 
@@ -102,7 +103,18 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
     cv_text: MOCK_TEXT[market],
   };
 
-  const SCALE = 0.72;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.7);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const obs = new ResizeObserver(entries => {
+      const w = entries[0].contentRect.width;
+      if (w > 0) setScale(w / 680);
+    });
+    obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, []);
 
   return (
     <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", boxShadow: "0 2px 4px rgba(0,0,0,.04), 0 12px 32px rgba(0,0,0,.08)" }}>
@@ -119,9 +131,9 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
         </span>
       </div>
 
-      {/* Scaled preview */}
-      <div style={{ overflow: "hidden", height: Math.round(680 * 0.97 * SCALE) }}>
-        <div style={{ transform: `scale(${SCALE})`, transformOrigin: "top left", width: 680, pointerEvents: "none" }}>
+      {/* Scaled preview — fills container width exactly */}
+      <div ref={containerRef} style={{ overflow: "hidden", height: Math.round(680 * 0.97 * scale) }}>
+        <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: 680, pointerEvents: "none" }}>
           <Preview data={cvData} />
         </div>
       </div>

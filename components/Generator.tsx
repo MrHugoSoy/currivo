@@ -1,8 +1,11 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import CVPreview from "./CVPreview";
 import TemplateSelector from "./TemplateSelector";
 import type { TemplateId } from "@/lib/templates/types";
+import { supabase } from "@/lib/supabase";
+
+const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
 const TONES = ["Profesional", "Creativo", "Formal", "Moderno"];
 const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas", "Construcción", "Manufactura", "Logística", "Ventas", "Recursos Humanos", "Legal", "Gastronomía", "Turismo", "Medios"];
@@ -61,6 +64,19 @@ export default function Generator() {
   const [result, setResult] = useState<string | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const email = data.session?.user?.email ?? "";
+      setIsAdmin(ADMIN_EMAILS.includes(email));
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      const email = session?.user?.email ?? "";
+      setIsAdmin(ADMIN_EMAILS.includes(email));
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const set = (k: keyof FormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -101,7 +117,7 @@ export default function Generator() {
 
   return (
     <section id="generador" style={{ background: "var(--ink)", padding: "88px 0" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
 
         {/* Label */}
         <div style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.2)", fontWeight: 500, marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
@@ -124,7 +140,7 @@ export default function Generator() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 32, alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "start" }}>
 
           {/* FORM */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -181,13 +197,14 @@ export default function Generator() {
               <TemplateSelector
                 selected={form.templateId}
                 onSelect={v => setForm(f => ({ ...f, templateId: v }))}
+                userIsPro={isAdmin}
               />
               {error && <p style={{ fontSize: 12, color: "#f87171", marginTop: 12 }}>{error}</p>}
               <button onClick={handleGenerate} disabled={loading}
                 style={{ width: "100%", marginTop: 18, background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: 13, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1 }}>
                 {loading ? <><Spinner />Generando...</> : <>✦ Generar CV para {selectedMarket.flag} {selectedMarket.label}</>}
               </button>
-              <p style={{ textAlign: "center", fontSize: 9, color: "rgba(255,255,255,.18)", marginTop: 8, letterSpacing: "0.5px" }}>El primero es gratis · Sin tarjeta · Sin registro</p>
+              {!isAdmin && <p style={{ textAlign: "center", fontSize: 9, color: "rgba(255,255,255,.18)", marginTop: 8, letterSpacing: "0.5px" }}>El primero es gratis · Sin tarjeta · Sin registro</p>}
             </FormBlock>
           </div>
 

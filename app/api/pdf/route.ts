@@ -3,6 +3,8 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { supabase } from "@/lib/supabase";
 import { PDF_TEMPLATES } from "@/lib/templates/index";
+
+export const dynamic = "force-dynamic";
 import type { TemplateId, CVData } from "@/lib/templates/types";
 
 export async function POST(req: NextRequest) {
