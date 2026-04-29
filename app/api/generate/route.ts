@@ -21,12 +21,21 @@ function generateSlug(nombre: string): string {
 
 interface ExperienciaEntry { puesto: string; empresa: string; periodo: string; descripcion: string; }
 interface RedSocial { tipo: string; url: string; }
+interface EducacionEntry { carrera: string; institucion: string; anio: string; }
 
 function formatExperiencias(experiencias: ExperienciaEntry[], mercado: string): string {
   if (!experiencias?.length) return "No especificada";
   return experiencias.map((e, i) =>
     `Experiencia ${i + 1}:\n- Puesto: ${e.puesto || "No especificado"}\n- Empresa: ${e.empresa || "No especificada"}\n- Período: ${e.periodo || "No especificado"}\n- Descripción: ${e.descripcion || "No especificada"}`
   ).join("\n\n");
+}
+
+function formatEducacion(educacion: EducacionEntry[]): string {
+  if (!educacion?.length) return "No especificada";
+  return educacion
+    .filter(e => e.carrera || e.institucion)
+    .map(e => [e.carrera, e.institucion, e.anio].filter(Boolean).join(" | "))
+    .join("\n") || "No especificada";
 }
 
 function formatRedes(redes: RedSocial[]): string {
@@ -49,6 +58,8 @@ function buildPrompt(data: Record<string, unknown>): string {
   const sinExperiencia = data.sinExperiencia as boolean | undefined;
   const experiencias = (data.experiencias as ExperienciaEntry[]) ?? [];
   const redesSociales = (data.redesSociales as RedSocial[]) ?? [];
+  const educacion = (data.educacion as EducacionEntry[]) ?? [];
+  const eduStr = formatEducacion(educacion);
   const rawHabilidades = data.habilidades;
   const habilidades = Array.isArray(rawHabilidades)
     ? rawHabilidades.join(", ")
@@ -88,13 +99,16 @@ ${languages ? `- Idiomas: ${languages}` : ""}
 EXPERIENCIA LABORAL:
 ${expStr}
 
+EDUCACIÓN:
+${eduStr}
+
 REGLAS PARA CV MEXICANO:
 - Incluye sección de DATOS PERSONALES al inicio (nombre, ciudad, email, edad si se dio, estado civil si se dio)
 ${redesStr ? "- Incluye los perfiles/redes proporcionados en la sección de datos personales o contacto" : ""}
 - Incluye OBJETIVO PROFESIONAL (2-3 líneas)
 ${sinExperiencia ? "- El candidato NO tiene experiencia laboral. NO inventes trabajos. Enfócate en EDUCACIÓN, HABILIDADES, PROYECTOS PERSONALES o CURSOS relevantes para " + puesto + "." : "- Sección EXPERIENCIA LABORAL con los puestos proporcionados y logros concretos"}
 - Sección HABILIDADES: ${skillsNote}
-- Sección EDUCACIÓN (genera algo plausible si no se proporcionó)
+- Sección EDUCACIÓN: usa los datos proporcionados; si no se dio información, genera algo plausible
 - Máximo 2 páginas de contenido
 - Español natural de México
 - Usa verbos de acción: lideré, desarrollé, implementé, coordiné, optimicé...
@@ -120,6 +134,9 @@ ${redesStr ? `- Profiles/Links: ${redesStr}` : ""}
 WORK EXPERIENCE:
 ${expStr}
 
+EDUCATION:
+${eduStr}
+
 US RESUME RULES (CRITICAL):
 - NO photo, NO age, NO marital status, NO nationality — these are illegal to include
 - Maximum 1 page
@@ -128,7 +145,7 @@ ${redesStr ? "- Include provided profile links in the header section" : "- Inclu
 ${sinExperiencia ? "- Candidate has NO work experience. Do NOT invent jobs. Focus on EDUCATION, SKILLS, PERSONAL PROJECTS, or CERTIFICATIONS relevant to " + puesto + "." : "- EXPERIENCE section: use bullet points with quantified achievements (\"Increased sales by 40%\", \"Managed team of 8\")"}
 - Use strong action verbs: Led, Developed, Implemented, Optimized, Delivered, Achieved...
 - SKILLS section: ${skillsNote}
-- EDUCATION section
+- EDUCATION section: use the provided data; if not provided, generate something plausible
 - Use American English
 
 Generate ONLY the resume content, no additional comments.`;
@@ -151,6 +168,9 @@ Industry: ${industria}
 
 WORK EXPERIENCE:
 ${expStr}
+
+EDUCATION:
+${eduStr}
 
 CANADIAN RESUME RULES — FOLLOW STRICTLY:
 

@@ -15,6 +15,7 @@ export interface LiveFormData {
   redesSociales?: Array<{ tipo: string; url: string }>;
   voluntariado?: string;
   habilidades?: string[];
+  educacion?: Array<{ carrera: string; institucion: string; anio: string }>;
 }
 
 interface CVPreviewProps {
@@ -169,7 +170,18 @@ function buildHybridText(form: LiveFormData, market: "mx" | "us" | "ca"): string
     lines.push(m.skills);
   }
   lines.push("");
-  lines.push(m.education);
+  const validEdu = (form.educacion ?? []).filter(e => e.carrera || e.institucion);
+  if (validEdu.length > 0) {
+    const eduHeader = market === "mx" ? "EDUCACIÓN" : "EDUCATION";
+    lines.push(eduHeader);
+    lines.push("");
+    for (const edu of validEdu) {
+      const parts = [edu.carrera, edu.institucion, edu.anio].filter(Boolean);
+      lines.push(parts.join(" | "));
+    }
+  } else {
+    lines.push(m.education);
+  }
   lines.push("");
 
   // Languages: replace if user has filled any

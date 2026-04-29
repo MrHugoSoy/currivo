@@ -62,6 +62,12 @@ export interface RedSocial {
   url: string;
 }
 
+export interface EducacionEntry {
+  carrera: string;
+  institucion: string;
+  anio: string;
+}
+
 export interface FormData {
   nombre: string; puesto: string; ciudad: string; email: string;
   tono: string; industria: string; mercado: Market;
@@ -72,6 +78,7 @@ export interface FormData {
   experiencias: ExperienciaEntry[];
   redesSociales?: RedSocial[];
   habilidades?: string[];
+  educacion?: EducacionEntry[];
 }
 
 export default function Generator() {
@@ -83,6 +90,7 @@ export default function Generator() {
     experiencias: [{ puesto: "", empresa: "", periodo: "", descripcion: "" }],
     redesSociales: [],
     habilidades: [],
+    educacion: [{ carrera: "", institucion: "", anio: "" }],
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -253,6 +261,18 @@ export default function Generator() {
               <SkillsSelector
                 skills={form.habilidades ?? []}
                 onChange={s => setForm(f => ({ ...f, habilidades: s }))}
+                market={form.mercado}
+              />
+            </FormBlock>
+
+            <FormBlock title={
+              form.mercado === "mx" ? "Educación" :
+              form.mercado === "us" ? "Education" :
+              "Education / Educación"
+            }>
+              <EducacionSelector
+                educacion={form.educacion ?? [{ carrera: "", institucion: "", anio: "" }]}
+                onChange={edu => setForm(f => ({ ...f, educacion: edu }))}
                 market={form.mercado}
               />
             </FormBlock>
@@ -535,6 +555,64 @@ function ExperienceSelector({ experiencias, onChange, market }: {
       <button type="button" onClick={add}
         style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
         + {isMx ? "Agregar otra experiencia" : "Add another experience"}
+      </button>
+    </div>
+  );
+}
+
+function EducacionSelector({ educacion, onChange, market }: {
+  educacion: EducacionEntry[];
+  onChange: (edu: EducacionEntry[]) => void;
+  market: Market;
+}) {
+  const isMx = market === "mx";
+  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
+  const update = (i: number, field: keyof EducacionEntry, val: string) =>
+    onChange(educacion.map((e, j) => j === i ? { ...e, [field]: val } : e));
+  const remove = (i: number) => onChange(educacion.filter((_, j) => j !== i));
+  const add = () => onChange([...educacion, { carrera: "", institucion: "", anio: "" }]);
+
+  return (
+    <div>
+      {educacion.map((edu, i) => (
+        <div key={i} style={{ marginBottom: 14, padding: 14, background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span style={{ fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,.22)" }}>
+              {isMx ? `Estudio ${i + 1}` : `Degree ${i + 1}`}
+            </span>
+            {educacion.length > 1 && (
+              <button type="button" onClick={() => remove(i)}
+                style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
+            )}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+              {isMx ? "Carrera / Título" : market === "us" ? "Degree / Field of Study" : "Degree / Titre"}
+            </label>
+            <input type="text" value={edu.carrera} onChange={e => update(i, "carrera", e.target.value)}
+              placeholder={isMx ? "Ej. Lic. en Diseño Gráfico" : "e.g. B.A. Graphic Design"} style={base} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
+            <div>
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+                {isMx ? "Institución" : "Institution"}
+              </label>
+              <input type="text" value={edu.institucion} onChange={e => update(i, "institucion", e.target.value)}
+                placeholder={isMx ? "Ej. Universidad de Guanajuato" : "e.g. University of Toronto"} style={base} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+                {isMx ? "Año" : "Year"}
+              </label>
+              <input type="text" value={edu.anio} onChange={e => update(i, "anio", e.target.value)}
+                placeholder={isMx ? "2020" : "2020"} style={{ ...base, width: 80 }} />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={add}
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+        + {isMx ? "Agregar otro estudio" : "Add another degree"}
       </button>
     </div>
   );
