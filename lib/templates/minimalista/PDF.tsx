@@ -1,12 +1,13 @@
 import { Document, Page, View, Text, StyleSheet, Font } from "@react-pdf/renderer";
 import { parseCVText, extractHeader, CVItem } from "../parser";
 import type { CVData } from "../types";
+import path from "path";
 
 Font.register({
   family: "DMSans",
   fonts: [
-    { src: "https://fonts.gstatic.com/s/dmsans/v15/rP2Hp2ywxg089UriCZa4ET-DNl0.woff2", fontWeight: 400 },
-    { src: "https://fonts.gstatic.com/s/dmsans/v15/rP2Cp2ywxg089UriASitCBimC3Un.woff2", fontWeight: 700 },
+    { src: path.join(process.cwd(), "public/fonts/DMSans-Regular.ttf"), fontWeight: 400 },
+    { src: path.join(process.cwd(), "public/fonts/DMSans-Bold.ttf"), fontWeight: 700 },
   ],
 });
 
