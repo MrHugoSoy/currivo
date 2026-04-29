@@ -14,6 +14,7 @@ export interface LiveFormData {
   languages?: Array<{ language: string; level: string }>;
   redesSociales?: Array<{ tipo: string; url: string }>;
   voluntariado?: string;
+  habilidades?: string;
 }
 
 interface CVPreviewProps {
@@ -90,7 +91,7 @@ Senior Graphic Designer | Creative Agency | Toronto, ON | 2020 – Present
 
 Freelance Designer | Self-employed | Remote | 2018 – 2020
 • Served 15+ clients across retail, hospitality, and professional services`,
-    skills: "",
+    skills: `CORE COMPETENCIES\nAdobe Suite | Figma | Brand Strategy | Team Leadership | Cross-cultural Communication | Bilingual`,
     education: `EDUCATION
 B.A. Graphic Design | University of Guanajuato | 2018`,
     languages: `LANGUAGES\nEnglish (Native) | French (Intermediate B1) | Spanish (Native)`,
@@ -161,7 +162,13 @@ function buildHybridText(form: LiveFormData, market: "mx" | "us" | "ca"): string
     lines.push("");
   }
 
-  if (m.skills) { lines.push(m.skills); lines.push(""); }
+  if (form.habilidades?.trim()) {
+    const header = market === "mx" ? "HABILIDADES" : market === "us" ? "SKILLS" : "CORE COMPETENCIES";
+    lines.push(`${header}\n${form.habilidades.trim()}`);
+  } else if (m.skills) {
+    lines.push(m.skills);
+  }
+  lines.push("");
   lines.push(m.education);
   lines.push("");
 

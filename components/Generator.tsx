@@ -71,6 +71,7 @@ export interface FormData {
   sinExperiencia?: boolean;
   experiencias: ExperienciaEntry[];
   redesSociales?: RedSocial[];
+  habilidades?: string;
 }
 
 export default function Generator() {
@@ -81,6 +82,7 @@ export default function Generator() {
     sinExperiencia: false,
     experiencias: [{ puesto: "", empresa: "", periodo: "", descripcion: "" }],
     redesSociales: [],
+    habilidades: "",
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -240,6 +242,33 @@ export default function Generator() {
                 languages={form.languages ?? []}
                 onChange={langs => setForm(f => ({ ...f, languages: langs }))}
                 market={form.mercado}
+              />
+            </FormBlock>
+
+            <FormBlock title={
+              form.mercado === "mx" ? "Habilidades (opcional)" :
+              form.mercado === "us" ? "Skills (optional)" :
+              "Skills / Core Competencies (optional)"
+            }>
+              <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 10, lineHeight: 1.5 }}>
+                {form.mercado === "mx"
+                  ? "Separa cada habilidad con coma. La IA también agregará las relevantes para tu industria."
+                  : form.mercado === "us"
+                  ? "Separate each skill with a comma. The AI will also add relevant skills for your industry."
+                  : "Séparez par virgule / Separate with commas. The AI will complement based on your industry."}
+              </p>
+              <textarea
+                value={form.habilidades ?? ""}
+                onChange={e => setForm(f => ({ ...f, habilidades: e.target.value }))}
+                rows={3}
+                placeholder={
+                  form.mercado === "mx"
+                    ? "Ej. Photoshop, Figma, Illustrator, Gestión de equipos, Branding..."
+                    : form.mercado === "us"
+                    ? "e.g. Adobe Photoshop, Figma, Brand Strategy, Team Leadership..."
+                    : "e.g. Figma, Brand Strategy, Team Leadership, Cross-cultural Communication..."
+                }
+                style={{ width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", resize: "none" }}
               />
             </FormBlock>
 

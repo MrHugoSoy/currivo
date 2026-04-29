@@ -49,11 +49,15 @@ function buildPrompt(data: Record<string, unknown>): string {
   const sinExperiencia = data.sinExperiencia as boolean | undefined;
   const experiencias = (data.experiencias as ExperienciaEntry[]) ?? [];
   const redesSociales = (data.redesSociales as RedSocial[]) ?? [];
+  const habilidades = (data.habilidades as string | undefined)?.trim() || "";
   const langList = languages;
   const redesStr = formatRedes(redesSociales);
   const expStr = sinExperiencia
     ? "SIN EXPERIENCIA LABORAL — no inventar trabajos anteriores."
     : formatExperiencias(experiencias, mercado);
+  const skillsNote = habilidades
+    ? `El usuario ya especificó estas habilidades, inclúyelas todas: ${habilidades}. Puedes complementar con otras relevantes para ${industria}.`
+    : `Genera habilidades relevantes para ${industria}.`;
 
   const toneDesc: Record<string, string> = {
     Profesional: "formal y ejecutivo, verbos de acción fuertes",
@@ -86,7 +90,7 @@ REGLAS PARA CV MEXICANO:
 ${redesStr ? "- Incluye los perfiles/redes proporcionados en la sección de datos personales o contacto" : ""}
 - Incluye OBJETIVO PROFESIONAL (2-3 líneas)
 ${sinExperiencia ? "- El candidato NO tiene experiencia laboral. NO inventes trabajos. Enfócate en EDUCACIÓN, HABILIDADES, PROYECTOS PERSONALES o CURSOS relevantes para " + puesto + "." : "- Sección EXPERIENCIA LABORAL con los puestos proporcionados y logros concretos"}
-- Sección HABILIDADES relevantes para ${industria}
+- Sección HABILIDADES: ${skillsNote}
 - Sección EDUCACIÓN (genera algo plausible si no se proporcionó)
 - Máximo 2 páginas de contenido
 - Español natural de México
@@ -120,7 +124,7 @@ US RESUME RULES (CRITICAL):
 ${redesStr ? "- Include provided profile links in the header section" : "- Include LinkedIn placeholder and location (City, State) but NOT full address"}
 ${sinExperiencia ? "- Candidate has NO work experience. Do NOT invent jobs. Focus on EDUCATION, SKILLS, PERSONAL PROJECTS, or CERTIFICATIONS relevant to " + puesto + "." : "- EXPERIENCE section: use bullet points with quantified achievements (\"Increased sales by 40%\", \"Managed team of 8\")"}
 - Use strong action verbs: Led, Developed, Implemented, Optimized, Delivered, Achieved...
-- SKILLS section with ATS-friendly keywords for ${industria}
+- SKILLS section: ${skillsNote}
 - EDUCATION section
 - Use American English
 
@@ -174,7 +178,7 @@ STRUCTURE (in this exact order):
 3. CORE COMPETENCIES
    - Grid of 9-12 keywords separated by | pipes
    - Must be ATS-friendly single keywords or short phrases
-   - Relevant to ${industria} and ${puesto}
+   - ${skillsNote}
    - Include both technical and soft skills
    Example format:
    Brand Strategy | Team Leadership | Project Management
