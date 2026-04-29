@@ -71,7 +71,7 @@ export interface FormData {
   sinExperiencia?: boolean;
   experiencias: ExperienciaEntry[];
   redesSociales?: RedSocial[];
-  habilidades?: string;
+  habilidades?: string[];
 }
 
 export default function Generator() {
@@ -82,7 +82,7 @@ export default function Generator() {
     sinExperiencia: false,
     experiencias: [{ puesto: "", empresa: "", periodo: "", descripcion: "" }],
     redesSociales: [],
-    habilidades: "",
+    habilidades: [],
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -250,25 +250,10 @@ export default function Generator() {
               form.mercado === "us" ? "Skills (optional)" :
               "Skills / Core Competencies (optional)"
             }>
-              <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 10, lineHeight: 1.5 }}>
-                {form.mercado === "mx"
-                  ? "Separa cada habilidad con coma. La IA también agregará las relevantes para tu industria."
-                  : form.mercado === "us"
-                  ? "Separate each skill with a comma. The AI will also add relevant skills for your industry."
-                  : "Séparez par virgule / Separate with commas. The AI will complement based on your industry."}
-              </p>
-              <textarea
-                value={form.habilidades ?? ""}
-                onChange={e => setForm(f => ({ ...f, habilidades: e.target.value }))}
-                rows={3}
-                placeholder={
-                  form.mercado === "mx"
-                    ? "Ej. Photoshop, Figma, Illustrator, Gestión de equipos, Branding..."
-                    : form.mercado === "us"
-                    ? "e.g. Adobe Photoshop, Figma, Brand Strategy, Team Leadership..."
-                    : "e.g. Figma, Brand Strategy, Team Leadership, Cross-cultural Communication..."
-                }
-                style={{ width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", resize: "none" }}
+              <SkillsSelector
+                skills={form.habilidades ?? []}
+                onChange={s => setForm(f => ({ ...f, habilidades: s }))}
+                market={form.mercado}
               />
             </FormBlock>
 
@@ -423,6 +408,70 @@ function PhotoUpload({ value, onChange }: { value?: string; onChange: (url: stri
     </div>
   );
 }
+function SkillsSelector({ skills, onChange, market }: {
+  skills: string[];
+  onChange: (s: string[]) => void;
+  market: Market;
+}) {
+  const [input, setInput] = useState("");
+  const isMx = market === "mx";
+
+  const add = () => {
+    const trimmed = input.trim();
+    if (trimmed && !skills.includes(trimmed)) onChange([...skills, trimmed]);
+    setInput("");
+  };
+
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); }
+    if (e.key === "Backspace" && !input && skills.length) onChange(skills.slice(0, -1));
+  };
+
+  const placeholder = isMx
+    ? "Ej. Photoshop, Figma..."
+    : market === "us" ? "e.g. Figma, Leadership..."
+    : "e.g. Figma, Bilingual...";
+
+  const hint = isMx
+    ? "Presiona Enter o coma para agregar. La IA también agregará las relevantes para tu industria."
+    : market === "us"
+    ? "Press Enter or comma to add. The AI will also suggest relevant skills."
+    : "Appuyez sur Entrée / Press Enter to add. The AI will complement based on your industry.";
+
+  const addLabel = isMx ? "+ Agregar" : "+ Add";
+
+  return (
+    <div>
+      <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 10, lineHeight: 1.5 }}>{hint}</p>
+      {skills.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+          {skills.map((s, i) => (
+            <span key={i} style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(42,82,54,.2)", border: "1px solid rgba(74,144,96,.3)", borderRadius: 100, padding: "3px 10px 3px 12px", fontSize: 11, color: "#7dd4a0" }}>
+              {s}
+              <button type="button" onClick={() => onChange(skills.filter((_, j) => j !== i))}
+                style={{ fontSize: 13, color: "rgba(125,212,160,.5)", background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1 }}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder={placeholder}
+          style={{ flex: 1, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }}
+        />
+        <button type="button" onClick={add} disabled={!input.trim()}
+          style={{ fontSize: 11, color: "rgba(255,255,255,.5)", background: "none", border: "1px solid rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 12px", cursor: input.trim() ? "pointer" : "not-allowed", fontFamily: "inherit", opacity: input.trim() ? 1 : 0.4 }}>
+          {addLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const SOCIAL_TYPES = ["LinkedIn", "GitHub", "Portfolio", "Behance", "Twitter/X", "Dribbble", "Otro"];
 
 function ExperienceSelector({ experiencias, onChange, market }: {

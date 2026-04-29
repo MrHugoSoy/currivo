@@ -49,7 +49,10 @@ function buildPrompt(data: Record<string, unknown>): string {
   const sinExperiencia = data.sinExperiencia as boolean | undefined;
   const experiencias = (data.experiencias as ExperienciaEntry[]) ?? [];
   const redesSociales = (data.redesSociales as RedSocial[]) ?? [];
-  const habilidades = (data.habilidades as string | undefined)?.trim() || "";
+  const rawHabilidades = data.habilidades;
+  const habilidades = Array.isArray(rawHabilidades)
+    ? rawHabilidades.join(", ")
+    : typeof rawHabilidades === "string" ? rawHabilidades.trim() : "";
   const langList = languages;
   const redesStr = formatRedes(redesSociales);
   const expStr = sinExperiencia

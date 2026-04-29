@@ -14,7 +14,7 @@ export interface LiveFormData {
   languages?: Array<{ language: string; level: string }>;
   redesSociales?: Array<{ tipo: string; url: string }>;
   voluntariado?: string;
-  habilidades?: string;
+  habilidades?: string[];
 }
 
 interface CVPreviewProps {
@@ -162,9 +162,9 @@ function buildHybridText(form: LiveFormData, market: "mx" | "us" | "ca"): string
     lines.push("");
   }
 
-  if (form.habilidades?.trim()) {
+  if (form.habilidades && form.habilidades.length > 0) {
     const header = market === "mx" ? "HABILIDADES" : market === "us" ? "SKILLS" : "CORE COMPETENCIES";
-    lines.push(`${header}\n${form.habilidades.trim()}`);
+    lines.push(`${header}\n${form.habilidades.join(" | ")}`);
   } else if (m.skills) {
     lines.push(m.skills);
   }
