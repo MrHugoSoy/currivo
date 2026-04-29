@@ -1,6 +1,8 @@
 "use client";
 import { useState, useRef } from "react";
 import CVPreview from "./CVPreview";
+import TemplateSelector from "./TemplateSelector";
+import type { TemplateId } from "@/lib/templates/types";
 
 const TONES = ["Profesional", "Creativo", "Formal", "Moderno"];
 const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas", "Construcción", "Manufactura", "Logística", "Ventas", "Recursos Humanos", "Legal", "Gastronomía", "Turismo", "Medios"];
@@ -45,13 +47,14 @@ export interface FormData {
   tono: string; industria: string; mercado: Market;
   edad?: string; estadoCivil?: string; voluntariado?: string; photoUrl?: string;
   languages?: Array<{ language: string; level: string }>;
+  templateId: TemplateId;
 }
 
 export default function Generator() {
   const [form, setForm] = useState<FormData>({
     nombre: "", puesto: "", ciudad: "", email: "",
     ultimoPuesto: "", empresa: "", descripcion: "",
-    tono: "Profesional", industria: "Diseño", mercado: "mx",
+    tono: "Profesional", industria: "Diseño", mercado: "mx", templateId: "clasico",
     languages: [{ language: "Spanish", level: "Nativo" }],
   });
   const [loading, setLoading] = useState(false);
@@ -171,10 +174,14 @@ export default function Generator() {
                 <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>Tono</label>
                 <PillGroup options={TONES} selected={form.tono} onSelect={v => setForm(f => ({ ...f, tono: v }))} />
               </div>
-              <div>
+              <div style={{ marginBottom: 14 }}>
                 <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>Industria</label>
                 <PillGroup options={INDUSTRIES} selected={form.industria} onSelect={v => setForm(f => ({ ...f, industria: v }))} />
               </div>
+              <TemplateSelector
+                selected={form.templateId}
+                onSelect={v => setForm(f => ({ ...f, templateId: v }))}
+              />
               {error && <p style={{ fontSize: 12, color: "#f87171", marginTop: 12 }}>{error}</p>}
               <button onClick={handleGenerate} disabled={loading}
                 style={{ width: "100%", marginTop: 18, background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: 13, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1 }}>
@@ -188,12 +195,12 @@ export default function Generator() {
           <div style={{ position: "relative" }}>
             {result ? (
               <>
-                <GeneratedResult text={result} market={form.mercado} />
+                <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} />
                 {slug && <ShareCard slug={slug} />}
               </>
             ) : (
               <>
-                <CVPreview market={form.mercado} photoUrl={form.photoUrl} />
+                <CVPreview market={form.mercado} photoUrl={form.photoUrl} templateId={form.templateId} />
                 {loading && (
                   <div style={{ position: "absolute", inset: 0, borderRadius: 8, background: "rgba(28,26,22,.88)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
                     <Spinner large />
@@ -346,8 +353,36 @@ function Spinner({ large }: { large?: boolean }) {
   const s = large ? 28 : 13;
   return <div style={{ width: s, height: s, borderRadius: "50%", border: "2px solid rgba(255,255,255,.15)", borderTopColor: "var(--green-mid)", animation: "spin .65s linear infinite", flexShrink: 0 }} />;
 }
-function GeneratedResult({ text, market }: { text: string; market: Market }) {
+function GeneratedResult({ text, market, slug, templateId }: { text: string; market: Market; slug: string | null; templateId: TemplateId }) {
   const m = MARKETS.find(x => x.id === market)!;
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+
+  const handleDownload = async () => {
+    if (!slug) return;
+    setPdfLoading(true);
+    setPdfError(null);
+    try {
+      const res = await fetch("/api/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, template: templateId }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "Error");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slug}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e: unknown) {
+      setPdfError(e instanceof Error ? e.message : "Error generando PDF");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
   return (
     <div style={{ background: "var(--paper)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--border)", boxShadow: "0 20px 56px rgba(0,0,0,.5)" }}>
       <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -357,8 +392,17 @@ function GeneratedResult({ text, market }: { text: string; market: Market }) {
       <div style={{ padding: 24, maxHeight: 480, overflowY: "auto" }}>
         <pre style={{ fontFamily: "inherit", fontSize: 12, color: "var(--body)", lineHeight: 1.7, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{text}</pre>
       </div>
+      {pdfError && (
+        <p style={{ fontSize: 11, color: "#b91c1c", background: "#fef2f2", margin: "0 16px", padding: "6px 10px", borderRadius: 5, border: "1px solid #fecaca" }}>{pdfError}</p>
+      )}
       <div style={{ padding: "12px 16px", background: "var(--warm)", borderTop: "1px solid var(--border)", display: "flex", gap: 8 }}>
-        <button style={{ flex: 1, background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: 10, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: "pointer" }}>⬇ Descargar PDF</button>
+        <button
+          onClick={handleDownload}
+          disabled={pdfLoading || !slug}
+          style={{ flex: 1, background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: 10, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+        >
+          {pdfLoading ? <><Spinner />Generando PDF...</> : "⬇ Descargar PDF"}
+        </button>
         <button style={{ flex: 1, background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: 10, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>Editar datos</button>
       </div>
     </div>
