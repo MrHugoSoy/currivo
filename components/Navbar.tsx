@@ -48,11 +48,11 @@ export default function Navbar() {
 
         {/* Links */}
         <div style={{ margin: "0 auto", display: "flex", gap: 32 }}>
-          {["Cómo funciona", "Plantillas", "Precios"].map((l) => (
-            <button key={l} onClick={() => scrollTo(l === "Cómo funciona" ? "como-funciona" : l === "Plantillas" ? "plantillas" : "precios")}
-              style={{ background: "none", border: "none", fontSize: 13, color: "var(--muted)", cursor: "pointer", fontFamily: "inherit", fontWeight: 400 }}>
-              {l}
-            </button>
+          {[["Cómo funciona", "como-funciona"], ["Plantillas", "plantillas"], ["Precios", "precios"]].map(([label, id]) => (
+            <a key={id} href={`/#${id}`}
+              style={{ background: "none", border: "none", fontSize: 13, color: "var(--muted)", cursor: "pointer", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>
+              {label}
+            </a>
           ))}
         </div>
 
