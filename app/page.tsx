@@ -4,6 +4,7 @@ import StatsBand from "@/components/StatsBand";
 import HowItWorks from "@/components/HowItWorks";
 import Testimonials from "@/components/Testimonials";
 import Pricing from "@/components/Pricing";
+import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
         <HowItWorks />
         <Testimonials />
         <Pricing />
+        <CTASection />
       </main>
       <Footer />
     </>

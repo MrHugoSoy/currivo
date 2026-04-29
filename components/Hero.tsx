@@ -27,9 +27,9 @@ export default function Hero() {
           <a href="/crear" style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "13px 26px", fontSize: 14, fontWeight: 500, fontFamily: "inherit", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
             ✦ Generar mi CV gratis
           </a>
-          <button style={{ background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: "13px 26px", fontSize: 14, fontFamily: "inherit", cursor: "pointer" }}>
-            Ver plantillas
-          </button>
+          <a href="/#precios" style={{ background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: "13px 26px", fontSize: 14, fontFamily: "inherit", cursor: "pointer", textDecoration: "none" }}>
+            Ver planes
+          </a>
         </div>
 
         {/* Social proof */}
