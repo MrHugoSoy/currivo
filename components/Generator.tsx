@@ -81,16 +81,38 @@ export interface FormData {
   educacion?: EducacionEntry[];
 }
 
-export default function Generator() {
-  const [form, setForm] = useState<FormData>({
-    nombre: "", puesto: "", ciudad: "", email: "",
-    tono: "Profesional", industria: "Diseño", mercado: "mx", templateId: "clasico",
-    languages: [{ language: "Spanish", level: "Nativo" }],
-    sinExperiencia: false,
-    experiencias: [{ puesto: "", empresa: "", periodo: "", descripcion: "" }],
-    redesSociales: [],
-    habilidades: [],
-    educacion: [{ carrera: "", institucion: "", anio: "" }],
+const DEFAULT_FORM: FormData = {
+  nombre: "", puesto: "", ciudad: "", email: "",
+  tono: "Profesional", industria: "Diseño", mercado: "mx", templateId: "clasico",
+  languages: [{ language: "Spanish", level: "Nativo" }],
+  sinExperiencia: false,
+  experiencias: [{ puesto: "", empresa: "", periodo: "", descripcion: "" }],
+  redesSociales: [],
+  habilidades: [],
+  educacion: [{ carrera: "", institucion: "", anio: "" }],
+};
+
+interface GeneratorProps {
+  initialData?: Record<string, unknown>;
+  editSlug?: string;
+}
+
+export default function Generator({ initialData, editSlug }: GeneratorProps = {}) {
+  const [form, setForm] = useState<FormData>(() => {
+    if (!initialData) return DEFAULT_FORM;
+    const merged = { ...DEFAULT_FORM, ...initialData };
+    // Parse languages string back to array if needed
+    if (typeof merged.languages === "string") {
+      merged.languages = (merged.languages as string)
+        ? (merged.languages as string).split(", ").map((entry: string) => {
+            const match = entry.match(/^(.+?)\s*\((.+)\)$/);
+            return match
+              ? { language: match[1].trim(), level: match[2].trim() }
+              : { language: entry.trim(), level: "Nativo" };
+          })
+        : DEFAULT_FORM.languages;
+    }
+    return merged as FormData;
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -156,7 +178,7 @@ export default function Generator() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, editSlug: editSlug ?? undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error generando CV");
@@ -344,7 +366,7 @@ export default function Generator() {
               {error && <p style={{ fontSize: 12, color: "#f87171", marginTop: 12 }}>{error}</p>}
               <button onClick={handleGenerate} disabled={loading}
                 style={{ width: "100%", marginTop: 18, background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: 13, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1 }}>
-                {loading ? <><Spinner />Generando...</> : <>✦ Generar CV para {selectedMarket.flag} {selectedMarket.label}</>}
+                {loading ? <><Spinner />Generando...</> : editSlug ? <>✦ Actualizar mi CV</> : <>✦ Generar CV para {selectedMarket.flag} {selectedMarket.label}</>}
               </button>
               {!isAdmin && <p style={{ textAlign: "center", fontSize: 9, color: "rgba(255,255,255,.18)", marginTop: 8, letterSpacing: "0.5px" }}>El primero es gratis · Sin tarjeta · Sin registro</p>}
             </FormBlock>

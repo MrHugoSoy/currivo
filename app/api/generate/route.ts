@@ -299,9 +299,25 @@ export async function POST(req: NextRequest) {
       .map(b => b.text)
       .join("\n");
 
-    const slug = generateSlug(nombre);
-    const { photoUrl: _photo, ...formDataToStore } = body;
+    const { photoUrl: _photo, editSlug, ...formDataToStore } = body;
+    const savedFormData = { ...formDataToStore, languages: langStr || undefined };
 
+    if (editSlug) {
+      await supabase.from("cvs").update({
+        nombre,
+        puesto,
+        ciudad: body.ciudad || null,
+        email: body.email || null,
+        mercado: body.mercado,
+        template: body.templateId || "clasico",
+        cv_text: cv,
+        form_data: savedFormData,
+      }).eq("slug", editSlug);
+
+      return NextResponse.json({ cv, slug: editSlug });
+    }
+
+    const slug = generateSlug(nombre);
     await supabase.from("cvs").insert({
       slug,
       nombre,
@@ -311,7 +327,7 @@ export async function POST(req: NextRequest) {
       mercado: body.mercado,
       template: body.templateId || "clasico",
       cv_text: cv,
-      form_data: { ...formDataToStore, languages: langStr || undefined },
+      form_data: savedFormData,
     });
 
     return NextResponse.json({ cv, slug });

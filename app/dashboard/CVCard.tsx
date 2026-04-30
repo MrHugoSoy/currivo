@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { deleteCV } from "./actions";
 
 const FLAG: Record<string, string> = { mx: "🇲🇽", us: "🇺🇸", ca: "🇨🇦" };
 
@@ -31,26 +32,23 @@ interface CVCardProps {
 }
 
 export function CVCard({ cv, onDelete }: CVCardProps) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  async function handleEdit() {
-    setEditLoading(true);
-    try {
-      const { data } = await supabase.from("cvs").select("form_data").eq("id", cv.id).single();
-      if (data?.form_data) {
-        localStorage.setItem("currivo_edit_draft", JSON.stringify(data.form_data));
-      }
-    } catch { /* navigate anyway */ }
-    window.location.href = "/#generador";
-  }
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowModal(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
-  const url = `https://currivo.mx/cv/${cv.slug}`;
+  const url = `https://currivo-rosy.vercel.app/cv/${cv.slug}`;
 
-  function copyLink() {
+  function handleCopy() {
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -59,13 +57,13 @@ export function CVCard({ cv, onDelete }: CVCardProps) {
   async function handleDelete() {
     setDeleting(true);
     try {
-      const { error } = await supabase.from("cvs").delete().eq("id", cv.id);
-      if (error) throw error;
+      await deleteCV(cv.id);
       onDelete(cv.id);
-    } catch (e) {
-      console.error(e);
-      alert("Error al eliminar el CV. Intenta de nuevo.");
+    } catch {
+      alert("Error al eliminar. Intenta de nuevo.");
+    } finally {
       setDeleting(false);
+      setShowModal(false);
     }
   }
 
@@ -105,72 +103,72 @@ export function CVCard({ cv, onDelete }: CVCardProps) {
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          <a
-            href={`/cv/${cv.slug}`}
-            target="_blank"
-            rel="noreferrer"
-            style={{ fontSize: 11, padding: "5px 11px", border: "1px solid rgba(42,82,54,.25)", borderRadius: 5, textDecoration: "none", color: "var(--green)", fontWeight: 500, background: "var(--green-bg)" }}
+        <div style={{ display: "flex", gap: 6, marginTop: 14, flexWrap: "wrap" }}>
+          <button
+            onClick={() => window.open(`/cv/${cv.slug}`, "_blank")}
+            style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "7px 14px", fontSize: 12, fontWeight: 500, fontFamily: "inherit", cursor: "pointer" }}
           >
             Ver página
-          </a>
-
-          <button
-            onClick={copyLink}
-            style={{ fontSize: 11, padding: "5px 11px", border: `1px solid ${copied ? "rgba(42,82,54,.2)" : "var(--border)"}`, borderRadius: 5, cursor: "pointer", fontFamily: "inherit", color: copied ? "var(--green)" : "var(--muted)", background: copied ? "var(--green-bg)" : "none", transition: "all .15s" }}
-          >
-            {copied ? "¡Copiado!" : "Copiar"}
           </button>
 
           <button
-            onClick={handleEdit}
-            disabled={editLoading}
-            style={{ fontSize: 11, padding: "5px 11px", border: "1px solid var(--border)", borderRadius: 5, cursor: editLoading ? "not-allowed" : "pointer", fontFamily: "inherit", color: "var(--muted)", background: "none", opacity: editLoading ? 0.6 : 1, display: "inline-flex", alignItems: "center", gap: 5 }}
+            onClick={handleCopy}
+            style={{ background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 14px", fontSize: 12, fontFamily: "inherit", cursor: "pointer" }}
           >
-            {editLoading ? (
-              <>
-                <span style={{ width: 9, height: 9, borderRadius: "50%", border: "2px solid rgba(0,0,0,.15)", borderTopColor: "var(--muted)", animation: "spin .65s linear infinite", display: "inline-block" }} />
-                Cargando...
-              </>
-            ) : "✏ Editar"}
+            {copied ? "¡Copiado!" : "🔗 Copiar"}
+          </button>
+
+          <button
+            onClick={() => router.push(`/crear?edit=${cv.slug}`)}
+            style={{ background: "none", color: "var(--muted)", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 14px", fontSize: 12, fontFamily: "inherit", cursor: "pointer" }}
+          >
+            ✏ Editar
           </button>
 
           <button
             onClick={() => setShowModal(true)}
-            style={{ fontSize: 11, padding: "5px 11px", border: "1px solid rgba(220,38,38,.2)", borderRadius: 5, cursor: "pointer", fontFamily: "inherit", color: "#dc2626", background: "none" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#fef2f2"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
+            style={{ background: "none", color: "#dc2626", border: "1px solid #fecaca", borderRadius: 6, padding: "7px 14px", fontSize: 12, fontFamily: "inherit", cursor: "pointer", transition: "all .15s" }}
           >
             🗑 Borrar
           </button>
         </div>
       </div>
 
-      {/* Delete confirmation modal */}
+      {/* Delete modal */}
       {showModal && (
         <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
+          style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}
         >
-          <div style={{ background: "var(--paper)", borderRadius: 10, padding: "28px 32px", maxWidth: 360, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,.3)" }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: "var(--ink)", marginBottom: 8 }}>¿Eliminar este CV?</h3>
-            <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 6, lineHeight: 1.5 }}>
+          <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 12, padding: 32, maxWidth: 400, width: "90%", textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🗑</div>
+            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: "var(--ink)", marginBottom: 8 }}>
+              ¿Eliminar este CV?
+            </h3>
+            <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 6, lineHeight: 1.6 }}>
               <strong style={{ color: "var(--ink)" }}>{cv.nombre}</strong> — {cv.puesto}
             </p>
-            <p style={{ fontSize: 12, color: "var(--hint)", marginBottom: 22 }}>Esta acción no se puede deshacer.</p>
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24, lineHeight: 1.6 }}>
+              Esta acción no se puede deshacer.<br />
+              El link público dejará de funcionar.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => setShowModal(false)}
                 disabled={deleting}
-                style={{ fontSize: 13, padding: "8px 16px", border: "1px solid var(--border)", borderRadius: 6, cursor: "pointer", fontFamily: "inherit", background: "none", color: "var(--muted)" }}
+                style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "10px", fontSize: 13, fontFamily: "inherit", cursor: "pointer", color: "var(--body)" }}
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                style={{ fontSize: 13, padding: "8px 16px", background: "#dc2626", color: "#fff", border: "none", borderRadius: 6, cursor: deleting ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: deleting ? 0.7 : 1, display: "flex", alignItems: "center", gap: 6 }}
+                style={{ flex: 1, background: "#dc2626", border: "none", borderRadius: 6, padding: "10px", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: deleting ? "not-allowed" : "pointer", color: "#fff", opacity: deleting ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
               >
                 {deleting && <span style={{ width: 11, height: 11, borderRadius: "50%", border: "2px solid rgba(255,255,255,.3)", borderTopColor: "#fff", animation: "spin .65s linear infinite", display: "inline-block" }} />}
-                {deleting ? "Eliminando..." : "Eliminar"}
+                {deleting ? "Eliminando..." : "Sí, eliminar"}
               </button>
             </div>
           </div>
