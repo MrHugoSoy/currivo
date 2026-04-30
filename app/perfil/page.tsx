@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
-import { deleteCV } from "../dashboard/actions";
 
 type CV = {
   id: string; slug: string; nombre: string;
@@ -305,7 +304,8 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => void }) {
   async function handleDelete() {
     setDeleting(true);
     try {
-      await deleteCV(cv.id);
+      const { error } = await supabase.from("cvs").delete().eq("id", cv.id);
+      if (error) throw error;
       onDelete(cv.id);
     } catch {
       alert("Error al eliminar. Intenta de nuevo.");
