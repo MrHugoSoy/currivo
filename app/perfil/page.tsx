@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
+import { deleteCV } from "../dashboard/actions";
 
 type CV = {
   id: string; slug: string; nombre: string;
@@ -19,7 +20,6 @@ export default function PerfilPage() {
   const [user, setUser] = useState<User | null>(null);
   const [cvs, setCvs] = useState<CV[]>([]);
   const [cvsLoading, setCvsLoading] = useState(true);
-  const [copied, setCopied] = useState<string | null>(null);
 
   // Profile edit state
   const [username, setUsername] = useState("");
@@ -104,11 +104,7 @@ export default function PerfilPage() {
   };
 
   const signOut = async () => { await supabase.auth.signOut(); router.replace("/"); };
-  const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(`https://currivo.mx/cv/${slug}`);
-    setCopied(slug);
-    setTimeout(() => setCopied(null), 2200);
-  };
+  const handleDeleteCV = (id: string) => setCvs(prev => prev.filter(c => c.id !== id));
 
   if (!user) return null;
 
@@ -256,7 +252,7 @@ export default function PerfilPage() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
               {cvs.map(cv => (
-                <CVCard key={cv.id} cv={cv} copied={copied} onCopy={copyLink} />
+                <CVCard key={cv.id} cv={cv} onDelete={handleDeleteCV} />
               ))}
             </div>
           )}
@@ -268,34 +264,101 @@ export default function PerfilPage() {
 
 // ── Sub-components ──
 
-function CVCard({ cv, copied, onCopy }: { cv: CV; copied: string | null; onCopy: (slug: string) => void }) {
+function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => void }) {
+  const router = useRouter();
+  const [copied, setCopied] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   const date = new Date(cv.created_at).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" });
-  const isCopied = copied === cv.slug;
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setShowDeleteModal(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(`${window.location.origin}/cv/${cv.slug}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await deleteCV(cv.id);
+      onDelete(cv.id);
+    } catch {
+      alert("Error al eliminar. Intenta de nuevo.");
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
+  }
+
   return (
-    <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 3px rgba(0,0,0,.04)" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <span style={{ fontSize: 11, background: "var(--green-bg)", color: "var(--green)", borderRadius: 4, padding: "3px 8px", fontWeight: 500, border: "1px solid rgba(45,90,61,.15)" }}>
-          {FLAG[cv.mercado]} {MARKET[cv.mercado] ?? cv.mercado}
-        </span>
-        <span style={{ fontSize: 10, color: "var(--hint)" }}>{date}</span>
+    <>
+      <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 3px rgba(0,0,0,.04)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <span style={{ fontSize: 11, background: "var(--green-bg)", color: "var(--green)", borderRadius: 4, padding: "3px 8px", fontWeight: 500, border: "1px solid rgba(45,90,61,.15)" }}>
+            {FLAG[cv.mercado]} {MARKET[cv.mercado] ?? cv.mercado}
+          </span>
+          <span style={{ fontSize: 10, color: "var(--hint)" }}>{date}</span>
+        </div>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.3px", lineHeight: 1.2, marginBottom: 4 }}>
+          {cv.nombre}
+        </div>
+        <div style={{ fontSize: 12, color: "var(--body)", marginBottom: cv.ciudad ? 2 : 14 }}>{cv.puesto}</div>
+        {cv.ciudad && <div style={{ fontSize: 11, color: "var(--hint)", marginBottom: 14 }}>📍 {cv.ciudad}</div>}
+        <div style={{ height: 1, background: "var(--border)", marginBottom: 12 }} />
+        <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+          <a href={`/cv/${cv.slug}`} target="_blank" rel="noreferrer"
+            style={{ flex: 1, textAlign: "center", fontSize: 12, fontWeight: 500, color: "var(--green)", background: "var(--green-bg)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 6, padding: "7px 0", textDecoration: "none", minWidth: 70 }}>
+            Ver →
+          </a>
+          <button onClick={handleCopy}
+            style={{ flex: 1, fontSize: 12, color: copied ? "var(--green)" : "var(--muted)", background: copied ? "var(--green-bg)" : "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 0", cursor: "pointer", fontFamily: "inherit", transition: "all .15s", minWidth: 70 }}>
+            {copied ? "✓ Copiado" : "Copiar link"}
+          </button>
+          <button onClick={() => router.push(`/crear?edit=${cv.slug}`)}
+            style={{ flex: 1, fontSize: 12, color: "var(--muted)", background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 0", cursor: "pointer", fontFamily: "inherit", minWidth: 60 }}>
+            ✏ Editar
+          </button>
+          <button onClick={() => setShowDeleteModal(true)}
+            style={{ flex: 1, fontSize: 12, color: "#dc2626", background: "none", border: "1px solid #fecaca", borderRadius: 6, padding: "7px 0", cursor: "pointer", fontFamily: "inherit", minWidth: 60 }}>
+            🗑 Borrar
+          </button>
+        </div>
       </div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.3px", lineHeight: 1.2, marginBottom: 4 }}>
-        {cv.nombre}
-      </div>
-      <div style={{ fontSize: 12, color: "var(--body)", marginBottom: cv.ciudad ? 2 : 14 }}>{cv.puesto}</div>
-      {cv.ciudad && <div style={{ fontSize: 11, color: "var(--hint)", marginBottom: 14 }}>📍 {cv.ciudad}</div>}
-      <div style={{ height: 1, background: "var(--border)", marginBottom: 12 }} />
-      <div style={{ display: "flex", gap: 7 }}>
-        <a href={`/cv/${cv.slug}`} target="_blank" rel="noreferrer"
-          style={{ flex: 1, textAlign: "center", fontSize: 12, fontWeight: 500, color: "var(--green)", background: "var(--green-bg)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 6, padding: "7px 0", textDecoration: "none" }}>
-          Ver →
-        </a>
-        <button onClick={() => onCopy(cv.slug)}
-          style={{ flex: 1, fontSize: 12, color: isCopied ? "var(--green)" : "var(--muted)", background: isCopied ? "var(--green-bg)" : "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 0", cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}>
-          {isCopied ? "✓ Copiado" : "Copiar link"}
-        </button>
-      </div>
-    </div>
+
+      {showDeleteModal && (
+        <div
+          onClick={() => setShowDeleteModal(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 12, padding: 32, maxWidth: 380, width: "90%", textAlign: "center" }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>🗑</div>
+            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: "var(--ink)", marginBottom: 8 }}>
+              ¿Eliminar este CV?
+            </h3>
+            <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24, lineHeight: 1.6 }}>
+              Esta acción no se puede deshacer.<br />
+              El link público dejará de funcionar.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setShowDeleteModal(false)} style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: 10, fontSize: 13, fontFamily: "inherit", cursor: "pointer", color: "var(--body)" }}>
+                Cancelar
+              </button>
+              <button onClick={handleDelete} disabled={deleting}
+                style={{ flex: 1, background: "#dc2626", border: "none", borderRadius: 6, padding: 10, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: deleting ? "not-allowed" : "pointer", color: "#fff", opacity: deleting ? 0.7 : 1 }}>
+                {deleting ? "Eliminando..." : "Sí, eliminar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
