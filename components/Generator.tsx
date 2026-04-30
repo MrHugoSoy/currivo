@@ -111,6 +111,26 @@ export default function Generator() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const raw = localStorage.getItem("currivo_edit_draft");
+    if (!raw) return;
+    localStorage.removeItem("currivo_edit_draft");
+    try {
+      const draft = JSON.parse(raw);
+      if (typeof draft.languages === "string") {
+        draft.languages = draft.languages
+          ? draft.languages.split(", ").map((entry: string) => {
+              const match = entry.match(/^(.+?)\s*\((.+)\)$/);
+              return match
+                ? { language: match[1].trim(), level: match[2].trim() }
+                : { language: entry.trim(), level: "Fluido" };
+            })
+          : [{ language: "Spanish", level: "Nativo" }];
+      }
+      setForm(f => ({ ...f, ...draft }));
+    } catch { /* ignore malformed draft */ }
+  }, []);
+
   const set = (k: keyof FormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm(f => ({ ...f, [k]: e.target.value }));

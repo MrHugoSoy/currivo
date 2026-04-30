@@ -34,7 +34,19 @@ export function CVCard({ cv, onDelete }: CVCardProps) {
   const [copied, setCopied] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const [hovered, setHovered] = useState(false);
+
+  async function handleEdit() {
+    setEditLoading(true);
+    try {
+      const { data } = await supabase.from("cvs").select("form_data").eq("id", cv.id).single();
+      if (data?.form_data) {
+        localStorage.setItem("currivo_edit_draft", JSON.stringify(data.form_data));
+      }
+    } catch { /* navigate anyway */ }
+    window.location.href = "/#generador";
+  }
 
   const url = `https://currivo.mx/cv/${cv.slug}`;
 
@@ -110,12 +122,18 @@ export function CVCard({ cv, onDelete }: CVCardProps) {
             {copied ? "¡Copiado!" : "Copiar"}
           </button>
 
-          <a
-            href="/#generador"
-            style={{ fontSize: 11, padding: "5px 11px", border: "1px solid var(--border)", borderRadius: 5, textDecoration: "none", color: "var(--muted)", background: "none" }}
+          <button
+            onClick={handleEdit}
+            disabled={editLoading}
+            style={{ fontSize: 11, padding: "5px 11px", border: "1px solid var(--border)", borderRadius: 5, cursor: editLoading ? "not-allowed" : "pointer", fontFamily: "inherit", color: "var(--muted)", background: "none", opacity: editLoading ? 0.6 : 1, display: "inline-flex", alignItems: "center", gap: 5 }}
           >
-            ✏ Editar
-          </a>
+            {editLoading ? (
+              <>
+                <span style={{ width: 9, height: 9, borderRadius: "50%", border: "2px solid rgba(0,0,0,.15)", borderTopColor: "var(--muted)", animation: "spin .65s linear infinite", display: "inline-block" }} />
+                Cargando...
+              </>
+            ) : "✏ Editar"}
+          </button>
 
           <button
             onClick={() => setShowModal(true)}

@@ -300,7 +300,7 @@ export async function POST(req: NextRequest) {
       .join("\n");
 
     const slug = generateSlug(nombre);
-    const { photoUrl: _photo, redesSociales: _redes, ...formDataToStore } = body;
+    const { photoUrl: _photo, ...formDataToStore } = body;
 
     await supabase.from("cvs").insert({
       slug,
