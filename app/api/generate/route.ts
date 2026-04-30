@@ -309,6 +309,7 @@ export async function POST(req: NextRequest) {
       ciudad: body.ciudad || null,
       email: body.email || null,
       mercado: body.mercado,
+      template: body.templateId || "clasico",
       cv_text: cv,
       form_data: { ...formDataToStore, languages: langStr || undefined },
     });
