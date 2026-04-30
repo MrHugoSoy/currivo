@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
+import { deleteCV } from "../dashboard/actions";
 
 type CV = {
   id: string; slug: string; nombre: string;
@@ -20,6 +21,7 @@ export default function PerfilPage() {
   const [cvs, setCvs] = useState<CV[]>([]);
   const [cvsLoading, setCvsLoading] = useState(true);
 
+  // Profile edit state
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -28,17 +30,6 @@ export default function PerfilPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const loadCVs = useCallback(async (u: User) => {
-    setCvsLoading(true);
-    const { data: rows } = await supabase
-      .from("cvs")
-      .select("id, slug, nombre, puesto, ciudad, mercado, created_at")
-      .eq("user_id", u.id)
-      .order("created_at", { ascending: false });
-    setCvs(rows ?? []);
-    setCvsLoading(false);
-  }, []);
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user ?? null;
@@ -46,9 +37,14 @@ export default function PerfilPage() {
       setUser(u);
       setUsername(u.user_metadata?.username ?? "");
       setAvatarUrl(u.user_metadata?.avatar_url ?? null);
-      loadCVs(u);
+      supabase
+        .from("cvs")
+        .select("id, slug, nombre, puesto, ciudad, mercado, created_at")
+        .eq("email", u.email)
+        .order("created_at", { ascending: false })
+        .then(({ data: rows }) => { setCvs(rows ?? []); setCvsLoading(false); });
     });
-  }, [router, loadCVs]);
+  }, [router]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,6 +71,7 @@ export default function PerfilPage() {
     setSaveError(null);
     try {
       let newAvatarUrl = avatarUrl;
+
       if (avatarFile) {
         const ext = avatarFile.name.split(".").pop() ?? "jpg";
         const path = `${user.id}/avatar.${ext}`;
@@ -85,10 +82,15 @@ export default function PerfilPage() {
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
         newAvatarUrl = publicUrl;
       }
+
       const { error } = await supabase.auth.updateUser({
-        data: { username: username.trim() || null, avatar_url: newAvatarUrl || null },
+        data: {
+          username: username.trim() || null,
+          avatar_url: newAvatarUrl || null,
+        },
       });
       if (error) throw error;
+
       setAvatarUrl(newAvatarUrl);
       setAvatarPreview(null);
       setAvatarFile(null);
@@ -101,23 +103,8 @@ export default function PerfilPage() {
     }
   };
 
-  // Borrar CV directamente con supabase client — sin server action
-  const handleDeleteCV = async (id: string) => {
-    const { error } = await supabase
-      .from("cvs")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      alert("Error al eliminar. Intenta de nuevo.");
-      return;
-    }
-
-    // Actualizar estado local inmediatamente sin refrescar
-    setCvs(prev => prev.filter(c => c.id !== id));
-  };
-
   const signOut = async () => { await supabase.auth.signOut(); router.replace("/"); };
+  const handleDeleteCV = (id: string) => setCvs(prev => prev.filter(c => c.id !== id));
 
   if (!user) return null;
 
@@ -135,6 +122,7 @@ export default function PerfilPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--cream)" }}>
 
+      {/* Header */}
       <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 48px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
         <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 21, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px" }}>
           curr<span style={{ color: "var(--green)" }}>ivo</span>
@@ -149,6 +137,7 @@ export default function PerfilPage() {
         </div>
       </header>
 
+      {/* Dark hero strip */}
       <div style={{ background: "var(--ink)", padding: "32px 48px" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", alignItems: "center", gap: 18 }}>
           <div style={{ width: 48, height: 48, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "1.5px solid rgba(74,148,98,.4)", background: "rgba(74,148,98,.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -170,17 +159,23 @@ export default function PerfilPage() {
         </div>
       </div>
 
+      {/* Two-column layout */}
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 48px 80px", display: "grid", gridTemplateColumns: "260px 1fr", gap: 28, alignItems: "start" }}>
 
-        {/* LEFT */}
+        {/* LEFT — Profile settings */}
         <div style={{ position: "sticky", top: 72 }}>
           <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "24px 22px" }}>
             <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--hint)", marginBottom: 20, fontWeight: 600 }}>
               Editar perfil
             </div>
+
+            {/* Avatar */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginBottom: 22 }}>
-              <div onClick={() => fileInputRef.current?.click()}
-                style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", border: "2px solid var(--border)", background: "var(--warm)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}>
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", border: "2px solid var(--border)", background: "var(--warm)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
+                title="Cambiar foto"
+              >
                 {displayAvatar
                   ? <img src={displayAvatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   : <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 700, color: "var(--green)" }}>{initial}</span>
@@ -191,41 +186,55 @@ export default function PerfilPage() {
                   <span style={{ fontSize: 18 }}>📷</span>
                 </div>
               </div>
-              <button type="button" onClick={() => fileInputRef.current?.click()}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
                 style={{ fontSize: 11, color: "var(--green)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 500, padding: 0 }}>
                 Cambiar foto
               </button>
               <p style={{ fontSize: 10, color: "var(--hint)", margin: 0 }}>JPG · PNG · WEBP · Máx. 2MB</p>
               <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" onChange={handleFileSelect} style={{ display: "none" }} />
             </div>
+
+            {/* Username */}
             <div style={{ marginBottom: 14 }}>
               <label style={{ display: "block", fontSize: 11, color: "var(--muted)", marginBottom: 5, fontWeight: 500 }}>Nombre de perfil</label>
               <div style={{ position: "relative" }}>
                 <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--hint)", pointerEvents: "none" }}>@</span>
-                <input type="text" placeholder="tunombre" value={username}
+                <input
+                  type="text"
+                  placeholder="tunombre"
+                  value={username}
                   onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 20))}
-                  style={{ ...inputStyle, paddingLeft: 26 }} />
+                  style={{ ...inputStyle, paddingLeft: 26 }}
+                />
               </div>
               <p style={{ fontSize: 10, color: "var(--hint)", marginTop: 4 }}>3–20 caracteres · letras, números, _ y -</p>
             </div>
+
+            {/* Email (readonly) */}
             <div style={{ marginBottom: 20 }}>
               <label style={{ display: "block", fontSize: 11, color: "var(--muted)", marginBottom: 5, fontWeight: 500 }}>Correo electrónico</label>
               <input type="email" value={user.email ?? ""} readOnly
                 style={{ ...inputStyle, color: "var(--hint)", cursor: "default", background: "var(--warm)" }} />
             </div>
+
             {saveError && (
               <p style={{ fontSize: 12, color: "#b91c1c", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 5, padding: "8px 10px", marginBottom: 12 }}>
                 {saveError}
               </p>
             )}
-            <button onClick={handleSave} disabled={saving || (!hasChanges && !saveSuccess)}
+
+            <button
+              onClick={handleSave}
+              disabled={saving || (!hasChanges && !saveSuccess)}
               style={{ width: "100%", background: saveSuccess ? "var(--green-bg)" : "var(--green)", color: saveSuccess ? "var(--green)" : "#fff", border: saveSuccess ? "1px solid rgba(45,90,61,.25)" : "none", borderRadius: 6, padding: "10px 0", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: (saving || (!hasChanges && !saveSuccess)) ? "default" : "pointer", opacity: saving ? 0.7 : 1, transition: "all .2s" }}>
               {saving ? "Guardando..." : saveSuccess ? "✓ Guardado" : "Guardar cambios"}
             </button>
           </div>
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT — CVs */}
         <div>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 20 }}>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px" }}>
@@ -235,7 +244,12 @@ export default function PerfilPage() {
               + Generar nuevo
             </a>
           </div>
-          {cvsLoading ? <LoadingSkeleton /> : cvs.length === 0 ? <EmptyState /> : (
+
+          {cvsLoading ? (
+            <LoadingSkeleton />
+          ) : cvs.length === 0 ? (
+            <EmptyState />
+          ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
               {cvs.map(cv => (
                 <CVCard key={cv.id} cv={cv} onDelete={handleDeleteCV} />
@@ -248,7 +262,9 @@ export default function PerfilPage() {
   );
 }
 
-function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => Promise<void> }) {
+// ── Sub-components ──
+
+function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => void }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -271,12 +287,13 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => Promise<vo
   async function handleDelete() {
     setDeleting(true);
     try {
-      await onDelete(cv.id);
-      setShowDeleteModal(false);
+      await deleteCV(cv.id);
+      onDelete(cv.id);
     } catch {
       alert("Error al eliminar. Intenta de nuevo.");
     } finally {
       setDeleting(false);
+      setShowDeleteModal(false);
     }
   }
 
@@ -316,10 +333,11 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => Promise<vo
       </div>
 
       {showDeleteModal && (
-        <div onClick={() => setShowDeleteModal(false)}
-          style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div onClick={e => e.stopPropagation()}
-            style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 12, padding: 32, maxWidth: 380, width: "90%", textAlign: "center" }}>
+        <div
+          onClick={() => setShowDeleteModal(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 50, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 12, padding: 32, maxWidth: 380, width: "90%", textAlign: "center" }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>🗑</div>
             <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: "var(--ink)", marginBottom: 8 }}>
               ¿Eliminar este CV?
@@ -329,8 +347,7 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => Promise<vo
               El link público dejará de funcionar.
             </p>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setShowDeleteModal(false)}
-                style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: 10, fontSize: 13, fontFamily: "inherit", cursor: "pointer", color: "var(--body)" }}>
+              <button onClick={() => setShowDeleteModal(false)} style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: 10, fontSize: 13, fontFamily: "inherit", cursor: "pointer", color: "var(--body)" }}>
                 Cancelar
               </button>
               <button onClick={handleDelete} disabled={deleting}
