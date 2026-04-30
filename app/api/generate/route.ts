@@ -299,7 +299,7 @@ export async function POST(req: NextRequest) {
       .map(b => b.text)
       .join("\n");
 
-    const { photoUrl: _photo, editSlug, ...formDataToStore } = body;
+    const { photoUrl: _photo, editSlug, userId, ...formDataToStore } = body;
     const savedFormData = { ...formDataToStore, languages: langStr || undefined };
 
     if (editSlug) {
@@ -328,6 +328,7 @@ export async function POST(req: NextRequest) {
       template: body.templateId || "clasico",
       cv_text: cv,
       form_data: savedFormData,
+      ...(userId ? { user_id: userId } : {}),
     });
 
     return NextResponse.json({ cv, slug });

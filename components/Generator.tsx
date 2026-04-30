@@ -119,16 +119,18 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const [slug, setSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userId, setUserId] = useState<string | undefined>(undefined);
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      const email = data.session?.user?.email ?? "";
-      setIsAdmin(ADMIN_EMAILS.includes(email));
+      const user = data.session?.user;
+      setIsAdmin(ADMIN_EMAILS.includes(user?.email ?? ""));
+      setUserId(user?.id);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      const email = session?.user?.email ?? "";
-      setIsAdmin(ADMIN_EMAILS.includes(email));
+      setIsAdmin(ADMIN_EMAILS.includes(session?.user?.email ?? ""));
+      setUserId(session?.user?.id);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -178,7 +180,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, editSlug: editSlug ?? undefined }),
+        body: JSON.stringify({ ...form, editSlug: editSlug ?? undefined, userId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error generando CV");
