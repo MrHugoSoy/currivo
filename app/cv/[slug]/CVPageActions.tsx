@@ -1,8 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-
-const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
 interface Props {
   slug: string;
@@ -13,14 +11,7 @@ interface Props {
 export function CVPageActions({ slug, mercado, templateId }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setIsAdmin(ADMIN_EMAILS.includes(data.session?.user?.email ?? ""));
-    });
-  }, []);
 
   async function handleEdit() {
     setEditLoading(true);
@@ -112,27 +103,25 @@ export function CVPageActions({ slug, mercado, templateId }: Props) {
         {copied ? "✓ Copiado" : "🔗 Copiar link"}
       </button>
 
-      {isAdmin && (
-        <button
-          onClick={handleEdit}
-          disabled={editLoading}
-          style={{
-            fontSize: 12, color: "var(--muted)",
-            border: "1px solid var(--border)", borderRadius: 5,
-            padding: "7px 14px", cursor: editLoading ? "not-allowed" : "pointer",
-            fontFamily: "inherit", background: "none",
-            opacity: editLoading ? 0.6 : 1,
-            display: "flex", alignItems: "center", gap: 6,
-          }}
-        >
-          {editLoading ? (
-            <>
-              <span style={{ width: 10, height: 10, borderRadius: "50%", border: "2px solid rgba(0,0,0,.15)", borderTopColor: "var(--muted)", animation: "spin .65s linear infinite", display: "inline-block" }} />
-              Cargando...
-            </>
-          ) : "✏ Editar"}
-        </button>
-      )}
+      <button
+        onClick={handleEdit}
+        disabled={editLoading}
+        style={{
+          fontSize: 12, color: "var(--muted)",
+          border: "1px solid var(--border)", borderRadius: 5,
+          padding: "7px 14px", cursor: editLoading ? "not-allowed" : "pointer",
+          fontFamily: "inherit", background: "none",
+          opacity: editLoading ? 0.6 : 1,
+          display: "flex", alignItems: "center", gap: 6,
+        }}
+      >
+        {editLoading ? (
+          <>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", border: "2px solid rgba(0,0,0,.15)", borderTopColor: "var(--muted)", animation: "spin .65s linear infinite", display: "inline-block" }} />
+            Cargando...
+          </>
+        ) : "✏ Editar"}
+      </button>
     </div>
   );
 }
