@@ -304,10 +304,18 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => void }) {
   async function handleDelete() {
     setDeleting(true);
     try {
-      const { error } = await supabase.from("cvs").delete().eq("id", cv.id);
-      if (error) throw error;
+      const res = await fetch("/api/cv/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: cv.id }),
+      });
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error);
+      }
       onDelete(cv.id);
-    } catch {
+    } catch (e) {
+      console.error(e);
       alert("Error al eliminar. Intenta de nuevo.");
     } finally {
       setDeleting(false);
