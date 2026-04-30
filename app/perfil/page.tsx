@@ -30,6 +30,29 @@ export default function PerfilPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  async function loadCVs(userId: string, authEmail: string) {
+    setCvsLoading(true);
+    // Query by user_id (new CVs) and by email (old CVs), merge both
+    const [{ data: byId }, { data: byEmail }] = await Promise.all([
+      supabase.from("cvs")
+        .select("id, slug, nombre, puesto, ciudad, mercado, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false }),
+      supabase.from("cvs")
+        .select("id, slug, nombre, puesto, ciudad, mercado, created_at")
+        .eq("email", authEmail)
+        .order("created_at", { ascending: false }),
+    ]);
+    const seen = new Set<string>();
+    const merged = [...(byId ?? []), ...(byEmail ?? [])].filter(cv => {
+      if (seen.has(cv.id)) return false;
+      seen.add(cv.id);
+      return true;
+    }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    setCvs(merged);
+    setCvsLoading(false);
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user ?? null;
@@ -37,12 +60,7 @@ export default function PerfilPage() {
       setUser(u);
       setUsername(u.user_metadata?.username ?? "");
       setAvatarUrl(u.user_metadata?.avatar_url ?? null);
-      supabase
-        .from("cvs")
-        .select("id, slug, nombre, puesto, ciudad, mercado, created_at")
-        .eq("email", u.email)
-        .order("created_at", { ascending: false })
-        .then(({ data: rows }) => { setCvs(rows ?? []); setCvsLoading(false); });
+      loadCVs(u.id, u.email ?? "");
     });
   }, [router]);
 
