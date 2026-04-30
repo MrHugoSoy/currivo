@@ -755,7 +755,7 @@ function LanguageSelector({ languages, onChange, market }: {
   );
 }
 function ShareCard({ slug }: { slug: string }) {
-  const url = `https://currivo.mx/cv/${slug}`;
+  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/cv/${slug}`;
   const [copied, setCopied] = useState(false);
   const copy = () => {
     navigator.clipboard.writeText(url);

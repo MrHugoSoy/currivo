@@ -46,7 +46,7 @@ export function CVCard({ cv, onDelete }: CVCardProps) {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const url = `https://currivo-rosy.vercel.app/cv/${cv.slug}`;
+  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/cv/${cv.slug}`;
 
   function handleCopy() {
     navigator.clipboard.writeText(url);
