@@ -19,7 +19,7 @@ const plans = [
     feats: [["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","PDF + Word"],["✓","CV adaptado por vacante"]],
     cta: "Suscribirme →",
     featured: true,
-    href: "/crear",
+    href: "/pago?plan=pro",
   },
   {
     label: "Lifetime",
@@ -28,7 +28,7 @@ const plans = [
     feats: [["✓","Todo lo de Pro"],["✓","Acceso de por vida"],["✓","Futuras plantillas"],["✓","LinkedIn Optimizer"],["✓","Soporte prioritario"],["✓","Sin renovaciones"]],
     cta: "Comprar ahora",
     featured: false,
-    href: "/crear",
+    href: "/pago?plan=lifetime",
   },
 ];
 

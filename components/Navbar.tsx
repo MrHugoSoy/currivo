@@ -48,12 +48,9 @@ export default function Navbar() {
 
         {/* Links */}
         <div style={{ margin: "0 auto", display: "flex", gap: 32 }}>
-          {[["Cómo funciona", "como-funciona"], ["Plantillas", "plantillas"], ["Precios", "precios"]].map(([label, id]) => (
-            <a key={id} href={`/#${id}`}
-              style={{ background: "none", border: "none", fontSize: 13, color: "var(--muted)", cursor: "pointer", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>
-              {label}
-            </a>
-          ))}
+          <a href="/#como-funciona" style={{ fontSize: 13, color: "var(--muted)", cursor: "pointer", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Cómo funciona</a>
+          <a href="/crear" style={{ fontSize: 13, color: "var(--muted)", cursor: "pointer", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Plantillas</a>
+          <a href="/#precios" style={{ fontSize: 13, color: "var(--muted)", cursor: "pointer", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Precios</a>
         </div>
 
         {/* CTA */}
