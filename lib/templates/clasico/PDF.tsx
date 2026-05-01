@@ -98,7 +98,7 @@ function PDFItem({ item }: { item: CVItem }) {
         {item.content ? <Text style={{ ...s.para, marginTop: 2 }}>{item.content}</Text> : null}
         {(item.bullets ?? []).map((b, i) => (
           <View key={i} style={s.bRow}>
-            <Text style={s.bMark}>▸</Text>
+            <Text style={s.bMark}>-</Text>
             <Text style={s.bTxt}>{b}</Text>
           </View>
         ))}
@@ -108,7 +108,7 @@ function PDFItem({ item }: { item: CVItem }) {
   if (item.type === "bullet") {
     return (
       <View style={s.bRow}>
-        <Text style={s.bMark}>▸</Text>
+        <Text style={s.bMark}>-</Text>
         <Text style={s.bTxt}>{item.content ?? ""}</Text>
       </View>
     );

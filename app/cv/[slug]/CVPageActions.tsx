@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 interface Props {
   slug: string;
@@ -11,17 +10,9 @@ interface Props {
 export function CVPageActions({ slug, mercado, templateId }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
 
-  async function handleEdit() {
-    setEditLoading(true);
-    try {
-      const { data } = await supabase.from("cvs").select("form_data").eq("slug", slug).single();
-      if (data?.form_data) {
-        localStorage.setItem("currivo_edit_draft", JSON.stringify(data.form_data));
-      }
-    } catch { /* navigate anyway */ }
-    window.location.href = "/#generador";
+  function handleEdit() {
+    window.location.href = `/editar/${slug}`;
   }
 
   async function downloadPDF() {
@@ -105,22 +96,14 @@ export function CVPageActions({ slug, mercado, templateId }: Props) {
 
       <button
         onClick={handleEdit}
-        disabled={editLoading}
         style={{
           fontSize: 12, color: "var(--muted)",
           border: "1px solid var(--border)", borderRadius: 5,
-          padding: "7px 14px", cursor: editLoading ? "not-allowed" : "pointer",
+          padding: "7px 14px", cursor: "pointer",
           fontFamily: "inherit", background: "none",
-          opacity: editLoading ? 0.6 : 1,
-          display: "flex", alignItems: "center", gap: 6,
         }}
       >
-        {editLoading ? (
-          <>
-            <span style={{ width: 10, height: 10, borderRadius: "50%", border: "2px solid rgba(0,0,0,.15)", borderTopColor: "var(--muted)", animation: "spin .65s linear infinite", display: "inline-block" }} />
-            Cargando...
-          </>
-        ) : "✏ Editar"}
+        ✏ Editar
       </button>
     </div>
   );

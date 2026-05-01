@@ -96,7 +96,7 @@ function DarkPDFItem({ item }: { item: CVItem }) {
         {(item.subtitle || item.location) ? <Text style={s.jMeta}>{[item.subtitle, item.location].filter(Boolean).join(" · ")}</Text> : null}
         {(item.bullets ?? []).map((b, i) => (
           <View key={i} style={s.bRow}>
-            <Text style={s.bMark}>▸</Text>
+            <Text style={s.bMark}>-</Text>
             <Text style={s.bTxt}>{b}</Text>
           </View>
         ))}
@@ -106,7 +106,7 @@ function DarkPDFItem({ item }: { item: CVItem }) {
   if (item.type === "bullet") {
     return (
       <View style={s.bRow}>
-        <Text style={s.bMark}>▸</Text>
+        <Text style={s.bMark}>-</Text>
         <Text style={s.bTxt}>{item.content ?? ""}</Text>
       </View>
     );

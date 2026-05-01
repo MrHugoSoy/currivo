@@ -28,9 +28,10 @@ function cleanBullet(line: string): string {
   return line.replace(/^[•·▸►\-\*]\s*/, "").replace(/^\d+[.)]\s*/, "").trim();
 }
 
-// Matches date ranges: "2020 – Present", "Jan 2020 – Dec 2022", "Ene 2020 – Presente"
+// Matches date ranges with optional month name prefix:
+// "2020 – 2023", "2020 — 2023", "Jan 2020 – Mar 2023", "Enero 2020 – Marzo 2023"
 const DATE_RE =
-  /\b\d{4}\s*[–\-]\s*(?:\d{4}|Present|Presente|Actual|Actualmente|Current)\b/i;
+  /(?:[A-Za-záéíóúüñÁÉÍÓÚÜÑ]{3,}\.?\s+)?\b\d{4}\s*[–—\-]\s*(?:(?:[A-Za-záéíóúüñÁÉÍÓÚÜÑ]{3,}\.?\s+)?\d{4}|Present|Presente|Actual|Actualmente|Current)\b/i;
 
 // Matches a standalone 4-digit year (e.g. education graduation year)
 const YEAR_RE = /^\d{4}$/;

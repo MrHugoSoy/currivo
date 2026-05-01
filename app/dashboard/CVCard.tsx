@@ -119,7 +119,7 @@ export function CVCard({ cv, onDelete }: CVCardProps) {
           </button>
 
           <button
-            onClick={() => router.push(`/crear?edit=${cv.slug}`)}
+            onClick={() => router.push(`/editar/${cv.slug}`)}
             style={{ background: "none", color: "var(--muted)", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 14px", fontSize: 12, fontFamily: "inherit", cursor: "pointer" }}
           >
             ✏ Editar

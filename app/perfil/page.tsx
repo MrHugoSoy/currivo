@@ -347,7 +347,7 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => void }) {
             style={{ flex: 1, fontSize: 12, color: copied ? "var(--green)" : "var(--muted)", background: copied ? "var(--green-bg)" : "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 0", cursor: "pointer", fontFamily: "inherit", transition: "all .15s", minWidth: 70 }}>
             {copied ? "✓ Copiado" : "Copiar link"}
           </button>
-          <button onClick={() => router.push(`/crear?edit=${cv.slug}`)}
+          <button onClick={() => router.push(`/editar/${cv.slug}`)}
             style={{ flex: 1, fontSize: 12, color: "var(--muted)", background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 0", cursor: "pointer", fontFamily: "inherit", minWidth: 60 }}>
             ✏ Editar
           </button>
