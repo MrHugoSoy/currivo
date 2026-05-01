@@ -67,7 +67,7 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
         width: "100%",
       }}>
         <div style={{
-          maxWidth: 1320, margin: "0 auto", padding: "0 64px",
+          padding: "0 64px",
           height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
         }}>
           {/* Breadcrumb */}
@@ -124,7 +124,7 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
       }}>
         <div style={{
           width: "42%", flexShrink: 0,
-          padding: "9px 64px",
+          padding: "9px 24px",
           borderRight: "1px solid var(--border)",
           fontSize: 10, letterSpacing: 1.5, fontWeight: 600, textTransform: "uppercase", color: "var(--hint)",
         }}>
@@ -132,7 +132,7 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
         </div>
         <div style={{
           flex: 1,
-          padding: "9px 32px",
+          padding: "9px 24px",
           fontSize: 10, letterSpacing: 1.5, fontWeight: 600, textTransform: "uppercase", color: "var(--hint)",
         }}>
           Previsualización en tiempo real
@@ -157,14 +157,14 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
             style={{
               flex: 1, resize: "none",
               border: "none", outline: "none",
-              padding: "20px 64px",
+              padding: "20px 24px",
               fontFamily: "'Courier New', 'Consolas', monospace",
               fontSize: 12, lineHeight: 1.8,
               color: "var(--ink)", background: "transparent",
             }}
           />
           <div style={{
-            padding: "8px 64px", borderTop: "1px solid var(--border)",
+            padding: "8px 24px", borderTop: "1px solid var(--border)",
             fontSize: 10, color: "var(--hint)",
           }}>
             {text.split("\n").length} líneas · {text.length} caracteres

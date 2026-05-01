@@ -41,7 +41,7 @@ export default function Navbar() {
           transition: "background .2s",
         }}
       >
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px", height: "100%", display: "flex", alignItems: "center" }}>
+      <div style={{ padding: "0 64px", height: "100%", display: "flex", alignItems: "center" }}>
         {/* Logo */}
         <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px" }}>
           curr<span style={{ color: "var(--green)" }}>ivo</span>

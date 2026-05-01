@@ -51,7 +51,7 @@ export default function Dashboard() {
     <div style={{ minHeight: "100vh", background: "var(--cream)" }}>
 
       {/* Nav */}
-      <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 32px", height: 52, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
+      <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 64px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
         <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px", textDecoration: "none" }}>
           currivo
         </a>
