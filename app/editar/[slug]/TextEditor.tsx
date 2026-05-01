@@ -116,70 +116,73 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
 
       {/* ── Sub-header de columnas — full width ── */}
       <div style={{
-        flexShrink: 0,
-        display: "flex",
+        flexShrink: 0, width: "100%",
         borderBottom: "1px solid var(--border)",
         background: "var(--paper)",
-        width: "100%",
       }}>
-        <div style={{
-          width: "42%", flexShrink: 0,
-          padding: "9px 24px",
-          borderRight: "1px solid var(--border)",
-          fontSize: 10, letterSpacing: 1.5, fontWeight: 600, textTransform: "uppercase", color: "var(--hint)",
-        }}>
-          Texto del CV
-        </div>
-        <div style={{
-          flex: 1,
-          padding: "9px 24px",
-          fontSize: 10, letterSpacing: 1.5, fontWeight: 600, textTransform: "uppercase", color: "var(--hint)",
-        }}>
-          Previsualización en tiempo real
+        <div style={{ maxWidth: 1320, margin: "0 auto", display: "flex" }}>
+          <div style={{
+            width: "45%", flexShrink: 0,
+            padding: "9px 24px",
+            borderRight: "1px solid var(--border)",
+            fontSize: 10, letterSpacing: 1.5, fontWeight: 600, textTransform: "uppercase", color: "var(--hint)",
+          }}>
+            Texto del CV
+          </div>
+          <div style={{
+            flex: 1, padding: "9px 24px",
+            fontSize: 10, letterSpacing: 1.5, fontWeight: 600, textTransform: "uppercase", color: "var(--hint)",
+          }}>
+            Previsualización en tiempo real
+          </div>
         </div>
       </div>
 
-      {/* ── Editor + Preview ── */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      {/* ── Editor + Preview centrados ── */}
+      <div style={{ flex: 1, overflow: "hidden", display: "flex", justifyContent: "center" }}>
+        <div style={{ width: "100%", maxWidth: 1320, display: "flex", overflow: "hidden" }}>
 
-        {/* Textarea */}
-        <div style={{
-          width: "42%", flexShrink: 0,
-          display: "flex", flexDirection: "column",
-          borderRight: "1px solid var(--border)",
-          background: "var(--paper)",
-        }}>
-          <textarea
-            value={text}
-            onChange={e => handleChange(e.target.value)}
-            spellCheck={false}
-            autoCorrect="off"
-            style={{
-              flex: 1, resize: "none",
-              border: "none", outline: "none",
-              padding: "20px 24px",
-              fontFamily: "'Courier New', 'Consolas', monospace",
-              fontSize: 12, lineHeight: 1.8,
-              color: "var(--ink)", background: "transparent",
-            }}
-          />
+          {/* Textarea */}
           <div style={{
-            padding: "8px 24px", borderTop: "1px solid var(--border)",
-            fontSize: 10, color: "var(--hint)",
+            width: "45%", flexShrink: 0,
+            display: "flex", flexDirection: "column",
+            borderRight: "1px solid var(--border)",
+            background: "var(--paper)",
           }}>
-            {text.split("\n").length} líneas · {text.length} caracteres
+            <textarea
+              value={text}
+              onChange={e => handleChange(e.target.value)}
+              spellCheck={false}
+              autoCorrect="off"
+              style={{
+                flex: 1, resize: "none",
+                border: "none", outline: "none",
+                padding: "20px 24px",
+                fontFamily: "'Courier New', 'Consolas', monospace",
+                fontSize: 12, lineHeight: 1.8,
+                color: "var(--ink)", background: "transparent",
+              }}
+            />
+            <div style={{
+              padding: "8px 24px", borderTop: "1px solid var(--border)",
+              fontSize: 10, color: "var(--hint)",
+            }}>
+              {text.split("\n").length} líneas · {text.length} caracteres
+            </div>
           </div>
-        </div>
 
-        {/* Preview */}
-        <div style={{ flex: 1, overflow: "auto", padding: "24px 32px", background: "var(--cream)" }}>
-          <div style={{
-            boxShadow: "0 2px 4px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08)",
-            borderRadius: 8, overflow: "hidden",
-            width: "fit-content", maxWidth: "100%",
-          }}>
-            <Preview data={cvData} />
+          {/* Preview */}
+          <div style={{ flex: 1, overflow: "auto", padding: "24px 32px", background: "var(--cream)" }}>
+            <div style={{
+              boxShadow: "0 2px 4px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08)",
+              borderRadius: 8, overflow: "hidden",
+              width: "fit-content", maxWidth: "100%",
+              margin: "0 auto",
+            }}>
+              <Preview data={cvData} />
+            </div>
           </div>
+
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import CVPreview from "./CVPreview";
 import TemplateSelector from "./TemplateSelector";
+import { AuthModal } from "./AuthModal";
 import type { TemplateId } from "@/lib/templates/types";
 import { supabase } from "@/lib/supabase";
 
@@ -120,6 +121,8 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userId, setUserId] = useState<string | undefined>(undefined);
+  const [authLoaded, setAuthLoaded] = useState(false);
+  const [showAuth, setShowAuth] = useState<"register" | "login" | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -127,10 +130,12 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
       const user = data.session?.user;
       setIsAdmin(ADMIN_EMAILS.includes(user?.email ?? ""));
       setUserId(user?.id);
+      setAuthLoaded(true);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setIsAdmin(ADMIN_EMAILS.includes(session?.user?.email ?? ""));
       setUserId(session?.user?.id);
+      setAuthLoaded(true);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -166,6 +171,10 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   };
 
   const handleGenerate = async () => {
+    if (authLoaded && !userId) {
+      setShowAuth("register");
+      return;
+    }
     if (!form.nombre || !form.puesto) {
       setError("Por favor completa nombre y puesto deseado.");
       return;
@@ -200,6 +209,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const note = DIFF_NOTES[form.mercado];
 
   return (
+    <>
     <section id="generador" style={{ background: "var(--ink)", padding: "88px 0" }}>
       <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px" }}>
 
@@ -401,6 +411,11 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
         </div>
       </div>
     </section>
+
+    {showAuth && (
+      <AuthModal initialTab={showAuth} onClose={() => setShowAuth(null)} />
+    )}
+  </>
   );
 }
 

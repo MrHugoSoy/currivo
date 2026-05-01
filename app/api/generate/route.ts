@@ -6,6 +6,15 @@ export const dynamic = "force-dynamic";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([^*\n]+)\*\*/g, "$1")   // **bold** → bold
+    .replace(/__([^_\n]+)__/g, "$1")        // __bold__ → bold
+    .replace(/^#{1,6}\s+/gm, "")            // ## Heading → plain
+    .replace(/[ \t]+$/gm, "")              // trailing spaces per line
+    .trim();
+}
+
 function generateSlug(nombre: string): string {
   const words = nombre
     .normalize("NFD")
@@ -149,6 +158,12 @@ ${sinExperiencia
 - NO incluyas RFC, CURP ni información bancaria
 ${languages ? "- Incluye sección IDIOMAS al final del CV con los idiomas y niveles proporcionados" : ""}
 
+FORMATO — MUY IMPORTANTE:
+- Solo texto plano. NUNCA markdown.
+- Prohibido: **negritas**, *cursivas*, # encabezados con hash
+- Títulos de sección en MAYÚSCULAS
+- Usa guion (-) o barra (|) para estructura, nunca asteriscos (*)
+
 Genera SOLO el contenido del CV, sin comentarios adicionales.`;
   }
 
@@ -195,6 +210,12 @@ ${sinExperiencia
 - SKILLS section: ${skillsNote}
 - EDUCATION section: use the provided data; if not provided, write "Education details not provided"
 - Use American English
+
+FORMATTING — CRITICAL:
+- Plain text ONLY. Never use markdown syntax.
+- Forbidden: **bold**, *italic*, _underline_, # hash headers
+- Section headers must be in ALL CAPS (EXPERIENCE, EDUCATION, SKILLS)
+- Use dash (-) or pipe (|) for structure. Never use asterisks (*) for emphasis.
 
 Generate ONLY the resume content, no additional comments.`;
   }
@@ -308,6 +329,12 @@ ${ciudad?.toLowerCase().includes('montreal') || ciudad?.toLowerCase().includes('
   ? '- Alberta position: Energy and tech sector. Highlight technical certifications.'
   : '- General Canada: Highlight adaptability and multicultural communication skills.'}
 
+FORMATTING — CRITICAL:
+- Plain text ONLY. Never use markdown syntax.
+- Forbidden: **bold**, *italic*, _underline_, # hash headers
+- Section headers must be in ALL CAPS (EXPERIENCE, EDUCATION, SKILLS)
+- Use dash (-) or pipe (|) for structure. Never use asterisks (*) for emphasis.
+
 Generate ONLY the resume content.
 No explanations, no comments, no preamble.
 Use plain text formatting with clear section headers in ALL CAPS.`;
@@ -335,10 +362,12 @@ export async function POST(req: NextRequest) {
       messages: [{ role: "user", content: prompt }],
     });
 
-    const cv = message.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map(b => b.text)
-      .join("\n");
+    const cv = stripMarkdown(
+      message.content
+        .filter((b): b is Anthropic.TextBlock => b.type === "text")
+        .map(b => b.text)
+        .join("\n")
+    );
 
     const { photoUrl: _photo, editSlug, userId, ...formDataToStore } = body;
     const savedFormData = { ...formDataToStore, languages: langStr || undefined };
