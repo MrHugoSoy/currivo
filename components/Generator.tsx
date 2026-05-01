@@ -201,7 +201,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
 
   return (
     <section id="generador" style={{ background: "var(--ink)", padding: "88px 0" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px" }}>
 
         {/* Label */}
         <div style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.2)", fontWeight: 500, marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>

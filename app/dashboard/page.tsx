@@ -59,7 +59,7 @@ export default function Dashboard() {
       </header>
 
       {/* Content */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px 80px" }}>
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "40px 64px 80px" }}>
 
         {/* Header row */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>

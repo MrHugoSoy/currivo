@@ -34,13 +34,14 @@ export default function Navbar() {
       <nav
         style={{
           position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-          height: 62, display: "flex", alignItems: "center", padding: "0 48px",
+          height: 62,
           background: scrolled ? "rgba(248,245,239,0.95)" : "rgba(248,245,239,0.92)",
           backdropFilter: "blur(16px)",
           borderBottom: "1px solid var(--border)",
           transition: "background .2s",
         }}
       >
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px", height: "100%", display: "flex", alignItems: "center" }}>
         {/* Logo */}
         <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px" }}>
           curr<span style={{ color: "var(--green)" }}>ivo</span>
@@ -96,6 +97,7 @@ export default function Navbar() {
             Crear mi CV →
           </a>
         </div>
+      </div>
       </nav>
 
       {modal && <AuthModal initialTab={modal} onClose={() => setModal(null)} />}
