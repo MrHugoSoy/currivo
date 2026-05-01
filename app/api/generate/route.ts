@@ -56,6 +56,7 @@ function buildPrompt(data: Record<string, unknown>): string {
   const voluntariado = data.voluntariado as string | undefined;
   const languages = data.languages as string;
   const sinExperiencia = data.sinExperiencia as boolean | undefined;
+  const certificaciones = data.certificaciones as string | undefined;
   const experiencias = (data.experiencias as ExperienciaEntry[]) ?? [];
   const redesSociales = (data.redesSociales as RedSocial[]) ?? [];
   const educacion = (data.educacion as EducacionEntry[]) ?? [];
@@ -72,6 +73,27 @@ function buildPrompt(data: Record<string, unknown>): string {
   const skillsNote = habilidades
     ? `El usuario ya especificó estas habilidades, inclúyelas todas: ${habilidades}. Puedes complementar con otras relevantes para ${industria}.`
     : `Genera habilidades relevantes para ${industria}.`;
+
+  // Regla de certificaciones compartida
+  const certRule_es = certificaciones
+    ? `CERTIFICACIONES — El usuario mencionó las siguientes: ${certificaciones}.
+- Inclúyelas en el CV con detalles realistas: institución emisora real, formato estándar de la industria y año aproximado si no se especificó.
+- NO agregues certificaciones adicionales que el usuario no haya mencionado.
+- NO sugiereas otras certificaciones basándote en las habilidades del usuario.`
+    : `CERTIFICACIONES — El usuario NO mencionó ninguna certificación.
+- NO incluyas sección de certificaciones.
+- NO inventes ni sugieras certificaciones aunque el usuario tenga habilidades relacionadas.
+- Omite esta sección completamente.`;
+
+  const certRule_en = certificaciones
+    ? `CERTIFICATIONS — User mentioned the following: ${certificaciones}.
+- Include them with realistic details: real issuing organization, industry-standard format, and approximate year if not specified.
+- Do NOT add extra certifications the user did not mention.
+- Do NOT suggest other certifications based on the user's skills.`
+    : `CERTIFICATIONS — User did NOT mention any certifications.
+- Do NOT include a certifications section.
+- Do NOT invent or suggest certifications even if the user has related skills.
+- Skip this section entirely.`;
 
   const toneDesc: Record<string, string> = {
     Profesional: "formal y ejecutivo, verbos de acción fuertes",
@@ -102,13 +124,25 @@ ${expStr}
 EDUCACIÓN:
 ${eduStr}
 
+REGLA MÁS IMPORTANTE — NO INVENTAR NADA:
+- USA SOLO la información que el usuario proporcionó
+- Si no hay datos de educación, escribe SOLO "Información no proporcionada"
+- Si no hay experiencia formal, NO inventes empresas ni fechas
+- NUNCA generes datos ficticios: nombres de empresas, universidades, fechas, proyectos
+- Si un campo está vacío, omite esa sección completa
+- Un CV corto y honesto es mejor que uno largo con datos falsos
+
+${certRule_es}
+
 REGLAS PARA CV MEXICANO:
 - Incluye sección de DATOS PERSONALES al inicio (nombre, ciudad, email, edad si se dio, estado civil si se dio)
 ${redesStr ? "- Incluye los perfiles/redes proporcionados en la sección de datos personales o contacto" : ""}
 - Incluye OBJETIVO PROFESIONAL (2-3 líneas)
-${sinExperiencia ? "- El candidato NO tiene experiencia laboral. NO inventes trabajos. Enfócate en EDUCACIÓN, HABILIDADES, PROYECTOS PERSONALES o CURSOS relevantes para " + puesto + "." : "- Sección EXPERIENCIA LABORAL con los puestos proporcionados y logros concretos"}
+${sinExperiencia
+  ? `- El candidato NO tiene experiencia laboral. NO inventes trabajos. Enfócate en EDUCACIÓN, HABILIDADES, PROYECTOS PERSONALES o CURSOS relevantes para ${puesto}.`
+  : "- Sección EXPERIENCIA LABORAL con los puestos proporcionados y logros concretos"}
 - Sección HABILIDADES: ${skillsNote}
-- Sección EDUCACIÓN: usa los datos proporcionados; si no se dio información, genera algo plausible
+- Sección EDUCACIÓN: usa los datos proporcionados; si no se dio información, escribe "No especificada"
 - Máximo 2 páginas de contenido
 - Español natural de México
 - Usa verbos de acción: lideré, desarrollé, implementé, coordiné, optimicé...
@@ -137,22 +171,36 @@ ${expStr}
 EDUCATION:
 ${eduStr}
 
+CRITICAL — NEVER FABRICATE INFORMATION:
+- Use ONLY the information provided by the user
+- If no education was provided, write ONLY "Education details not provided"
+- If no company names were given, do NOT invent them
+- NEVER create fake: companies, universities, dates, projects or achievements
+- Omit entire sections if no real data was provided
+- A short honest resume beats a long fabricated one
+
+${certRule_en}
+
 US RESUME RULES (CRITICAL):
 - NO photo, NO age, NO marital status, NO nationality — these are illegal to include
 - Maximum 1 page
 - Start with a strong PROFESSIONAL SUMMARY (2-3 lines)
-${redesStr ? "- Include provided profile links in the header section" : "- Include LinkedIn placeholder and location (City, State) but NOT full address"}
-${sinExperiencia ? "- Candidate has NO work experience. Do NOT invent jobs. Focus on EDUCATION, SKILLS, PERSONAL PROJECTS, or CERTIFICATIONS relevant to " + puesto + "." : "- EXPERIENCE section: use bullet points with quantified achievements (\"Increased sales by 40%\", \"Managed team of 8\")"}
+${redesStr
+  ? "- Include provided profile links in the header section"
+  : "- Include LinkedIn placeholder and location (City, State) but NOT full address"}
+${sinExperiencia
+  ? `- Candidate has NO work experience. Do NOT invent jobs. Focus on EDUCATION, SKILLS, PERSONAL PROJECTS relevant to ${puesto}.`
+  : `- EXPERIENCE section: use bullet points with quantified achievements ("Increased sales by 40%", "Managed team of 8")`}
 - Use strong action verbs: Led, Developed, Implemented, Optimized, Delivered, Achieved...
 - SKILLS section: ${skillsNote}
-- EDUCATION section: use the provided data; if not provided, generate something plausible
+- EDUCATION section: use the provided data; if not provided, write "Education details not provided"
 - Use American English
 
 Generate ONLY the resume content, no additional comments.`;
   }
 
   // ── CANADÁ ───────────────────────────────────────────────
-  return `You are a Canadian resume expert specializing in helping immigrants and international professionals land jobs in Canada. You know exactly what Canadian recruiters and ATS systems look for.
+  return `You are a Canadian resume expert specializing in helping immigrants and international professionals land jobs in Canada.
 
 Generate a professional Canadian resume in English with this information:
 
@@ -171,6 +219,14 @@ ${expStr}
 
 EDUCATION:
 ${eduStr}
+
+CRITICAL — NEVER FABRICATE INFORMATION:
+- Use ONLY the information provided by the user
+- If no education details were given, write only "Education details not provided"
+- NEVER invent: company names, dates, universities, projects or achievements
+- A short honest resume is always better than a fabricated one
+
+${certRule_en}
 
 CANADIAN RESUME RULES — FOLLOW STRICTLY:
 
@@ -203,50 +259,36 @@ STRUCTURE (in this exact order):
    - Must be ATS-friendly single keywords or short phrases
    - ${skillsNote}
    - Include both technical and soft skills
-   Example format:
-   Brand Strategy | Team Leadership | Project Management
-   Client Relations | Adobe Suite | Budget Planning
-   Cross-cultural Communication | Bilingual | Agile
 
 4. PROFESSIONAL EXPERIENCE
 ${sinExperiencia
-  ? "   - Candidate has NO work experience. Do NOT invent jobs. Instead, include an ACADEMIC PROJECTS or PERSONAL PROJECTS section relevant to " + puesto + ". Focus on transferable skills."
+  ? `   - Candidate has NO work experience. Do NOT invent jobs. Include ACADEMIC PROJECTS or PERSONAL PROJECTS relevant to ${puesto}. Focus on transferable skills.`
   : `   - Reverse chronological order
    - Format: Job Title | Company Name | City, Province | Month Year – Month Year
    - 3-5 bullet points per position
    - EVERY bullet must start with a strong past-tense action verb
    - EVERY bullet must follow: Context + Action + Result format
    - QUANTIFY everything possible: numbers, %, $, team sizes, timelines
-   - Bad example: "Managed social media accounts"
-   - Good example: "Grew Instagram following from 2K to 18K in 8 months, increasing engagement rate by 340% and driving 25% more website traffic"
    - Highlight collaboration, leadership and cross-cultural work`}
 
 5. VOLUNTEER WORK (very important in Canada)
-   - Shows community integration — critical for immigrants
-   - Format: Role | Organization | City | Dates
-   - 1-2 bullet points with impact
-   - If volunteer work was provided use it, otherwise generate a plausible entry relevant to ${industria} and ${ciudad}
+   - If volunteer work was provided, use it with 1-2 bullet points showing impact
+   - If NOT provided, write ONLY "Open to volunteer opportunities" — do NOT invent organizations
 
 6. EDUCATION
-   - Degree | Institution | Year
-   - Add: "International credential — equivalent to Canadian Bachelor's Degree"
+   - Degree | Institution | Year — use provided data only
+   - Add: "International credential — equivalent to Canadian Bachelor's Degree" if applicable
    - Add: "Evaluated by WES (World Education Services)" if applicable
-   - Include relevant coursework or honors if space allows
 
 7. LANGUAGES
-   - List all provided languages with levels
    ${langList ? `Languages to include: ${langList}` : ""}
    - If French is listed, add note about advantage in Quebec/Ottawa/federal government positions
    - Format: Language — Level (e.g. French — Advanced B2)
-
-8. CERTIFICATIONS (if relevant)
-   - Only include if directly relevant to ${puesto}
 
 ATS OPTIMIZATION RULES:
 - Use standard section headers (Experience, Education, Skills)
 - No tables, no text boxes, no columns
 - Dates format: Jan 2020 – Mar 2023
-- Spell out abbreviations at first use
 - Mirror exact keywords from ${puesto} job title
 
 CANADIAN SOFT SKILLS TO EMPHASIZE:
@@ -254,17 +296,16 @@ CANADIAN SOFT SKILLS TO EMPHASIZE:
 - Adaptability and cultural awareness
 - Community involvement
 - Clear written and verbal communication
-- Initiative and problem-solving
 
 PROVINCE-SPECIFIC NOTES:
 ${ciudad?.toLowerCase().includes('montreal') || ciudad?.toLowerCase().includes('quebec')
-  ? '- Quebec position: Emphasize French language skills prominently. Many Quebec employers require French. Consider noting willingness to work in French.'
+  ? '- Quebec position: Emphasize French language skills prominently.'
   : ciudad?.toLowerCase().includes('ottawa')
-  ? '- Ottawa position: Federal government hub — bilingualism (EN/FR) is a major asset. Emphasize any government or public sector experience.'
+  ? '- Ottawa position: Federal government hub — bilingualism (EN/FR) is a major asset.'
   : ciudad?.toLowerCase().includes('vancouver') || ciudad?.toLowerCase().includes('bc')
-  ? '- BC/Vancouver position: Tech-forward market. Include GitHub, portfolio links, and any tech certifications prominently.'
+  ? '- BC/Vancouver position: Tech-forward market. Include GitHub, portfolio links prominently.'
   : ciudad?.toLowerCase().includes('calgary') || ciudad?.toLowerCase().includes('alberta')
-  ? '- Alberta position: Energy and tech sector. Highlight any oil & gas, engineering or technical certifications.'
+  ? '- Alberta position: Energy and tech sector. Highlight technical certifications.'
   : '- General Canada: Highlight adaptability and multicultural communication skills.'}
 
 Generate ONLY the resume content.
