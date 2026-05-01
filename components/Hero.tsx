@@ -3,7 +3,7 @@ import CVPreview from "./CVPreview";
 
 export default function Hero() {
   return (
-    <section style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 48px 80px", display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 64, alignItems: "center" }}>
+    <section style={{ maxWidth: 1320, margin: "0 auto", padding: "120px 64px 80px", display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 64, alignItems: "center" }}>
       {/* LEFT */}
       <div className="animate-fade-up">
         {/* Badge */}

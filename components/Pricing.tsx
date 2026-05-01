@@ -35,7 +35,7 @@ const plans = [
 export default function Pricing() {
   return (
     <section id="precios" style={{ padding: "96px 0", background: "var(--cream)" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px" }}>
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px" }}>
         <SectionLabel>Precios</SectionLabel>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "end", marginBottom: 56 }}>

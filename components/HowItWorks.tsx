@@ -24,7 +24,7 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section id="como-funciona" style={{ padding: "96px 0", background: "var(--paper)" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px" }}>
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px" }}>
         <SectionLabel>Cómo funciona</SectionLabel>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "end", marginBottom: 64 }}>

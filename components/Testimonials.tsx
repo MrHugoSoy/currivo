@@ -115,7 +115,7 @@ export default function Testimonials() {
 
   return (
     <section style={{ background: "var(--ink)", padding: "80px 0 88px", overflow: "hidden" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px" }}>
+      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 48 }}>

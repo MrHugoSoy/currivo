@@ -156,7 +156,7 @@ export default function PerfilPage() {
 
       {/* Dark hero strip */}
       <div style={{ background: "var(--ink)", padding: "32px 48px" }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", alignItems: "center", gap: 18 }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: 18 }}>
           <div style={{ width: 48, height: 48, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "1.5px solid rgba(74,148,98,.4)", background: "rgba(74,148,98,.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {displayAvatar
               ? <img src={displayAvatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -177,7 +177,7 @@ export default function PerfilPage() {
       </div>
 
       {/* Two-column layout */}
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 48px 80px", display: "grid", gridTemplateColumns: "260px 1fr", gap: 28, alignItems: "start" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 48px 80px", display: "grid", gridTemplateColumns: "260px 1fr", gap: 28, alignItems: "start" }}>
 
         {/* LEFT — Profile settings */}
         <div style={{ position: "sticky", top: 72 }}>
