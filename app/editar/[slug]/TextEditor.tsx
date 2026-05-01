@@ -18,7 +18,7 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
   const [previewText, setPreviewText] = useState(initialText);
   const [saveState, setSaveState] = useState<"idle" | "saved" | "error">("idle");
   const [isPending, startTransition] = useTransition();
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const Preview = PREVIEW_TEMPLATES[(templateId as TemplateId)] ?? PREVIEW_TEMPLATES.clasico;
 
