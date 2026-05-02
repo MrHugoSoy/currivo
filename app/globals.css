@@ -40,6 +40,10 @@ body {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,148,98,0); }
   50%       { opacity: .7; box-shadow: 0 0 0 4px rgba(74,148,98,0.15); }
 }
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
 
 .animate-fade-up   { animation: fadeUp .65s ease both; }
 .animate-fade-up-2 { animation: fadeUp .65s ease .1s both; }
@@ -47,3 +51,11 @@ body {
 .animate-fade-up-4 { animation: fadeUp .65s ease .3s both; }
 .animate-spin-slow { animation: spin .65s linear infinite; }
 .animate-glow      { animation: glow 2.5s ease infinite; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--border) 25%, var(--warm) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  display: block;
+}

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { CVCard, type CVCardData } from "./CVCard";
+import { CVCardSkeleton } from "@/components/Skeleton";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
@@ -86,10 +87,8 @@ export default function Dashboard() {
 
         {/* CV list */}
         {loading ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[1, 2, 3].map((i) => (
-              <div key={i} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: 20, height: 100, opacity: 0.5 }} />
-            ))}
+          <div>
+            {[1, 2, 3, 4].map(i => <CVCardSkeleton key={i} />)}
           </div>
         ) : cvs.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 24px", background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8 }}>

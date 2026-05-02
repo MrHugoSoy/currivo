@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { CVCardPerfilSkeleton } from "@/components/Skeleton";
 import type { User } from "@supabase/supabase-js";
 
 type CV = {
@@ -406,13 +407,7 @@ function EmptyState() {
 function LoadingSkeleton() {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
-      {[1, 2, 3].map(i => (
-        <div key={i} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "18px 20px", height: 170 }}>
-          <div style={{ height: 18, width: "55%", background: "var(--warm)", borderRadius: 4, marginBottom: 12 }} />
-          <div style={{ height: 20, width: "80%", background: "var(--warm)", borderRadius: 4, marginBottom: 7 }} />
-          <div style={{ height: 13, width: "60%", background: "var(--warm)", borderRadius: 4 }} />
-        </div>
-      ))}
+      {[1, 2, 3, 4].map(i => <CVCardPerfilSkeleton key={i} />)}
     </div>
   );
 }
