@@ -14,12 +14,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .select("nombre, puesto, ciudad")
     .eq("slug", slug)
     .single();
-
   if (!data) return { title: "CV no encontrado · currivo.mx" };
-
   const title = `${data.nombre} — ${data.puesto} | currivo`;
   const description = `CV profesional de ${data.nombre}, ${data.puesto}${data.ciudad ? ` en ${data.ciudad}` : ""}. Creado con currivo.mx.`;
-
   return {
     title,
     description,
@@ -59,11 +56,19 @@ export default async function CVPage({ params }: PageProps) {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--cream)" }}>
+      {/* Print styles */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page { size: ${data.mercado === "mx" ? "A4" : "Letter"}; margin: 0; }
+          .no-print { display: none !important; }
+          body { background: white; }
+        }
+      `}} />
 
       {/* Nav */}
       <header className="no-print" style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 64px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
-        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px", textDecoration: "none" }}>
-          currivo
+        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", letterSpacing: "-0.5px", textDecoration: "none" }}>
+          curr<span style={{ color: "var(--green)" }}>ivo</span>
         </a>
         <a href="/" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(45,90,61,.25)", borderRadius: 5, padding: "6px 14px", background: "var(--green-bg)" }}>
           ✦ Crear mi CV
@@ -81,7 +86,7 @@ export default async function CVPage({ params }: PageProps) {
           <Preview data={cvData} />
         </div>
 
-        <p style={{ textAlign: "center", fontSize: 11, color: "var(--hint)", marginTop: 20 }}>
+        <p className="no-print" style={{ textAlign: "center", fontSize: 11, color: "var(--hint)", marginTop: 20 }}>
           Generado el {date}
         </p>
       </div>

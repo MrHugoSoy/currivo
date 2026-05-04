@@ -22,18 +22,14 @@ const LEVELS_EN = ["Native", "Fluent", "Advanced (C1)", "Intermediate (B2)", "Ba
 
 const FORM_LABELS = {
   blocks: {
-    personalData: { mx: "Datos personales",  us: "Personal Data / Datos personales",  ca: "Personal Data / Datos personales / Données personnelles" },
-    experience:   { mx: "Experiencia",        us: "Experience / Experiencia",           ca: "Experience / Experiencia / Expérience" },
-    languages:    { mx: "Idiomas",            us: "Languages / Idiomas",               ca: "Languages / Idiomas / Langues" },
+    personalData: { mx: "Datos personales", us: "Personal Data / Datos personales", ca: "Personal Data / Datos personales / Données personnelles" },
+    experience:   { mx: "Experiencia", us: "Experience / Experiencia", ca: "Experience / Experiencia / Expérience" },
+    languages:    { mx: "Idiomas", us: "Languages / Idiomas", ca: "Languages / Idiomas / Langues" },
   },
   fields: {
-    nombre:       { mx: "Nombre completo",    us: "Full Name / Nombre",                ca: "Full Name / Nombre / Nom complet" },
-    puesto:       { mx: "Puesto deseado",     us: "Job Title / Puesto",                ca: "Job Title / Puesto / Titre du poste" },
-    ciudad:       { mx: "Ciudad",             us: "City / Ciudad",                     ca: "City / Ciudad / Ville" },
-    ultimoPuesto: { mx: "Último puesto",      us: "Last Position / Último puesto",     ca: "Last Position / Último puesto / Dernier poste" },
-    empresa:      { mx: "Empresa",            us: "Company / Empresa",                 ca: "Company / Empresa / Entreprise" },
-    descripcion:  { mx: "¿Qué hacías? Descríbelo brevemente", us: "Achievements (with numbers) / Logros (con números)", ca: "Work Description / Descripción / Description du travail" },
-    voluntariado: { mx: "", us: "", ca: "Volunteer Work / Voluntariado / Bénévolat (important in Canada)" },
+    nombre:  { mx: "Nombre completo", us: "Full Name / Nombre", ca: "Full Name / Nombre / Nom complet" },
+    puesto:  { mx: "Puesto deseado", us: "Job Title / Puesto", ca: "Job Title / Puesto / Titre du poste" },
+    ciudad:  { mx: "Ciudad", us: "City / Ciudad", ca: "City / Ciudad / Ville" },
   },
 };
 
@@ -52,27 +48,18 @@ const DIFF_NOTES: Record<Market, { bg: string; border: string; color: string; ic
 };
 
 export interface ExperienciaEntry {
-  puesto: string;
-  empresa: string;
-  periodo: string;
-  descripcion: string;
+  puesto: string; empresa: string; periodo: string; descripcion: string;
 }
-
-export interface RedSocial {
-  tipo: string;
-  url: string;
-}
-
-export interface EducacionEntry {
-  carrera: string;
-  institucion: string;
-  anio: string;
-}
+export interface RedSocial { tipo: string; url: string; }
+export interface EducacionEntry { carrera: string; institucion: string; anio: string; }
 
 export interface FormData {
   nombre: string; puesto: string; ciudad: string; email: string;
+  telefono?: string;
   tono: string; industria: string; mercado: Market;
-  edad?: string; estadoCivil?: string; voluntariado?: string; photoUrl?: string;
+  edad?: string; estadoCivil?: string; voluntariado?: string;
+  photoUrl?: string;
+  certificaciones?: string;
   languages?: Array<{ language: string; level: string }>;
   templateId: TemplateId;
   sinExperiencia?: boolean;
@@ -83,7 +70,7 @@ export interface FormData {
 }
 
 const DEFAULT_FORM: FormData = {
-  nombre: "", puesto: "", ciudad: "", email: "",
+  nombre: "", puesto: "", ciudad: "", email: "", telefono: "",
   tono: "Profesional", industria: "Diseño", mercado: "mx", templateId: "clasico",
   languages: [{ language: "Spanish", level: "Nativo" }],
   sinExperiencia: false,
@@ -91,6 +78,7 @@ const DEFAULT_FORM: FormData = {
   redesSociales: [],
   habilidades: [],
   educacion: [{ carrera: "", institucion: "", anio: "" }],
+  certificaciones: "",
 };
 
 interface GeneratorProps {
@@ -102,7 +90,6 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const [form, setForm] = useState<FormData>(() => {
     if (!initialData) return DEFAULT_FORM;
     const merged = { ...DEFAULT_FORM, ...initialData };
-    // Parse languages string back to array if needed
     if (typeof merged.languages === "string") {
       merged.languages = (merged.languages as string)
         ? (merged.languages as string).split(", ").map((entry: string) => {
@@ -115,6 +102,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     }
     return merged as FormData;
   });
+
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
@@ -157,7 +145,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
           : [{ language: "Spanish", level: "Nativo" }];
       }
       setForm(f => ({ ...f, ...draft }));
-    } catch { /* ignore malformed draft */ }
+    } catch { /* ignore */ }
   }, []);
 
   const set = (k: keyof FormData) =>
@@ -171,10 +159,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   };
 
   const handleGenerate = async () => {
-    if (authLoaded && !userId) {
-      setShowAuth("register");
-      return;
-    }
+    if (authLoaded && !userId) { setShowAuth("register"); return; }
     if (!form.nombre || !form.puesto) {
       setError("Por favor completa nombre y puesto deseado.");
       return;
@@ -210,212 +195,232 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
 
   return (
     <>
-    <section id="generador" style={{ background: "var(--ink)", padding: "88px 0" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px" }}>
+      <section id="generador" style={{ background: "var(--ink)", padding: "88px 0" }}>
+        <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px" }}>
 
-        {/* Label */}
-        <div style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.2)", fontWeight: 500, marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
-          Generador
-          <span style={{ flex: 1, height: 1, background: "rgba(255,255,255,.07)", display: "block" }} />
-        </div>
-
-        {/* Market selector */}
-        <div style={{ marginBottom: 28 }}>
-          <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 12 }}>¿Para qué mercado?</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-            {MARKETS.map(m => (
-              <button key={m.id} onClick={() => selectMarket(m.id)}
-                style={{ border: `1px solid ${form.mercado === m.id ? "rgba(74,144,96,.55)" : "rgba(255,255,255,.08)"}`, borderRadius: 8, padding: "14px 16px", background: form.mercado === m.id ? "rgba(42,82,54,.18)" : "rgba(255,255,255,.03)", cursor: "pointer", textAlign: "left", transition: "all .15s" }}>
-                <div style={{ fontSize: 20, marginBottom: 5 }}>{m.flag}</div>
-                <div style={{ fontSize: 12, fontWeight: 500, color: form.mercado === m.id ? "#7dd4a0" : "rgba(255,255,255,.7)", fontFamily: "inherit", marginBottom: 2 }}>{m.label}</div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.28)", fontFamily: "inherit", lineHeight: 1.4 }}>{m.hint}</div>
-              </button>
-            ))}
+          {/* Label */}
+          <div style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.2)", fontWeight: 500, marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
+            Generador
+            <span style={{ flex: 1, height: 1, background: "rgba(255,255,255,.07)", display: "block" }} />
           </div>
-        </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "start" }}>
+          {/* Market selector */}
+          <div style={{ marginBottom: 28 }}>
+            <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 12 }}>¿Para qué mercado?</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+              {MARKETS.map(m => (
+                <button key={m.id} onClick={() => selectMarket(m.id)}
+                  style={{ border: `1px solid ${form.mercado === m.id ? "rgba(74,144,96,.55)" : "rgba(255,255,255,.08)"}`, borderRadius: 8, padding: "14px 16px", background: form.mercado === m.id ? "rgba(42,82,54,.18)" : "rgba(255,255,255,.03)", cursor: "pointer", textAlign: "left", transition: "all .15s" }}>
+                  <div style={{ fontSize: 20, marginBottom: 5 }}>{m.flag}</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: form.mercado === m.id ? "#7dd4a0" : "rgba(255,255,255,.7)", fontFamily: "inherit", marginBottom: 2 }}>{m.label}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,.28)", fontFamily: "inherit", lineHeight: 1.4 }}>{m.hint}</div>
+                </button>
+              ))}
+            </div>
+          </div>
 
-          {/* FORM */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <FormBlock title={FORM_LABELS.blocks.personalData[form.mercado]}>
-              <FieldRow>
-                <Field label={FORM_LABELS.fields.nombre[form.mercado]} placeholder="María García López" value={form.nombre} onChange={set("nombre")} />
-                <Field label={FORM_LABELS.fields.puesto[form.mercado]} placeholder={form.mercado === "us" ? "Graphic Designer" : "Diseñadora Gráfica"} value={form.puesto} onChange={set("puesto")} />
-              </FieldRow>
-              <FieldRow>
-                <Field label={FORM_LABELS.fields.ciudad[form.mercado]} placeholder={form.mercado === "mx" ? "León, Gto." : form.mercado === "us" ? "Austin, TX" : "Toronto, ON"} value={form.ciudad} onChange={set("ciudad")} />
-                <Field label="Email" placeholder="maria@correo.com" value={form.email} onChange={set("email")} />
-              </FieldRow>
-              {form.mercado === "mx" && (
-                <>
-                  <FieldRow>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "start" }}>
+
+            {/* FORM */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+              {/* DATOS PERSONALES */}
+              <FormBlock title={FORM_LABELS.blocks.personalData[form.mercado]}>
+                <FieldRow>
+                  <Field label={FORM_LABELS.fields.nombre[form.mercado]} placeholder="María García López" value={form.nombre} onChange={set("nombre")} />
+                  <Field label={FORM_LABELS.fields.puesto[form.mercado]} placeholder={form.mercado === "us" ? "Graphic Designer" : "Diseñadora Gráfica"} value={form.puesto} onChange={set("puesto")} />
+                </FieldRow>
+                <FieldRow>
+                  <Field label={FORM_LABELS.fields.ciudad[form.mercado]} placeholder={form.mercado === "mx" ? "León, Gto." : form.mercado === "us" ? "Austin, TX" : "Toronto, ON"} value={form.ciudad} onChange={set("ciudad")} />
+                  <Field label="Email" placeholder="maria@correo.com" value={form.email} onChange={set("email")} />
+                </FieldRow>
+                {/* TELÉFONO — todos los mercados */}
+                <FieldRow>
+                  <Field
+                    label={form.mercado === "mx" ? "Teléfono" : form.mercado === "us" ? "Phone / Teléfono" : "Phone / Téléphone"}
+                    placeholder={form.mercado === "mx" ? "+52 477 123 4567" : form.mercado === "us" ? "+1 (555) 123-4567" : "+1 (416) 123-4567"}
+                    value={form.telefono ?? ""}
+                    onChange={set("telefono")}
+                  />
+                  {/* Email ya está arriba, segunda columna vacía o para edad en MX */}
+                  {form.mercado === "mx" ? (
                     <Field label="Edad (opcional)" placeholder="28 años" value={form.edad ?? ""} onChange={set("edad")} />
+                  ) : (
+                    <div /> // espacio vacío para mantener el grid
+                  )}
+                </FieldRow>
+                {form.mercado === "mx" && (
+                  <>
                     <Field label="Estado civil (opcional)" placeholder="Soltero/a" value={form.estadoCivil ?? ""} onChange={set("estadoCivil")} />
-                  </FieldRow>
-                  <PhotoUpload value={form.photoUrl} onChange={url => setForm(f => ({ ...f, photoUrl: url }))} />
-                </>
-              )}
-            </FormBlock>
+                    <PhotoUpload value={form.photoUrl} onChange={url => setForm(f => ({ ...f, photoUrl: url }))} />
+                  </>
+                )}
+              </FormBlock>
 
-            <FormBlock title={FORM_LABELS.blocks.experience[form.mercado]}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, cursor: "pointer" }}>
-                <input
-                  type="checkbox"
-                  checked={form.sinExperiencia ?? false}
-                  onChange={e => setForm(f => ({ ...f, sinExperiencia: e.target.checked }))}
-                  style={{ accentColor: "var(--green-mid)", width: 14, height: 14 }}
-                />
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>
-                  {form.mercado === "us" ? "I have no work experience" : "No tengo experiencia laboral"}
-                </span>
-              </label>
-              {!form.sinExperiencia && (
-                <ExperienceSelector
-                  experiencias={form.experiencias}
-                  onChange={exp => setForm(f => ({ ...f, experiencias: exp }))}
-                  market={form.mercado}
-                />
-              )}
-              {form.sinExperiencia && (
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,.3)", lineHeight: 1.6, marginBottom: 4 }}>
-                  {form.mercado === "us"
-                    ? "The AI will focus on your education, skills, and personal projects — no invented work history."
-                    : "La IA se enfocará en educación, habilidades y proyectos — sin inventar experiencia laboral."}
-                </p>
-              )}
-              {form.mercado === "ca" && (
-                <div style={{ marginTop: 12 }}>
-                  <Field label={FORM_LABELS.fields.voluntariado.ca} placeholder="Ej. Voluntario en banco de alimentos, diseñé materiales..." value={form.voluntariado ?? ""} onChange={e => setForm(f => ({ ...f, voluntariado: e.target.value }))} textarea />
-                </div>
-              )}
-            </FormBlock>
-
-            <FormBlock title={
-              form.mercado === "mx" ? "Redes y perfiles" :
-              form.mercado === "us" ? "Links & Profiles" :
-              "Links & Profiles / Réseaux et profils"
-            }>
-              <SocialLinksSelector
-                links={form.redesSociales ?? []}
-                onChange={links => setForm(f => ({ ...f, redesSociales: links }))}
-                market={form.mercado}
-              />
-            </FormBlock>
-
-            <FormBlock title={FORM_LABELS.blocks.languages[form.mercado]}>
-              <LanguageSelector
-                languages={form.languages ?? []}
-                onChange={langs => setForm(f => ({ ...f, languages: langs }))}
-                market={form.mercado}
-              />
-            </FormBlock>
-
-            <FormBlock title={
-              form.mercado === "mx" ? "Habilidades (opcional)" :
-              form.mercado === "us" ? "Skills (optional)" :
-              "Skills / Core Competencies (optional)"
-            }>
-              <SkillsSelector
-                skills={form.habilidades ?? []}
-                onChange={s => setForm(f => ({ ...f, habilidades: s }))}
-                market={form.mercado}
-              />
-            </FormBlock>
-
-            <FormBlock title={
-              form.mercado === "mx" ? "Educación" :
-              form.mercado === "us" ? "Education" :
-              "Education / Educación"
-            }>
-              <EducacionSelector
-                educacion={form.educacion ?? [{ carrera: "", institucion: "", anio: "" }]}
-                onChange={edu => setForm(f => ({ ...f, educacion: edu }))}
-                market={form.mercado}
-              />
-            </FormBlock>
-
-            <FormBlock title="Preferencias de IA">
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>Tono</label>
-                <PillGroup
-                  options={[...TONES, "Otro"]}
-                  selected={TONES.includes(form.tono) ? form.tono : "Otro"}
-                  onSelect={v => setForm(f => ({ ...f, tono: v === "Otro" ? "" : v }))}
-                />
-                {!TONES.includes(form.tono) && (
+              {/* EXPERIENCIA */}
+              <FormBlock title={FORM_LABELS.blocks.experience[form.mercado]}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, cursor: "pointer" }}>
                   <input
-                    type="text" autoFocus
-                    placeholder="Ej. Emprendedor, Técnico, Académico..."
-                    value={form.tono}
-                    onChange={e => setForm(f => ({ ...f, tono: e.target.value }))}
-                    style={{ marginTop: 8, width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(74,144,96,.35)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }}
+                    type="checkbox"
+                    checked={form.sinExperiencia ?? false}
+                    onChange={e => setForm(f => ({ ...f, sinExperiencia: e.target.checked }))}
+                    style={{ accentColor: "var(--green-mid)", width: 14, height: 14 }}
+                  />
+                  <span style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>
+                    {form.mercado === "us" ? "I have no work experience" : "No tengo experiencia laboral"}
+                  </span>
+                </label>
+                {!form.sinExperiencia && (
+                  <ExperienceSelector
+                    experiencias={form.experiencias}
+                    onChange={exp => setForm(f => ({ ...f, experiencias: exp }))}
+                    market={form.mercado}
                   />
                 )}
-              </div>
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>Industria</label>
-                <PillGroup
-                  options={[...INDUSTRIES, "Otra"]}
-                  selected={INDUSTRIES.includes(form.industria) ? form.industria : "Otra"}
-                  onSelect={v => setForm(f => ({ ...f, industria: v === "Otra" ? "" : v }))}
-                />
-                {!INDUSTRIES.includes(form.industria) && (
-                  <input
-                    type="text" autoFocus
-                    placeholder="Ej. Agricultura, Minería, Deportes..."
-                    value={form.industria}
-                    onChange={e => setForm(f => ({ ...f, industria: e.target.value }))}
-                    style={{ marginTop: 8, width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(74,144,96,.35)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }}
-                  />
+                {form.sinExperiencia && (
+                  <p style={{ fontSize: 11, color: "rgba(255,255,255,.3)", lineHeight: 1.6, marginBottom: 4 }}>
+                    {form.mercado === "us"
+                      ? "The AI will focus on your education, skills, and personal projects — no invented work history."
+                      : "La IA se enfocará en educación, habilidades y proyectos — sin inventar experiencia laboral."}
+                  </p>
                 )}
-              </div>
-              <TemplateSelector
-                selected={form.templateId}
-                onSelect={v => setForm(f => ({ ...f, templateId: v }))}
-                userIsPro={isAdmin}
-              />
-              {error && <p style={{ fontSize: 12, color: "#f87171", marginTop: 12 }}>{error}</p>}
-              <button onClick={handleGenerate} disabled={loading}
-                style={{ width: "100%", marginTop: 18, background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: 13, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1 }}>
-                {loading ? <><Spinner />Generando...</> : editSlug ? <>✦ Actualizar mi CV</> : <>✦ Generar CV para {selectedMarket.flag} {selectedMarket.label}</>}
-              </button>
-              {!isAdmin && <p style={{ textAlign: "center", fontSize: 9, color: "rgba(255,255,255,.18)", marginTop: 8, letterSpacing: "0.5px" }}>El primero es gratis · Sin tarjeta · Sin registro</p>}
-            </FormBlock>
-          </div>
-
-          {/* PREVIEW */}
-          <div ref={previewRef} style={{ position: "relative" }}>
-            {result ? (
-              <>
-                <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} />
-                {slug && <ShareCard slug={slug} />}
-              </>
-            ) : (
-              <>
-                <CVPreview market={form.mercado} photoUrl={form.photoUrl} templateId={form.templateId} formData={form} />
-                {loading && (
-                  <div style={{ position: "absolute", inset: 0, borderRadius: 8, background: "rgba(28,26,22,.88)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
-                    <Spinner large />
-                    <p style={{ fontSize: 13, color: "rgba(248,245,239,.4)" }}>Generando CV para {selectedMarket.flag} {selectedMarket.label}...</p>
+                {form.mercado === "ca" && (
+                  <div style={{ marginTop: 12 }}>
+                    <Field label="Volunteer Work / Voluntariado / Bénévolat (important in Canada)" placeholder="Ej. Voluntario en banco de alimentos, diseñé materiales..." value={form.voluntariado ?? ""} onChange={e => setForm(f => ({ ...f, voluntariado: e.target.value }))} textarea />
                   </div>
                 )}
-              </>
-            )}
-            {/* Diff note */}
-            <div style={{ marginTop: 12, background: note.bg, border: `1px solid ${note.border}`, color: note.color, borderRadius: 6, padding: "8px 12px", fontSize: 11, display: "flex", gap: 7, alignItems: "flex-start", lineHeight: 1.5 }}>
-              <span style={{ fontSize: 13, flexShrink: 0 }}>{note.icon}</span>
-              <span dangerouslySetInnerHTML={{ __html: note.text }} />
+              </FormBlock>
+
+              {/* REDES Y PERFILES */}
+              <FormBlock title={form.mercado === "mx" ? "Redes y perfiles" : form.mercado === "us" ? "Links & Profiles" : "Links & Profiles / Réseaux et profils"}>
+                <SocialLinksSelector
+                  links={form.redesSociales ?? []}
+                  onChange={links => setForm(f => ({ ...f, redesSociales: links }))}
+                  market={form.mercado}
+                />
+              </FormBlock>
+
+              {/* IDIOMAS */}
+              <FormBlock title={FORM_LABELS.blocks.languages[form.mercado]}>
+                <LanguageSelector
+                  languages={form.languages ?? []}
+                  onChange={langs => setForm(f => ({ ...f, languages: langs }))}
+                  market={form.mercado}
+                />
+              </FormBlock>
+
+              {/* HABILIDADES */}
+              <FormBlock title={form.mercado === "mx" ? "Habilidades (opcional)" : form.mercado === "us" ? "Skills (optional)" : "Skills / Core Competencies (optional)"}>
+                <SkillsSelector
+                  skills={form.habilidades ?? []}
+                  onChange={s => setForm(f => ({ ...f, habilidades: s }))}
+                  market={form.mercado}
+                />
+              </FormBlock>
+
+              {/* CERTIFICACIONES */}
+              <FormBlock title={form.mercado === "mx" ? "Certificaciones (opcional)" : form.mercado === "us" ? "Certifications (optional)" : "Certifications / Certifications (optional)"}>
+                <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 10, lineHeight: 1.6 }}>
+                  {form.mercado === "mx"
+                    ? "Solo agrega certificaciones que realmente tienes. La IA las incluirá con detalles realistas. Si no tienes, deja en blanco."
+                    : form.mercado === "us"
+                    ? "Only add certifications you actually have. The AI will format them properly. Leave blank if none."
+                    : "Only include certifications you actually hold. The AI will format them with proper details. Leave blank if none."}
+                </p>
+                <Field
+                  label={form.mercado === "mx" ? "Tus certificaciones" : "Your certifications"}
+                  placeholder={
+                    form.mercado === "mx"
+                      ? "Ej. IRATA Nivel 1, Google Analytics, PMP..."
+                      : form.mercado === "us"
+                      ? "e.g. PMP, AWS Solutions Architect, Google Analytics..."
+                      : "e.g. PMP, Scrum Master, Google Analytics, WHMIS..."
+                  }
+                  value={form.certificaciones ?? ""}
+                  onChange={set("certificaciones")}
+                />
+              </FormBlock>
+
+              {/* EDUCACIÓN */}
+              <FormBlock title={form.mercado === "mx" ? "Educación" : form.mercado === "us" ? "Education" : "Education / Educación"}>
+                <EducacionSelector
+                  educacion={form.educacion ?? [{ carrera: "", institucion: "", anio: "" }]}
+                  onChange={edu => setForm(f => ({ ...f, educacion: edu }))}
+                  market={form.mercado}
+                />
+              </FormBlock>
+
+              {/* PREFERENCIAS DE IA */}
+              <FormBlock title="Preferencias de IA">
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>Tono</label>
+                  <PillGroup
+                    options={[...TONES, "Otro"]}
+                    selected={TONES.includes(form.tono) ? form.tono : "Otro"}
+                    onSelect={v => setForm(f => ({ ...f, tono: v === "Otro" ? "" : v }))}
+                  />
+                  {!TONES.includes(form.tono) && (
+                    <input type="text" autoFocus placeholder="Ej. Emprendedor, Técnico, Académico..." value={form.tono}
+                      onChange={e => setForm(f => ({ ...f, tono: e.target.value }))}
+                      style={{ marginTop: 8, width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(74,144,96,.35)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }} />
+                  )}
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>Industria</label>
+                  <PillGroup
+                    options={[...INDUSTRIES, "Otra"]}
+                    selected={INDUSTRIES.includes(form.industria) ? form.industria : "Otra"}
+                    onSelect={v => setForm(f => ({ ...f, industria: v === "Otra" ? "" : v }))}
+                  />
+                  {!INDUSTRIES.includes(form.industria) && (
+                    <input type="text" autoFocus placeholder="Ej. Agricultura, Minería, Deportes..." value={form.industria}
+                      onChange={e => setForm(f => ({ ...f, industria: e.target.value }))}
+                      style={{ marginTop: 8, width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(74,144,96,.35)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }} />
+                  )}
+                </div>
+                <TemplateSelector
+                  selected={form.templateId}
+                  onSelect={v => setForm(f => ({ ...f, templateId: v }))}
+                  userIsPro={isAdmin}
+                />
+                {error && <p style={{ fontSize: 12, color: "#f87171", marginTop: 12 }}>{error}</p>}
+                <button onClick={handleGenerate} disabled={loading}
+                  style={{ width: "100%", marginTop: 18, background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: 13, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1 }}>
+                  {loading ? <><Spinner />Generando...</> : editSlug ? <>✦ Actualizar mi CV</> : <>✦ Generar CV para {selectedMarket.flag} {selectedMarket.label}</>}
+                </button>
+                {!isAdmin && <p style={{ textAlign: "center", fontSize: 9, color: "rgba(255,255,255,.18)", marginTop: 8, letterSpacing: "0.5px" }}>El primero es gratis · Sin tarjeta · Sin registro</p>}
+              </FormBlock>
+            </div>
+
+            {/* PREVIEW */}
+            <div ref={previewRef} style={{ position: "relative" }}>
+              {result ? (
+                <>
+                  <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} />
+                  {slug && <ShareCard slug={slug} />}
+                </>
+              ) : (
+                <>
+                  <CVPreview market={form.mercado} photoUrl={form.photoUrl} templateId={form.templateId} formData={form} />
+                  {loading && (
+                    <div style={{ position: "absolute", inset: 0, borderRadius: 8, background: "rgba(28,26,22,.88)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
+                      <Spinner large />
+                      <p style={{ fontSize: 13, color: "rgba(248,245,239,.4)" }}>Generando CV para {selectedMarket.flag} {selectedMarket.label}...</p>
+                    </div>
+                  )}
+                </>
+              )}
+              <div style={{ marginTop: 12, background: note.bg, border: `1px solid ${note.border}`, color: note.color, borderRadius: 6, padding: "8px 12px", fontSize: 11, display: "flex", gap: 7, alignItems: "flex-start", lineHeight: 1.5 }}>
+                <span style={{ fontSize: 13, flexShrink: 0 }}>{note.icon}</span>
+                <span dangerouslySetInnerHTML={{ __html: note.text }} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    {showAuth && (
-      <AuthModal initialTab={showAuth} onClose={() => setShowAuth(null)} />
-    )}
-  </>
+      {showAuth && <AuthModal initialTab={showAuth} onClose={() => setShowAuth(null)} />}
+    </>
   );
 }
 
@@ -432,12 +437,18 @@ function FormBlock({ title, children }: { title: string; children: React.ReactNo
 function FieldRow({ children }: { children: React.ReactNode }) {
   return <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>{children}</div>;
 }
-function Field({ label, placeholder, value, onChange, textarea }: { label: string; placeholder: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void; textarea?: boolean }) {
+function Field({ label, placeholder, value, onChange, textarea }: {
+  label: string; placeholder: string; value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  textarea?: boolean;
+}) {
   const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   return (
     <div style={{ marginBottom: 10 }}>
       <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{label}</label>
-      {textarea ? <textarea placeholder={placeholder} value={value} onChange={onChange} rows={3} style={{ ...base, resize: "none" }} /> : <input type="text" placeholder={placeholder} value={value} onChange={onChange} style={base} />}
+      {textarea
+        ? <textarea placeholder={placeholder} value={value} onChange={onChange} rows={3} style={{ ...base, resize: "none" }} />
+        : <input type="text" placeholder={placeholder} value={value} onChange={onChange} style={base} />}
     </div>
   );
 }
@@ -458,11 +469,7 @@ function PhotoUpload({ value, onChange }: { value?: string; onChange: (url: stri
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert("La foto no puede superar 2MB.");
-      e.target.value = "";
-      return;
-    }
+    if (file.size > 2 * 1024 * 1024) { alert("La foto no puede superar 2MB."); e.target.value = ""; return; }
     const reader = new FileReader();
     reader.onload = () => onChange(reader.result as string);
     reader.readAsDataURL(file);
@@ -491,41 +498,23 @@ function PhotoUpload({ value, onChange }: { value?: string; onChange: (url: stri
     </div>
   );
 }
-function SkillsSelector({ skills, onChange, market }: {
-  skills: string[];
-  onChange: (s: string[]) => void;
-  market: Market;
-}) {
+function SkillsSelector({ skills, onChange, market }: { skills: string[]; onChange: (s: string[]) => void; market: Market }) {
   const [input, setInput] = useState("");
   const isMx = market === "mx";
-
   const add = () => {
     const trimmed = input.trim();
     if (trimmed && !skills.includes(trimmed)) onChange([...skills, trimmed]);
     setInput("");
   };
-
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); }
     if (e.key === "Backspace" && !input && skills.length) onChange(skills.slice(0, -1));
   };
-
-  const placeholder = isMx
-    ? "Ej. Photoshop, Figma..."
-    : market === "us" ? "e.g. Figma, Leadership..."
-    : "e.g. Figma, Bilingual...";
-
-  const hint = isMx
-    ? "Presiona Enter o coma para agregar. La IA también agregará las relevantes para tu industria."
-    : market === "us"
-    ? "Press Enter or comma to add. The AI will also suggest relevant skills."
-    : "Appuyez sur Entrée / Press Enter to add. The AI will complement based on your industry.";
-
-  const addLabel = isMx ? "+ Agregar" : "+ Add";
-
   return (
     <div>
-      <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 10, lineHeight: 1.5 }}>{hint}</p>
+      <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 10, lineHeight: 1.5 }}>
+        {isMx ? "Presiona Enter o coma para agregar. La IA también agregará las relevantes para tu industria." : market === "us" ? "Press Enter or comma to add. The AI will also suggest relevant skills." : "Press Enter to add. The AI will complement based on your industry."}
+      </p>
       {skills.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
           {skills.map((s, i) => (
@@ -538,37 +527,23 @@ function SkillsSelector({ skills, onChange, market }: {
         </div>
       )}
       <div style={{ display: "flex", gap: 8 }}>
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKey}
-          placeholder={placeholder}
-          style={{ flex: 1, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }}
-        />
+        <input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
+          placeholder={isMx ? "Ej. Photoshop, Figma..." : market === "us" ? "e.g. Figma, Leadership..." : "e.g. Figma, Bilingual..."}
+          style={{ flex: 1, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }} />
         <button type="button" onClick={add} disabled={!input.trim()}
           style={{ fontSize: 11, color: "rgba(255,255,255,.5)", background: "none", border: "1px solid rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 12px", cursor: input.trim() ? "pointer" : "not-allowed", fontFamily: "inherit", opacity: input.trim() ? 1 : 0.4 }}>
-          {addLabel}
+          {isMx ? "+ Agregar" : "+ Add"}
         </button>
       </div>
     </div>
   );
 }
-
 const SOCIAL_TYPES = ["LinkedIn", "GitHub", "Portfolio", "Behance", "Twitter/X", "Dribbble", "Otro"];
-
-function ExperienceSelector({ experiencias, onChange, market }: {
-  experiencias: ExperienciaEntry[];
-  onChange: (exp: ExperienciaEntry[]) => void;
-  market: Market;
-}) {
+function ExperienceSelector({ experiencias, onChange, market }: { experiencias: ExperienciaEntry[]; onChange: (exp: ExperienciaEntry[]) => void; market: Market }) {
   const isMx = market === "mx";
   const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   const update = (i: number, field: keyof ExperienciaEntry, val: string) =>
     onChange(experiencias.map((e, j) => j === i ? { ...e, [field]: val } : e));
-  const remove = (i: number) => onChange(experiencias.filter((_, j) => j !== i));
-  const add = () => onChange([...experiencias, { puesto: "", empresa: "", periodo: "", descripcion: "" }]);
-
   return (
     <div>
       {experiencias.map((exp, i) => (
@@ -578,30 +553,22 @@ function ExperienceSelector({ experiencias, onChange, market }: {
               {isMx ? `Experiencia ${i + 1}` : `Experience ${i + 1}`}
             </span>
             {experiencias.length > 1 && (
-              <button type="button" onClick={() => remove(i)}
+              <button type="button" onClick={() => onChange(experiencias.filter((_, j) => j !== i))}
                 style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
             )}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
-                {isMx ? "Puesto" : market === "us" ? "Job Title" : "Position"}
-              </label>
-              <input type="text" value={exp.puesto} onChange={e => update(i, "puesto", e.target.value)}
-                placeholder={isMx ? "Diseñadora Gráfica" : "Graphic Designer"} style={base} />
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Puesto" : market === "us" ? "Job Title" : "Position"}</label>
+              <input type="text" value={exp.puesto} onChange={e => update(i, "puesto", e.target.value)} placeholder={isMx ? "Diseñadora Gráfica" : "Graphic Designer"} style={base} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
-                {isMx ? "Empresa" : "Company"}
-              </label>
-              <input type="text" value={exp.empresa} onChange={e => update(i, "empresa", e.target.value)}
-                placeholder="Agencia Creativa" style={base} />
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Empresa" : "Company"}</label>
+              <input type="text" value={exp.empresa} onChange={e => update(i, "empresa", e.target.value)} placeholder="Agencia Creativa" style={base} />
             </div>
           </div>
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
-              {isMx ? "Período" : "Period"}
-            </label>
+            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Período" : "Period"}</label>
             <input type="text" value={exp.periodo} onChange={e => update(i, "periodo", e.target.value)}
               placeholder={isMx ? "Ej. Ene 2020 – Presente" : "e.g. Jan 2020 – Present"} style={base} />
           </div>
@@ -615,26 +582,18 @@ function ExperienceSelector({ experiencias, onChange, market }: {
           </div>
         </div>
       ))}
-      <button type="button" onClick={add}
+      <button type="button" onClick={() => onChange([...experiencias, { puesto: "", empresa: "", periodo: "", descripcion: "" }])}
         style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
         + {isMx ? "Agregar otra experiencia" : "Add another experience"}
       </button>
     </div>
   );
 }
-
-function EducacionSelector({ educacion, onChange, market }: {
-  educacion: EducacionEntry[];
-  onChange: (edu: EducacionEntry[]) => void;
-  market: Market;
-}) {
+function EducacionSelector({ educacion, onChange, market }: { educacion: EducacionEntry[]; onChange: (edu: EducacionEntry[]) => void; market: Market }) {
   const isMx = market === "mx";
   const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   const update = (i: number, field: keyof EducacionEntry, val: string) =>
     onChange(educacion.map((e, j) => j === i ? { ...e, [field]: val } : e));
-  const remove = (i: number) => onChange(educacion.filter((_, j) => j !== i));
-  const add = () => onChange([...educacion, { carrera: "", institucion: "", anio: "" }]);
-
   return (
     <div>
       {educacion.map((edu, i) => (
@@ -644,7 +603,7 @@ function EducacionSelector({ educacion, onChange, market }: {
               {isMx ? `Estudio ${i + 1}` : `Degree ${i + 1}`}
             </span>
             {educacion.length > 1 && (
-              <button type="button" onClick={() => remove(i)}
+              <button type="button" onClick={() => onChange(educacion.filter((_, j) => j !== i))}
                 style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
             )}
           </div>
@@ -657,85 +616,54 @@ function EducacionSelector({ educacion, onChange, market }: {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
-                {isMx ? "Institución" : "Institution"}
-              </label>
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Institución" : "Institution"}</label>
               <input type="text" value={edu.institucion} onChange={e => update(i, "institucion", e.target.value)}
                 placeholder={isMx ? "Ej. Universidad de Guanajuato" : "e.g. University of Toronto"} style={base} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
-                {isMx ? "Año" : "Year"}
-              </label>
-              <input type="text" value={edu.anio} onChange={e => update(i, "anio", e.target.value)}
-                placeholder={isMx ? "2020" : "2020"} style={{ ...base, width: 80 }} />
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Año" : "Year"}</label>
+              <input type="text" value={edu.anio} onChange={e => update(i, "anio", e.target.value)} placeholder="2020" style={{ ...base, width: 80 }} />
             </div>
           </div>
         </div>
       ))}
-      <button type="button" onClick={add}
+      <button type="button" onClick={() => onChange([...educacion, { carrera: "", institucion: "", anio: "" }])}
         style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
         + {isMx ? "Agregar otro estudio" : "Add another degree"}
       </button>
     </div>
   );
 }
-
-function SocialLinksSelector({ links, onChange, market }: {
-  links: RedSocial[];
-  onChange: (links: RedSocial[]) => void;
-  market: Market;
-}) {
+function SocialLinksSelector({ links, onChange, market }: { links: RedSocial[]; onChange: (links: RedSocial[]) => void; market: Market }) {
   const base: React.CSSProperties = { background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", width: "100%" };
   const update = (i: number, field: keyof RedSocial, val: string) =>
     onChange(links.map((l, j) => j === i ? { ...l, [field]: val } : l));
-  const remove = (i: number) => onChange(links.filter((_, j) => j !== i));
-  const add = () => onChange([...links, { tipo: "LinkedIn", url: "" }]);
-
-  const emptyText = market === "mx"
-    ? "Agrega tu LinkedIn, portafolio u otras redes para incluirlos en el CV."
-    : market === "us"
-    ? "Add your LinkedIn, portfolio or other profiles to include them in your resume."
-    : "Ajoutez LinkedIn, portfolio ou autres profils / Add your LinkedIn, portfolio or other profiles.";
-
-  const addLabel = market === "mx" ? "+ Agregar link" : market === "us" ? "+ Add link" : "+ Ajouter / Add link";
-
-  const placeholder = market === "mx"
-    ? "https://linkedin.com/in/tu-perfil"
-    : "https://linkedin.com/in/your-profile";
-
   return (
     <div>
       {links.length === 0 && (
         <p style={{ fontSize: 11, color: "rgba(255,255,255,.25)", marginBottom: 10, lineHeight: 1.5 }}>
-          {emptyText}
+          {market === "mx" ? "Agrega tu LinkedIn, portafolio u otras redes para incluirlos en el CV." : market === "us" ? "Add your LinkedIn, portfolio or other profiles to include them in your resume." : "Add LinkedIn, portfolio or other profiles / Ajoutez LinkedIn, portfolio ou autres profils."}
         </p>
       )}
       {links.map((link, i) => (
         <div key={i} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 8, marginBottom: 8, alignItems: "center" }}>
-          <select value={link.tipo} onChange={e => update(i, "tipo", e.target.value)}
-            style={{ ...base, width: "auto", cursor: "pointer" }}>
+          <select value={link.tipo} onChange={e => update(i, "tipo", e.target.value)} style={{ ...base, width: "auto", cursor: "pointer" }}>
             {SOCIAL_TYPES.map(t => <option key={t} value={t} style={{ background: "#1c1a16" }}>{t}</option>)}
           </select>
           <input type="text" value={link.url} onChange={e => update(i, "url", e.target.value)}
-            placeholder={placeholder} style={base} />
-          <button type="button" onClick={() => remove(i)}
+            placeholder={market === "mx" ? "https://linkedin.com/in/tu-perfil" : "https://linkedin.com/in/your-profile"} style={base} />
+          <button type="button" onClick={() => onChange(links.filter((_, j) => j !== i))}
             style={{ fontSize: 16, color: "rgba(255,255,255,.3)", background: "none", border: "none", cursor: "pointer", padding: "0 4px", lineHeight: 1 }}>×</button>
         </div>
       ))}
-      <button type="button" onClick={add}
+      <button type="button" onClick={() => onChange([...links, { tipo: "LinkedIn", url: "" }])}
         style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
-        {addLabel}
+        {market === "mx" ? "+ Agregar link" : market === "us" ? "+ Add link" : "+ Ajouter / Add link"}
       </button>
     </div>
   );
 }
-
-function LanguageSelector({ languages, onChange, market }: {
-  languages: Array<{ language: string; level: string }>;
-  onChange: (langs: Array<{ language: string; level: string }>) => void;
-  market: Market;
-}) {
+function LanguageSelector({ languages, onChange, market }: { languages: Array<{ language: string; level: string }>; onChange: (langs: Array<{ language: string; level: string }>) => void; market: Market }) {
   const isMx = market === "mx";
   const levels = isMx ? LEVELS_ES : LEVELS_EN;
   const inputBase: React.CSSProperties = { background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", width: "100%" };
@@ -744,13 +672,9 @@ function LanguageSelector({ languages, onChange, market }: {
       {languages.map((l, i) => (
         <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, marginBottom: 8, alignItems: "center" }}>
           <div>
-            <input
-              list={`lang-list-${i}`}
-              placeholder={isMx ? "Ej. Inglés" : "e.g. French"}
-              value={l.language}
+            <input list={`lang-list-${i}`} placeholder={isMx ? "Ej. Inglés" : "e.g. French"} value={l.language}
               onChange={e => onChange(languages.map((x, j) => j === i ? { ...x, language: e.target.value } : x))}
-              style={inputBase}
-            />
+              style={inputBase} />
             <datalist id={`lang-list-${i}`}>
               {COMMON_LANGUAGES.map(lang => <option key={lang} value={lang} />)}
             </datalist>
@@ -774,11 +698,7 @@ function LanguageSelector({ languages, onChange, market }: {
 function ShareCard({ slug }: { slug: string }) {
   const url = `${typeof window !== "undefined" ? window.location.origin : ""}/cv/${slug}`;
   const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  const copy = () => { navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   return (
     <div style={{ marginTop: 10, background: "rgba(42,82,54,.12)", border: "1px solid rgba(74,144,96,.28)", borderRadius: 8, padding: "16px 18px" }}>
       <p style={{ fontSize: 10, color: "rgba(255,255,255,.35)", marginBottom: 8, letterSpacing: "0.5px", textTransform: "uppercase" }}>Comparte este link con reclutadores</p>
@@ -804,32 +724,20 @@ function GeneratedResult({ text, market, slug, templateId }: { text: string; mar
   const m = MARKETS.find(x => x.id === market)!;
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
-
   const handleDownload = async () => {
     if (!slug) return;
-    setPdfLoading(true);
-    setPdfError(null);
+    setPdfLoading(true); setPdfError(null);
     try {
-      const res = await fetch("/api/pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, template: templateId }),
-      });
+      const res = await fetch("/api/pdf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug, template: templateId }) });
       if (!res.ok) throw new Error((await res.json()).error || "Error");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${slug}.pdf`;
-      a.click();
+      const a = document.createElement("a"); a.href = url; a.download = `${slug}.pdf`; a.click();
       URL.revokeObjectURL(url);
     } catch (e: unknown) {
       setPdfError(e instanceof Error ? e.message : "Error generando PDF");
-    } finally {
-      setPdfLoading(false);
-    }
+    } finally { setPdfLoading(false); }
   };
-
   return (
     <div style={{ background: "var(--paper)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--border)", boxShadow: "0 20px 56px rgba(0,0,0,.5)" }}>
       <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -839,15 +747,10 @@ function GeneratedResult({ text, market, slug, templateId }: { text: string; mar
       <div style={{ padding: 24, maxHeight: 480, overflowY: "auto" }}>
         <pre style={{ fontFamily: "inherit", fontSize: 12, color: "var(--body)", lineHeight: 1.7, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{text}</pre>
       </div>
-      {pdfError && (
-        <p style={{ fontSize: 11, color: "#b91c1c", background: "#fef2f2", margin: "0 16px", padding: "6px 10px", borderRadius: 5, border: "1px solid #fecaca" }}>{pdfError}</p>
-      )}
+      {pdfError && <p style={{ fontSize: 11, color: "#b91c1c", background: "#fef2f2", margin: "0 16px", padding: "6px 10px", borderRadius: 5, border: "1px solid #fecaca" }}>{pdfError}</p>}
       <div style={{ padding: "12px 16px", background: "var(--warm)", borderTop: "1px solid var(--border)", display: "flex", gap: 8 }}>
-        <button
-          onClick={handleDownload}
-          disabled={pdfLoading || !slug}
-          style={{ flex: 1, background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: 10, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-        >
+        <button onClick={handleDownload} disabled={pdfLoading || !slug}
+          style={{ flex: 1, background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: 10, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
           {pdfLoading ? <><Spinner />Generando PDF...</> : "⬇ Descargar PDF"}
         </button>
         <button style={{ flex: 1, background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: 10, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>Editar datos</button>
