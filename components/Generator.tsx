@@ -30,11 +30,13 @@ const DIFF_NOTES: Record<Market, { bg: string; border: string; color: string; ic
 export interface ExperienciaEntry { puesto: string; empresa: string; periodo: string; descripcion: string; }
 export interface RedSocial { tipo: string; url: string; }
 export interface EducacionEntry { carrera: string; institucion: string; anio: string; }
+export interface CertificacionEntry { nombre: string; institucion: string; anio: string; }
 export interface FormData {
   nombre: string; puesto: string; ciudad: string; email: string; telefono?: string;
   tono: string; industria: string; mercado: Market;
   edad?: string; estadoCivil?: string; disponibilidad?: string;
-  voluntariado?: string; photoUrl?: string; certificaciones?: string;
+  voluntariado?: string; photoUrl?: string;
+  certificaciones?: CertificacionEntry[];
   languages?: Array<{ language: string; level: string }>;
   templateId: TemplateId; sinExperiencia?: boolean;
   experiencias: ExperienciaEntry[];
@@ -51,7 +53,7 @@ const DEFAULT_FORM: FormData = {
   experiencias: [{ puesto: "", empresa: "", periodo: "", descripcion: "" }],
   redesSociales: [], habilidades: [],
   educacion: [{ carrera: "", institucion: "", anio: "" }],
-  certificaciones: "", disponibilidad: "Inmediata", vacante: "",
+  certificaciones: [], disponibilidad: "Inmediata", vacante: "",
 };
 
 interface GeneratorProps { initialData?: Record<string, unknown>; editSlug?: string; }
@@ -308,12 +310,16 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
 
               {/* CERTIFICACIONES */}
               <FB title={isMx ? "Certificaciones (opcional)" : "Certifications (optional)"}>
-                <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 10, lineHeight: 1.6 }}>
-                  {isMx ? "Solo agrega certificaciones que realmente tienes. Si no tienes, deja en blanco." : "Only add certifications you actually have. Leave blank if none."}
+                <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 12, lineHeight: 1.6 }}>
+                  {isMx
+                    ? "Solo agrega certificaciones que realmente tienes. Si no tienes, deja en blanco."
+                    : "Only add certifications you actually have. Leave blank if none."}
                 </p>
-                <F label={isMx ? "Tus certificaciones" : "Your certifications"}
-                  placeholder={isMx ? "Ej. IRATA Nivel 1, Google Analytics, PMP..." : isUs ? "e.g. PMP, AWS Solutions Architect..." : "e.g. PMP, Scrum Master, WHMIS..."}
-                  value={form.certificaciones ?? ""} onChange={set("certificaciones")} />
+                <CertificacionesSelector
+                  certificaciones={form.certificaciones ?? []}
+                  onChange={c => setForm(f => ({ ...f, certificaciones: c }))}
+                  market={form.mercado}
+                />
               </FB>
 
               {/* EDUCACIÓN */}
@@ -602,6 +608,70 @@ function LanguageSelector({ languages, onChange, market }: { languages: Array<{ 
       <button type="button" onClick={() => onChange([...languages, { language: "", level: levels[0] }])}
         style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 12px", cursor: "pointer", fontFamily: "inherit" }}>
         + {isMx ? "Agregar idioma" : "Add language"}
+      </button>
+    </div>
+  );
+}
+function CertificacionesSelector({ certificaciones, onChange, market }: {
+  certificaciones: CertificacionEntry[];
+  onChange: (c: CertificacionEntry[]) => void;
+  market: Market;
+}) {
+  const isMx = market === "mx";
+  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
+  const update = (i: number, field: keyof CertificacionEntry, val: string) =>
+    onChange(certificaciones.map((c, j) => j === i ? { ...c, [field]: val } : c));
+  const add = () => onChange([...certificaciones, { nombre: "", institucion: "", anio: "" }]);
+  const remove = (i: number) => onChange(certificaciones.filter((_, j) => j !== i));
+
+  return (
+    <div>
+      {certificaciones.length === 0 && (
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,.2)", marginBottom: 10, lineHeight: 1.5 }}>
+          {isMx ? "Aún no has agregado certificaciones." : "No certifications added yet."}
+        </p>
+      )}
+      {certificaciones.map((cert, i) => (
+        <div key={i} style={{ marginBottom: 12, padding: 14, background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span style={{ fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,.22)" }}>
+              {isMx ? `Certificación ${i + 1}` : `Certification ${i + 1}`}
+            </span>
+            <button type="button" onClick={() => remove(i)}
+              style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
+          </div>
+          {/* Nombre */}
+          <div style={{ marginBottom: 8 }}>
+            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+              {isMx ? "Nombre de la certificación" : "Certification name"}
+            </label>
+            <input type="text" value={cert.nombre} onChange={e => update(i, "nombre", e.target.value)}
+              placeholder={isMx ? "Ej. IRATA Nivel 1, PMP, Google Analytics..." : "e.g. PMP, AWS Solutions Architect, WHMIS..."}
+              style={base} />
+          </div>
+          {/* Institución + Año */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
+            <div>
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+                {isMx ? "Institución emisora" : "Issuing organization"}
+              </label>
+              <input type="text" value={cert.institucion} onChange={e => update(i, "institucion", e.target.value)}
+                placeholder={isMx ? "Ej. IRATA International, PMI, Google..." : "e.g. PMI, AWS, Google, Coursera..."}
+                style={base} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
+                {isMx ? "Año" : "Year"}
+              </label>
+              <input type="text" value={cert.anio} onChange={e => update(i, "anio", e.target.value)}
+                placeholder="2023" style={{ ...base, width: 80 }} />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={add}
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+        + {isMx ? "Agregar certificación" : "Add certification"}
       </button>
     </div>
   );

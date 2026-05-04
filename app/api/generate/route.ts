@@ -62,7 +62,6 @@ function buildPrompt(data: Record<string, unknown>): string {
   const voluntariado = data.voluntariado as string | undefined;
   const languages    = data.languages as string;
   const sinExperiencia = data.sinExperiencia as boolean | undefined;
-  const certificaciones = data.certificaciones as string | undefined;
   const vacante      = data.vacante as string | undefined;
 
   const experiencias  = (data.experiencias as ExperienciaEntry[]) ?? [];
@@ -87,9 +86,20 @@ function buildPrompt(data: Record<string, unknown>): string {
     : `Genera habilidades relevantes para ${industria}.`;
 
   // ── Reglas de certificaciones ──
-  const certRule_es = certificaciones?.trim()
-    ? `CERTIFICACIONES — El usuario mencionó: ${certificaciones}.
-- Inclúyelas con detalles realistas: institución emisora real, formato estándar y año aproximado.
+  const certificaciones = data.certificaciones as Array<{ nombre: string; institucion: string; anio: string }> | string | undefined;
+
+  // Formatear certificaciones (puede venir como array o string legacy)
+  const certTexto = Array.isArray(certificaciones) && certificaciones.length > 0
+    ? certificaciones
+        .filter(c => c.nombre?.trim())
+        .map(c => `${c.nombre}${c.institucion ? ` (${c.institucion}` : ""}${c.anio ? `, ${c.anio})` : c.institucion ? ")" : ""}`)
+        .join(", ")
+    : typeof certificaciones === "string" ? certificaciones.trim() : "";
+
+  // Regla de certificaciones
+  const certRule_es = certTexto
+    ? `CERTIFICACIONES — El usuario mencionó: ${certTexto}.
+- Inclúyelas con los datos exactos proporcionados: nombre, institución emisora y año.
 - NO agregues otras que el usuario no haya mencionado.
 - NO sugiereas basándote en las habilidades.`
     : `CERTIFICACIONES — El usuario NO mencionó ninguna.
@@ -97,9 +107,9 @@ function buildPrompt(data: Record<string, unknown>): string {
 - NO inventes ni sugieras ninguna aunque el usuario tenga habilidades relacionadas.
 - Omite esta sección completamente.`;
 
-  const certRule_en = certificaciones?.trim()
-    ? `CERTIFICATIONS — User mentioned: ${certificaciones}.
-- Include with realistic details: real issuing organization, standard format, approximate year.
+  const certRule_en = certTexto
+    ? `CERTIFICATIONS — User mentioned: ${certTexto}.
+- Include them with the exact data provided: name, issuing organization and year.
 - Do NOT add others the user did not mention.
 - Do NOT suggest based on skills.`
     : `CERTIFICATIONS — User did NOT mention any.
