@@ -142,7 +142,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     } catch { /* ignore */ }
   }, []);
 
-  const set = (k: keyof FormData) =>
+  const set = (k: keyof CVFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm(f => ({ ...f, [k]: e.target.value }));
 
