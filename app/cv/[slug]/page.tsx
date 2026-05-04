@@ -32,7 +32,7 @@ export default async function CVPage({ params }: PageProps) {
   const { slug } = await params;
   const { data, error } = await supabase
     .from("cvs")
-    .select("nombre, puesto, ciudad, email, mercado, cv_text, template, created_at")
+    .select("nombre, puesto, ciudad, email, mercado, cv_text, template, form_data, created_at")
     .eq("slug", slug)
     .single();
 
@@ -41,13 +41,18 @@ export default async function CVPage({ params }: PageProps) {
   const templateId = ((data.template as string) || "clasico") as TemplateId;
   const Preview = PREVIEW_TEMPLATES[templateId] ?? PREVIEW_TEMPLATES.clasico;
 
+  // Extract photoUrl from form_data if available (for Mexico CVs)
+  const formData = data.form_data as Record<string, unknown> | null;
+  const photoUrl = (formData?.photoUrl as string | undefined) ?? undefined;
+
   const cvData: CVData = {
-    nombre: data.nombre,
-    puesto: data.puesto,
-    ciudad: data.ciudad ?? undefined,
-    email: data.email ?? undefined,
-    mercado: data.mercado,
-    cv_text: data.cv_text,
+    nombre:   data.nombre,
+    puesto:   data.puesto,
+    ciudad:   data.ciudad  ?? undefined,
+    email:    data.email   ?? undefined,
+    mercado:  data.mercado,
+    cv_text:  data.cv_text,
+    photoUrl,
   };
 
   const date = new Date(data.created_at).toLocaleDateString("es-MX", {
@@ -77,15 +82,10 @@ export default async function CVPage({ params }: PageProps) {
 
       {/* Content */}
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 24px 72px" }}>
-
-        {/* Action bar */}
         <CVPageActions slug={slug} mercado={data.mercado} templateId={templateId} />
-
-        {/* CV rendered with template */}
         <div style={{ borderRadius: 8, overflow: "hidden", boxShadow: "0 2px 4px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08)" }}>
           <Preview data={cvData} />
         </div>
-
         <p className="no-print" style={{ textAlign: "center", fontSize: 11, color: "var(--hint)", marginTop: 20 }}>
           Generado el {date}
         </p>

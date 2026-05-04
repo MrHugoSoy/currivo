@@ -1,47 +1,81 @@
-import { parseCVText, extractHeader, extractSkills, CVItem } from "../parser";
+import { parseCVText, extractHeader, CVItem } from "../parser";
 import type { CVData } from "../types";
 
 const C = {
   primario: "#1a1814",
-  acento: "#2a5236",
-  fondo: "#fffefc",
-  texto: "#4a443c",
-  hint: "#8a8278",
-  border: "#ddd7c8",
-  greenBg: "#edf4ef",
+  acento:   "#2a5236",
+  fondo:    "#fffefc",
+  texto:    "#4a443c",
+  hint:     "#8a8278",
+  border:   "#ddd7c8",
+  greenBg:  "#edf4ef",
   greenMid: "#4a9060",
 };
 
 export default function ClasicoPreview({ data }: { data: CVData }) {
-  const sections = parseCVText(data.cv_text);
-  const hdr = extractHeader(data.cv_text);
-  const name = hdr.name || data.nombre;
-  const subtitle = hdr.subtitle || data.puesto;
-  const contacts = hdr.contacts.length
+  const sections  = parseCVText(data.cv_text);
+  const hdr       = extractHeader(data.cv_text);
+  const name      = hdr.name     || data.nombre;
+  const subtitle  = hdr.subtitle || data.puesto;
+  const contacts  = hdr.contacts.length
     ? hdr.contacts
     : [data.ciudad, data.email].filter(Boolean) as string[];
-  const main = sections.filter((s) => s.title !== "");
+  const main      = sections.filter(s => s.title !== "");
+  const isMx      = data.mercado === "mx";
 
   return (
     <div style={{ width: 680, background: C.fondo, fontFamily: "'DM Sans','Nunito Sans',sans-serif", color: C.texto, fontSize: 12, lineHeight: 1.5, padding: "40px 44px", boxSizing: "border-box" }}>
 
-      {/* Header */}
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 36, fontWeight: 600, color: C.primario, letterSpacing: "-1px", lineHeight: 1.1 }}>
-          {name}
+      {/* ── HEADER ── */}
+      <div style={{ marginBottom: 18, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 36, fontWeight: 600, color: C.primario, letterSpacing: "-1px", lineHeight: 1.1 }}>
+            {name}
+          </div>
+          {subtitle && (
+            <div style={{ fontSize: 14, color: C.acento, marginTop: 5, fontWeight: 500 }}>{subtitle}</div>
+          )}
+          {contacts.length > 0 && (
+            <div style={{ fontSize: 11, color: C.hint, marginTop: 7 }}>
+              {contacts.join(" · ")}
+            </div>
+          )}
         </div>
-        {subtitle && (
-          <div style={{ fontSize: 14, color: C.acento, marginTop: 5, fontWeight: 500 }}>{subtitle}</div>
+
+        {/* Photo — only for Mexico */}
+        {isMx && data.photoUrl && (
+          <div style={{ flexShrink: 0 }}>
+            <img
+              src={data.photoUrl}
+              alt={name}
+              style={{
+                width: 80, height: 80,
+                borderRadius: 6,
+                objectFit: "cover",
+                border: `2px solid ${C.border}`,
+                display: "block",
+              }}
+            />
+          </div>
         )}
-        {contacts.length > 0 && (
-          <div style={{ fontSize: 11, color: C.hint, marginTop: 7 }}>
-            {contacts.join(" · ")}
+
+        {/* Placeholder photo box for Mexico when no photo */}
+        {isMx && !data.photoUrl && (
+          <div style={{
+            flexShrink: 0, width: 80, height: 80, borderRadius: 6,
+            border: `1.5px dashed ${C.border}`,
+            background: C.greenBg,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 10, color: C.hint, textAlign: "center", lineHeight: 1.3,
+          }}>
+            <span>📷<br/>Foto</span>
           </div>
         )}
       </div>
 
       <div style={{ height: 2, background: C.primario, marginBottom: 22 }} />
 
+      {/* ── SECTIONS ── */}
       {main.map((section, idx) => (
         <div key={idx} style={{ marginBottom: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 8, letterSpacing: 2.5, textTransform: "uppercase", color: C.hint, fontWeight: 600, marginBottom: 10 }}>
@@ -69,8 +103,9 @@ function Item({ item }: { item: CVItem }) {
       </div>
     );
   }
+
   if (item.type === "skills") {
-    const tags = (item.content ?? "").split(" | ").map((t) => t.trim()).filter(Boolean);
+    const tags = (item.content ?? "").split(" | ").map(t => t.trim()).filter(Boolean);
     return (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 4 }}>
         {tags.map((tag, i) => (
@@ -81,6 +116,7 @@ function Item({ item }: { item: CVItem }) {
       </div>
     );
   }
+
   if (item.type === "job") {
     return (
       <div style={{ marginBottom: 12 }}>
@@ -121,7 +157,7 @@ function Item({ item }: { item: CVItem }) {
 
   const content = item.content ?? "";
   if (content.includes(" | ") || content.split(",").length > 2) {
-    const tags = content.split(/[|,]/).map((t) => t.trim()).filter(Boolean);
+    const tags = content.split(/[|,]/).map(t => t.trim()).filter(Boolean);
     return (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 4 }}>
         {tags.map((tag, i) => (
