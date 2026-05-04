@@ -3,14 +3,12 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { supabase } from "@/lib/supabase";
 import { PDF_TEMPLATES } from "@/lib/templates/index";
-
 export const dynamic = "force-dynamic";
 import type { TemplateId, CVData } from "@/lib/templates/types";
 
 export async function POST(req: NextRequest) {
   try {
     const { slug, template } = await req.json() as { slug: string; template: TemplateId };
-
     if (!slug || !template) {
       return NextResponse.json({ error: "slug y template son requeridos" }, { status: 400 });
     }
@@ -25,14 +23,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "CV no encontrado" }, { status: 404 });
     }
 
+    // Extract photoUrl from form_data (stored as JSON)
+    const formData = row.form_data as Record<string, unknown> | null;
+    const photoUrl = (formData?.photoUrl as string | undefined) ?? undefined;
+
     const cvData: CVData = {
-      nombre: row.nombre,
-      puesto: row.puesto,
-      ciudad: row.ciudad ?? undefined,
-      email: row.email ?? undefined,
-      mercado: row.mercado,
-      cv_text: row.cv_text,
-      form_data: row.form_data ?? undefined,
+      nombre:   row.nombre,
+      puesto:   row.puesto,
+      ciudad:   row.ciudad   ?? undefined,
+      email:    row.email    ?? undefined,
+      mercado:  row.mercado,
+      cv_text:  row.cv_text,
+      photoUrl,
     };
 
     const PDFComponent = PDF_TEMPLATES[template];
