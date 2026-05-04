@@ -1,7 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import CVPreview from "./CVPreview";
-import TemplateSelector from "./TemplateSelector";
 import { AuthModal } from "./AuthModal";
 import type { TemplateId } from "@/lib/templates/types";
 import { supabase } from "@/lib/supabase";
@@ -15,6 +14,14 @@ const LEVELS_ES = ["Nativo","Fluido","Avanzado (C1)","Intermedio (B2)","Básico 
 const LEVELS_EN = ["Native","Fluent","Advanced (C1)","Intermediate (B2)","Basic (B1)","Elementary (A2)"];
 const SOCIAL_TYPES = ["LinkedIn","GitHub","Portfolio","Behance","Twitter/X","Dribbble","Otro"];
 
+// Template definitions inline (replaces TemplateSelector import)
+const TEMPLATE_DEFS = [
+  { id: "clasico" as TemplateId,     nombre: "Clásico",      libre: true },
+  { id: "moderno" as TemplateId,     nombre: "Moderno",      libre: true },
+  { id: "minimalista" as TemplateId, nombre: "Minimalista",  libre: false },
+  { id: "oscuro" as TemplateId,      nombre: "Oscuro",       libre: false },
+];
+
 type Market = "mx" | "us" | "ca";
 const MARKETS: { id: Market; flag: string; label: string; hint: string }[] = [
   { id: "mx", flag: "🇲🇽", label: "México",  hint: "Con foto, datos personales, objetivo" },
@@ -27,11 +34,23 @@ const DIFF_NOTES: Record<Market, { bg: string; border: string; color: string; ic
   ca: { bg: "#fef8ec", border: "rgba(138,74,0,.15)", color: "#5a3000", icon: "🍁", text: "<strong>Canadian Resume:</strong> Sin foto ni datos personales. El voluntariado tiene mucho peso. Bilingüismo inglés/francés es una ventaja enorme." },
 };
 
+// Block icons & colors per section
+const BLOCK_META: Record<string, { icon: string; color: string }> = {
+  personal:        { icon: "👤", color: "rgba(74,144,96,.2)" },
+  experiencia:     { icon: "💼", color: "rgba(74,120,200,.15)" },
+  redes:           { icon: "🔗", color: "rgba(255,255,255,.06)" },
+  idiomas:         { icon: "🌐", color: "rgba(200,150,50,.15)" },
+  habilidades:     { icon: "⚡", color: "rgba(74,144,96,.18)" },
+  certificaciones: { icon: "🏆", color: "rgba(200,150,50,.12)" },
+  educacion:       { icon: "🎓", color: "rgba(74,120,200,.15)" },
+  ia:              { icon: "✦",  color: "rgba(255,255,255,.06)" },
+};
+
 export interface ExperienciaEntry { puesto: string; empresa: string; periodo: string; descripcion: string; }
 export interface RedSocial { tipo: string; url: string; }
 export interface EducacionEntry { carrera: string; institucion: string; anio: string; }
 export interface CertificacionEntry { nombre: string; institucion: string; anio: string; }
-export interface FormData {
+export interface CVFormData {
   nombre: string; puesto: string; ciudad: string; email: string; telefono?: string;
   tono: string; industria: string; mercado: Market;
   edad?: string; estadoCivil?: string; disponibilidad?: string;
@@ -45,7 +64,7 @@ export interface FormData {
   educacion?: EducacionEntry[];
   vacante?: string;
 }
-const DEFAULT_FORM: FormData = {
+const DEFAULT_FORM: CVFormData = {
   nombre: "", puesto: "", ciudad: "", email: "", telefono: "",
   tono: "Profesional", industria: "Diseño", mercado: "mx", templateId: "clasico",
   languages: [{ language: "Spanish", level: "Nativo" }],
@@ -59,7 +78,7 @@ const DEFAULT_FORM: FormData = {
 interface GeneratorProps { initialData?: Record<string, unknown>; editSlug?: string; }
 
 export default function Generator({ initialData, editSlug }: GeneratorProps = {}) {
-  const [form, setForm] = useState<FormData>(() => {
+  const [form, setForm] = useState<CVFormData>(() => {
     if (!initialData) return DEFAULT_FORM;
     const merged = { ...DEFAULT_FORM, ...initialData };
     if (typeof merged.languages === "string") {
@@ -74,7 +93,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     if (!Array.isArray(merged.educacion) || !merged.educacion.length) merged.educacion = DEFAULT_FORM.educacion;
     if (!Array.isArray(merged.redesSociales)) merged.redesSociales = [];
     if (!Array.isArray(merged.habilidades)) merged.habilidades = [];
-    return merged as FormData;
+    return merged as CVFormData;
   });
 
   const [loading, setLoading] = useState(false);
@@ -156,14 +175,31 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const isUs = form.mercado === "us";
   const vacanteActiva = (form.vacante ?? "").length > 50;
 
-  const fieldBase: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
+  const fieldBase: React.CSSProperties = {
+    width: "100%", background: "rgba(255,255,255,.05)",
+    border: "1px solid rgba(255,255,255,.08)", borderRadius: 6,
+    padding: "9px 12px", fontFamily: "inherit", fontSize: 12,
+    color: "rgba(248,245,239,.9)", outline: "none",
+  };
+
+  const TOTAL_STEPS = 8;
+  const steps = [
+    isMx ? "Datos personales" : isUs ? "Personal Data" : "Personal Data / Données",
+    isMx ? "Experiencia" : isUs ? "Experience" : "Experience / Expérience",
+    isMx ? "Redes y perfiles" : isUs ? "Links & Profiles" : "Links & Profiles",
+    isMx ? "Idiomas" : isUs ? "Languages" : "Languages / Langues",
+    isMx ? "Habilidades" : isUs ? "Skills" : "Skills",
+    isMx ? "Certificaciones" : "Certifications",
+    isMx ? "Educación" : isUs ? "Education" : "Education",
+    isMx ? "Preferencias de IA" : "AI Preferences",
+  ];
 
   return (
     <>
       <style>{`
-        @media (max-width: 900px) {
+        @media (max-width: 960px) {
           .gen-grid { grid-template-columns: 1fr !important; }
-          .gen-preview { display: none; }
+          .gen-preview-col { display: none !important; }
           .gen-market { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 600px) {
@@ -177,49 +213,63 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
         <div className="gen-wrap" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 40px" }}>
 
           {/* Label */}
-          <div style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.2)", fontWeight: 500, marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.2)", fontWeight: 500, marginBottom: 32, display: "flex", alignItems: "center", gap: 12 }}>
             {editSlug ? "Editar CV" : "Generador"}
             <span style={{ flex: 1, height: 1, background: "rgba(255,255,255,.07)", display: "block" }} />
             {editSlug && <span style={{ fontSize: 10, color: "rgba(255,255,255,.3)", letterSpacing: 0 }}>Editando · tus datos están precargados</span>}
           </div>
 
-          {/* Market */}
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 12 }}>¿Para qué mercado?</p>
+          {/* ── MARKET SELECTOR — mejorado ── */}
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>¿Para qué mercado?</p>
             <div className="gen-market" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
               {MARKETS.map(m => (
                 <button key={m.id} onClick={() => selectMarket(m.id)}
-                  style={{ border: `1px solid ${form.mercado === m.id ? "rgba(74,144,96,.55)" : "rgba(255,255,255,.08)"}`, borderRadius: 8, padding: "14px 16px", background: form.mercado === m.id ? "rgba(42,82,54,.18)" : "rgba(255,255,255,.03)", cursor: "pointer", textAlign: "left", transition: "all .15s" }}>
-                  <div style={{ fontSize: 20, marginBottom: 5 }}>{m.flag}</div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: form.mercado === m.id ? "#7dd4a0" : "rgba(255,255,255,.7)", fontFamily: "inherit", marginBottom: 2 }}>{m.label}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,.28)", fontFamily: "inherit", lineHeight: 1.4 }}>{m.hint}</div>
+                  style={{
+                    border: `1px solid ${form.mercado === m.id ? "rgba(74,144,96,.55)" : "rgba(255,255,255,.08)"}`,
+                    borderRadius: 10, padding: "16px", background: form.mercado === m.id ? "rgba(42,82,54,.18)" : "rgba(255,255,255,.02)",
+                    cursor: "pointer", textAlign: "left", transition: "all .15s", position: "relative",
+                  }}>
+                  {form.mercado === m.id && (
+                    <span style={{ position: "absolute", top: 10, right: 10, fontSize: 9, fontWeight: 600, padding: "2px 7px", borderRadius: 3, background: "rgba(74,144,96,.2)", color: "#7dd4a0", border: "1px solid rgba(74,144,96,.3)", letterSpacing: ".5px" }}>
+                      Activo
+                    </span>
+                  )}
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>{m.flag}</div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: form.mercado === m.id ? "#7dd4a0" : "rgba(255,255,255,.8)", fontFamily: "inherit", marginBottom: 3 }}>{m.label}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", fontFamily: "inherit", lineHeight: 1.4 }}>{m.hint}</div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* ADAPTADOR POR VACANTE */}
+          {/* ── ADAPTADOR POR VACANTE — más visual ── */}
           <div style={{ marginBottom: 24 }}>
             <button onClick={() => setShowVacante(v => !v)}
-              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", background: showVacante ? "rgba(42,82,54,.22)" : "rgba(255,255,255,.04)", border: `1px solid ${showVacante ? "rgba(74,144,96,.45)" : "rgba(255,255,255,.1)"}`, borderRadius: 8, padding: "13px 18px", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}>
-              <span style={{ fontSize: 18 }}>🎯</span>
+              style={{
+                display: "flex", alignItems: "center", gap: 12, width: "100%",
+                background: showVacante ? "rgba(42,82,54,.18)" : "rgba(255,255,255,.02)",
+                border: `1px solid ${showVacante ? "rgba(74,144,96,.45)" : "rgba(255,255,255,.08)"}`,
+                borderRadius: 10, padding: "14px 18px", cursor: "pointer", fontFamily: "inherit", transition: "all .2s",
+              }}>
+              <div style={{ width: 34, height: 34, borderRadius: 8, background: "rgba(74,144,96,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>🎯</div>
               <div style={{ textAlign: "left", flex: 1 }}>
                 <div style={{ fontSize: 12, fontWeight: 500, color: showVacante ? "#7dd4a0" : "rgba(255,255,255,.75)" }}>
                   {isMx ? "Adaptar a una vacante específica" : "Tailor to a specific job posting"}
                 </div>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginTop: 2 }}>
-                  {isMx ? "Pega la descripción del puesto y la IA optimiza tu CV con las keywords exactas" : "Paste the job description and AI optimizes your CV with exact keywords"}
+                  {isMx ? "Pega la descripción y la IA optimiza tu CV con las keywords exactas" : "Paste the job description and AI optimizes your CV with exact keywords"}
                 </div>
               </div>
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,.3)", transform: showVacante ? "rotate(180deg)" : "none", transition: "transform .2s", flexShrink: 0 }}>▼</span>
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,.25)", transform: showVacante ? "rotate(180deg)" : "none", transition: "transform .2s", flexShrink: 0 }}>▼</span>
             </button>
             {showVacante && (
-              <div style={{ marginTop: 8, background: "rgba(255,255,255,.03)", border: "1px solid rgba(74,144,96,.18)", borderRadius: 8, padding: "16px" }}>
+              <div style={{ marginTop: 8, background: "rgba(255,255,255,.02)", border: "1px solid rgba(74,144,96,.18)", borderRadius: 10, padding: 16 }}>
                 <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.35)", marginBottom: 8, letterSpacing: "0.5px" }}>
                   {isMx ? "Descripción de la vacante (pega el texto completo)" : "Job Description (paste the full text)"}
                 </label>
                 <textarea value={form.vacante ?? ""} onChange={e => setForm(f => ({ ...f, vacante: e.target.value }))} rows={6}
-                  placeholder={isMx ? "Pega aquí la descripción completa del puesto al que quieres aplicar. La IA analizará los requisitos y optimizará tu CV con las palabras clave exactas..." : "Paste the full job description here. The AI will analyze the requirements and optimize your CV with exact keywords from this posting..."}
+                  placeholder={isMx ? "Pega aquí la descripción completa del puesto..." : "Paste the full job description here..."}
                   style={{ ...fieldBase, resize: "vertical", lineHeight: 1.6 }} />
                 {vacanteActiva && (
                   <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6 }}>
@@ -233,14 +283,14 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
             )}
           </div>
 
-          {/* FORM + PREVIEW */}
-          <div className="gen-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, alignItems: "start" }}>
+          {/* ── FORM + PREVIEW GRID ── */}
+          <div className="gen-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "start" }}>
 
             {/* FORM COL */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
 
-              {/* DATOS PERSONALES */}
-              <FB title={isMx ? "Datos personales" : isUs ? "Personal Data" : "Personal Data / Données personnelles"}>
+              {/* 1. DATOS PERSONALES */}
+              <FB step={1} total={TOTAL_STEPS} title={steps[0]} icon={BLOCK_META.personal.icon} iconBg={BLOCK_META.personal.color}>
                 <FR>
                   <F label={isMx ? "Nombre completo" : isUs ? "Full Name" : "Full Name / Nom complet"} placeholder="María García López" value={form.nombre} onChange={set("nombre")} />
                   <F label={isMx ? "Puesto deseado" : isUs ? "Job Title" : "Job Title / Titre"} placeholder={isUs ? "Graphic Designer" : "Diseñadora Gráfica"} value={form.puesto} onChange={set("puesto")} />
@@ -251,18 +301,15 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                 </FR>
                 <FR>
                   <F label={isMx ? "Teléfono" : isUs ? "Phone" : "Phone / Téléphone"} placeholder={isMx ? "+52 477 123 4567" : isUs ? "+1 (555) 123-4567" : "+1 (416) 123-4567"} value={form.telefono ?? ""} onChange={set("telefono")} />
-                  {isMx
-                    ? <F label="Edad (opcional)" placeholder="28 años" value={form.edad ?? ""} onChange={set("edad")} />
-                    : <div />}
+                  {isMx ? <F label="Edad (opcional)" placeholder="28 años" value={form.edad ?? ""} onChange={set("edad")} /> : <div />}
                 </FR>
                 {isMx && (
                   <>
                     <FR>
                       <F label="Estado civil (opcional)" placeholder="Soltero/a" value={form.estadoCivil ?? ""} onChange={set("estadoCivil")} />
                       <div style={{ marginBottom: 10 }}>
-                        <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>Disponibilidad</label>
-                        <select value={form.disponibilidad ?? "Inmediata"} onChange={e => setForm(f => ({ ...f, disponibilidad: e.target.value }))}
-                          style={{ ...fieldBase, cursor: "pointer" }}>
+                        <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.38)", marginBottom: 5 }}>Disponibilidad</label>
+                        <select value={form.disponibilidad ?? "Inmediata"} onChange={e => setForm(f => ({ ...f, disponibilidad: e.target.value }))} style={{ ...fieldBase, cursor: "pointer" }}>
                           {DISPONIBILIDAD_OPTIONS.map(d => <option key={d} value={d} style={{ background: "#1c1a16" }}>{d}</option>)}
                         </select>
                       </div>
@@ -272,20 +319,14 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                 )}
               </FB>
 
-              {/* EXPERIENCIA */}
-              <FB title={isMx ? "Experiencia" : isUs ? "Experience" : "Experience / Expérience"}>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, cursor: "pointer" }}>
+              {/* 2. EXPERIENCIA */}
+              <FB step={2} total={TOTAL_STEPS} title={steps[1]} icon={BLOCK_META.experiencia.icon} iconBg={BLOCK_META.experiencia.color}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, cursor: "pointer" }}>
                   <input type="checkbox" checked={form.sinExperiencia ?? false} onChange={e => setForm(f => ({ ...f, sinExperiencia: e.target.checked }))} style={{ accentColor: "var(--green-mid)", width: 14, height: 14 }} />
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>{isUs ? "I have no work experience" : "No tengo experiencia laboral"}</span>
+                  <span style={{ fontSize: 11, color: "rgba(255,255,255,.45)" }}>{isUs ? "I have no work experience" : "No tengo experiencia laboral"}</span>
                 </label>
-                {!form.sinExperiencia && (
-                  <ExperienceSelector experiencias={form.experiencias} onChange={exp => setForm(f => ({ ...f, experiencias: exp }))} market={form.mercado} />
-                )}
-                {form.sinExperiencia && (
-                  <p style={{ fontSize: 11, color: "rgba(255,255,255,.3)", lineHeight: 1.6 }}>
-                    {isUs ? "The AI will focus on education, skills, and personal projects." : "La IA se enfocará en educación, habilidades y proyectos — sin inventar experiencia."}
-                  </p>
-                )}
+                {!form.sinExperiencia && <ExperienceSelector experiencias={form.experiencias} onChange={exp => setForm(f => ({ ...f, experiencias: exp }))} market={form.mercado} />}
+                {form.sinExperiencia && <p style={{ fontSize: 11, color: "rgba(255,255,255,.3)", lineHeight: 1.6 }}>{isUs ? "The AI will focus on education, skills, and personal projects." : "La IA se enfocará en educación, habilidades y proyectos — sin inventar experiencia."}</p>}
                 {form.mercado === "ca" && (
                   <div style={{ marginTop: 12 }}>
                     <F label="Volunteer Work / Voluntariado (important in Canada)" placeholder="Ej. Voluntario en banco de alimentos..." value={form.voluntariado ?? ""} onChange={e => setForm(f => ({ ...f, voluntariado: e.target.value }))} textarea />
@@ -293,62 +334,110 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                 )}
               </FB>
 
-              {/* REDES */}
-              <FB title={isMx ? "Redes y perfiles" : isUs ? "Links & Profiles" : "Links & Profiles / Réseaux"}>
+              {/* 3. REDES */}
+              <FB step={3} total={TOTAL_STEPS} title={steps[2]} icon={BLOCK_META.redes.icon} iconBg={BLOCK_META.redes.color}>
                 <SocialLinksSelector links={form.redesSociales ?? []} onChange={links => setForm(f => ({ ...f, redesSociales: links }))} market={form.mercado} />
               </FB>
 
-              {/* IDIOMAS */}
-              <FB title={isMx ? "Idiomas" : isUs ? "Languages" : "Languages / Langues"}>
+              {/* 4. IDIOMAS */}
+              <FB step={4} total={TOTAL_STEPS} title={steps[3]} icon={BLOCK_META.idiomas.icon} iconBg={BLOCK_META.idiomas.color}>
                 <LanguageSelector languages={form.languages ?? []} onChange={langs => setForm(f => ({ ...f, languages: langs }))} market={form.mercado} />
               </FB>
 
-              {/* HABILIDADES */}
-              <FB title={isMx ? "Habilidades (opcional)" : isUs ? "Skills (optional)" : "Skills / Core Competencies (optional)"}>
+              {/* 5. HABILIDADES */}
+              <FB step={5} total={TOTAL_STEPS} title={steps[4]} icon={BLOCK_META.habilidades.icon} iconBg={BLOCK_META.habilidades.color}>
                 <SkillsSelector skills={form.habilidades ?? []} onChange={s => setForm(f => ({ ...f, habilidades: s }))} market={form.mercado} />
               </FB>
 
-              {/* CERTIFICACIONES */}
-              <FB title={isMx ? "Certificaciones (opcional)" : "Certifications (optional)"}>
+              {/* 6. CERTIFICACIONES */}
+              <FB step={6} total={TOTAL_STEPS} title={steps[5]} icon={BLOCK_META.certificaciones.icon} iconBg={BLOCK_META.certificaciones.color}>
                 <p style={{ fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 12, lineHeight: 1.6 }}>
-                  {isMx
-                    ? "Solo agrega certificaciones que realmente tienes. Si no tienes, deja en blanco."
-                    : "Only add certifications you actually have. Leave blank if none."}
+                  {isMx ? "Solo agrega certificaciones que realmente tienes. Si no tienes, deja en blanco." : "Only add certifications you actually have. Leave blank if none."}
                 </p>
-                <CertificacionesSelector
-                  certificaciones={form.certificaciones ?? []}
-                  onChange={c => setForm(f => ({ ...f, certificaciones: c }))}
-                  market={form.mercado}
-                />
+                <CertificacionesSelector certificaciones={form.certificaciones ?? []} onChange={c => setForm(f => ({ ...f, certificaciones: c }))} market={form.mercado} />
               </FB>
 
-              {/* EDUCACIÓN */}
-              <FB title={isMx ? "Educación" : isUs ? "Education" : "Education / Éducation"}>
+              {/* 7. EDUCACIÓN */}
+              <FB step={7} total={TOTAL_STEPS} title={steps[6]} icon={BLOCK_META.educacion.icon} iconBg={BLOCK_META.educacion.color}>
                 <EducacionSelector educacion={form.educacion ?? [{ carrera: "", institucion: "", anio: "" }]} onChange={edu => setForm(f => ({ ...f, educacion: edu }))} market={form.mercado} />
               </FB>
 
-              {/* PREFERENCIAS IA */}
-              <FB title={isMx ? "Preferencias de IA" : "AI Preferences"}>
+              {/* 8. PREFERENCIAS IA */}
+              <FB step={8} total={TOTAL_STEPS} title={steps[7]} icon={BLOCK_META.ia.icon} iconBg={BLOCK_META.ia.color}>
                 <div style={{ marginBottom: 14 }}>
-                  <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>{isMx ? "Tono" : "Tone"}</label>
+                  <label style={{ fontSize: 11, color: "rgba(255,255,255,.38)", display: "block", marginBottom: 8 }}>{isMx ? "Tono" : "Tone"}</label>
                   <PillGroup options={[...TONES, isMx ? "Otro" : "Other"]} selected={TONES.includes(form.tono) ? form.tono : (isMx ? "Otro" : "Other")} onSelect={v => setForm(f => ({ ...f, tono: (v === "Otro" || v === "Other") ? "" : v }))} />
                   {!TONES.includes(form.tono) && (
-                    <input type="text" autoFocus placeholder={isMx ? "Ej. Emprendedor, Técnico..." : "e.g. Entrepreneurial..."} value={form.tono} onChange={e => setForm(f => ({ ...f, tono: e.target.value }))}
+                    <input type="text" autoFocus placeholder={isMx ? "Ej. Emprendedor..." : "e.g. Entrepreneurial..."} value={form.tono} onChange={e => setForm(f => ({ ...f, tono: e.target.value }))}
                       style={{ marginTop: 8, ...fieldBase, border: "1px solid rgba(74,144,96,.35)" }} />
                   )}
                 </div>
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ fontSize: 10, color: "rgba(255,255,255,.28)", display: "block", marginBottom: 8 }}>{isMx ? "Industria" : "Industry"}</label>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 11, color: "rgba(255,255,255,.38)", display: "block", marginBottom: 8 }}>{isMx ? "Industria" : "Industry"}</label>
                   <PillGroup options={[...INDUSTRIES, isMx ? "Otra" : "Other"]} selected={INDUSTRIES.includes(form.industria) ? form.industria : (isMx ? "Otra" : "Other")} onSelect={v => setForm(f => ({ ...f, industria: (v === "Otra" || v === "Other") ? "" : v }))} />
                   {!INDUSTRIES.includes(form.industria) && (
                     <input type="text" autoFocus placeholder={isMx ? "Ej. Agricultura..." : "e.g. Agriculture..."} value={form.industria} onChange={e => setForm(f => ({ ...f, industria: e.target.value }))}
                       style={{ marginTop: 8, ...fieldBase, border: "1px solid rgba(74,144,96,.35)" }} />
                   )}
                 </div>
-                <TemplateSelector selected={form.templateId} onSelect={v => setForm(f => ({ ...f, templateId: v }))} userIsPro={isAdmin} />
-                {error && <p style={{ fontSize: 12, color: "#f87171", marginTop: 12 }}>{error}</p>}
+
+                {/* ── TEMPLATE SELECTOR MEJORADO ── */}
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ fontSize: 11, color: "rgba(255,255,255,.38)", display: "block", marginBottom: 10 }}>{isMx ? "Plantilla" : "Template"}</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    {TEMPLATE_DEFS.map(t => {
+                      const isSelected = form.templateId === t.id;
+                      const isPro = !t.libre && !isAdmin;
+                      return (
+                        <button key={t.id} type="button"
+                          onClick={() => { if (!isPro) setForm(f => ({ ...f, templateId: t.id })); }}
+                          style={{ border: `1px solid ${isSelected ? "rgba(74,144,96,.5)" : "rgba(255,255,255,.08)"}`, borderRadius: 8, overflow: "hidden", cursor: isPro ? "default" : "pointer", background: "none", padding: 0, position: "relative", textAlign: "left", transition: "border-color .15s", opacity: isPro ? 0.6 : 1 }}>
+                          {isSelected && (
+                            <div style={{ position: "absolute", top: 7, right: 7, width: 16, height: 16, borderRadius: "50%", background: "var(--green-mid)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: "#fff", zIndex: 2 }}>✓</div>
+                          )}
+                          {/* Preview thumbnail */}
+                          <div style={{ height: 72, padding: "10px 10px 6px", background: t.id === "oscuro" ? "#0f0e0c" : t.id === "moderno" ? "#f8f5ef" : "#f8f5ef", display: "flex", gap: t.id === "moderno" ? 5 : 0 }}>
+                            {t.id === "moderno" ? (
+                              <>
+                                <div style={{ width: "32%", background: "#2a5236", borderRadius: 2, padding: 5 }}>
+                                  <div style={{ height: 3, background: "rgba(255,255,255,.5)", borderRadius: 1, marginBottom: 3 }} />
+                                  <div style={{ height: 3, background: "rgba(255,255,255,.3)", borderRadius: 1, width: "70%" }} />
+                                </div>
+                                <div style={{ flex: 1, padding: "3px 0" }}>
+                                  <div style={{ height: 5, background: "#1a1814", borderRadius: 1, width: "60%", marginBottom: 4 }} />
+                                  <div style={{ height: 3, background: "#ddd", borderRadius: 1, marginBottom: 3 }} />
+                                  <div style={{ height: 3, background: "#ddd", borderRadius: 1, width: "80%" }} />
+                                </div>
+                              </>
+                            ) : (
+                              <div style={{ flex: 1 }}>
+                                <div style={{ height: t.id === "oscuro" ? 5 : 6, background: t.id === "oscuro" ? "rgba(255,255,255,.85)" : "#1a1814", borderRadius: 1, width: "50%", marginBottom: t.id === "minimalista" ? 7 : 5 }} />
+                                {t.id !== "minimalista" && <div style={{ height: 3, background: t.id === "oscuro" ? "#4a9060" : "#2a5236", borderRadius: 1, width: "30%", marginBottom: 5 }} />}
+                                {t.id !== "minimalista" && <div style={{ height: 1, background: t.id === "oscuro" ? "rgba(255,255,255,.15)" : "#ddd", marginBottom: 6 }} />}
+                                <div style={{ height: 3, background: t.id === "oscuro" ? "rgba(255,255,255,.2)" : "#ddd", borderRadius: 1, width: "85%", marginBottom: 3 }} />
+                                <div style={{ height: 3, background: t.id === "oscuro" ? "rgba(255,255,255,.2)" : "#ddd", borderRadius: 1, width: "65%" }} />
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ padding: "7px 10px", borderTop: `1px solid ${t.id === "oscuro" ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: t.id === "oscuro" ? "#161512" : "#f0ece4" }}>
+                            <span style={{ fontSize: 11, color: isSelected ? "#7dd4a0" : t.id === "oscuro" ? "rgba(255,255,255,.6)" : "#4a443c" }}>{t.nombre}</span>
+                            <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 7px", borderRadius: 3,
+                              background: t.libre ? "rgba(74,144,96,.15)" : "rgba(200,150,50,.12)",
+                              color: t.libre ? "#7dd4a0" : "#d4a050",
+                              border: `1px solid ${t.libre ? "rgba(74,144,96,.2)" : "rgba(200,150,50,.2)"}`,
+                            }}>
+                              {t.libre ? "Gratis" : "Pro"}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {error && <p style={{ fontSize: 12, color: "#f87171", marginBottom: 8 }}>{error}</p>}
                 <button onClick={handleGenerate} disabled={loading}
-                  style={{ width: "100%", marginTop: 18, background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: 13, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1 }}>
+                  style={{ width: "100%", background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 8, padding: 14, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1, transition: "background .2s" }}>
                   {loading ? <><Spinner />Generando...</>
                     : editSlug ? <>✦ Actualizar mi CV</>
                     : vacanteActiva ? <>🎯 Generar CV optimizado para la vacante</>
@@ -358,8 +447,8 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
               </FB>
             </div>
 
-            {/* PREVIEW COL */}
-            <div className="gen-preview" ref={previewRef} style={{ position: "relative" }}>
+            {/* ── PREVIEW COL — STICKY ── */}
+            <div className="gen-preview-col" ref={previewRef} style={{ position: "sticky", top: 72, maxHeight: "calc(100vh - 90px)", overflowY: "auto" }}>
               {result ? (
                 <>
                   <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} />
@@ -378,7 +467,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                   )}
                 </>
               )}
-              <div style={{ marginTop: 12, background: note.bg, border: `1px solid ${note.border}`, color: note.color, borderRadius: 6, padding: "8px 12px", fontSize: 11, display: "flex", gap: 7, alignItems: "flex-start", lineHeight: 1.5 }}>
+              <div style={{ marginTop: 10, background: note.bg, border: `1px solid ${note.border}`, color: note.color, borderRadius: 6, padding: "8px 12px", fontSize: 11, display: "flex", gap: 7, alignItems: "flex-start", lineHeight: 1.5 }}>
                 <span style={{ fontSize: 13, flexShrink: 0 }}>{note.icon}</span>
                 <span dangerouslySetInnerHTML={{ __html: note.text }} />
               </div>
@@ -392,11 +481,20 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   );
 }
 
-// ─── Primitives ───
-function FB({ title, children }: { title: string; children: React.ReactNode }) {
+// ─── Form Block con icono y paso numerado ───
+function FB({ title, children, step, total, icon, iconBg }: {
+  title: string; children: React.ReactNode;
+  step: number; total: number; icon: string; iconBg: string;
+}) {
   return (
-    <div style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 8, padding: 22 }}>
-      <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,.22)", marginBottom: 18, fontWeight: 500 }}>{title}</div>
+    <div style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 10, padding: 22, transition: "border-color .2s" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+        <div style={{ width: 26, height: 26, borderRadius: 7, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, flexShrink: 0 }}>
+          {icon}
+        </div>
+        <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,.28)", fontWeight: 500, flex: 1 }}>{title}</div>
+        <div style={{ fontSize: 9, color: "rgba(255,255,255,.18)", fontVariantNumeric: "tabular-nums" }}>{step}/{total}</div>
+      </div>
       {children}
     </div>
   );
@@ -404,11 +502,14 @@ function FB({ title, children }: { title: string; children: React.ReactNode }) {
 function FR({ children }: { children: React.ReactNode }) {
   return <div className="field-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>{children}</div>;
 }
-function F({ label, placeholder, value, onChange, textarea }: { label: string; placeholder: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void; textarea?: boolean }) {
-  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
+function F({ label, placeholder, value, onChange, textarea }: {
+  label: string; placeholder: string; value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void; textarea?: boolean;
+}) {
+  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   return (
     <div style={{ marginBottom: 10 }}>
-      <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{label}</label>
+      <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.38)", marginBottom: 5 }}>{label}</label>
       {textarea ? <textarea placeholder={placeholder} value={value} onChange={onChange} rows={3} style={{ ...base, resize: "none" }} /> : <input type="text" placeholder={placeholder} value={value} onChange={onChange} style={base} />}
     </div>
   );
@@ -436,7 +537,7 @@ function PhotoUpload({ value, onChange }: { value?: string; onChange: (url: stri
   };
   return (
     <div style={{ marginBottom: 10 }}>
-      <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>Foto (opcional)</label>
+      <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.38)", marginBottom: 5 }}>Foto (opcional)</label>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         {value ? (
           <>
@@ -446,7 +547,7 @@ function PhotoUpload({ value, onChange }: { value?: string; onChange: (url: stri
           </>
         ) : (
           <button type="button" onClick={() => inputRef.current?.click()}
-            style={{ fontSize: 11, color: "rgba(255,255,255,.6)", background: "rgba(255,255,255,.05)", border: "1px dashed rgba(255,255,255,.15)", borderRadius: 5, padding: "8px 14px", cursor: "pointer", fontFamily: "inherit" }}>+ Subir foto</button>
+            style={{ fontSize: 11, color: "rgba(255,255,255,.6)", background: "rgba(255,255,255,.04)", border: "1px dashed rgba(255,255,255,.15)", borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontFamily: "inherit" }}>+ Subir foto</button>
         )}
         <span style={{ fontSize: 9, color: "rgba(255,255,255,.2)" }}>JPG · PNG · WEBP · Máx. 2MB</span>
       </div>
@@ -478,9 +579,9 @@ function SkillsSelector({ skills, onChange, market }: { skills: string[]; onChan
       <div style={{ display: "flex", gap: 8 }}>
         <input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
           placeholder={isMx ? "Ej. Photoshop, Figma..." : market === "us" ? "e.g. Figma, Leadership..." : "e.g. Figma, Bilingual..."}
-          style={{ flex: 1, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }} />
+          style={{ flex: 1, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }} />
         <button type="button" onClick={add} disabled={!input.trim()}
-          style={{ fontSize: 11, color: "rgba(255,255,255,.5)", background: "none", border: "1px solid rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 12px", cursor: input.trim() ? "pointer" : "not-allowed", fontFamily: "inherit", opacity: input.trim() ? 1 : 0.4 }}>
+          style={{ fontSize: 11, color: "rgba(255,255,255,.5)", background: "none", border: "1px solid rgba(255,255,255,.12)", borderRadius: 6, padding: "6px 12px", cursor: input.trim() ? "pointer" : "not-allowed", fontFamily: "inherit", opacity: input.trim() ? 1 : 0.4 }}>
           {isMx ? "+ Agregar" : "+ Add"}
         </button>
       </div>
@@ -489,32 +590,32 @@ function SkillsSelector({ skills, onChange, market }: { skills: string[]; onChan
 }
 function ExperienceSelector({ experiencias, onChange, market }: { experiencias: ExperienciaEntry[]; onChange: (exp: ExperienciaEntry[]) => void; market: Market }) {
   const isMx = market === "mx";
-  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
+  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   const update = (i: number, field: keyof ExperienciaEntry, val: string) => onChange(experiencias.map((e, j) => j === i ? { ...e, [field]: val } : e));
   return (
     <div>
       {experiencias.map((exp, i) => (
-        <div key={i} style={{ marginBottom: 16, padding: 14, background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 6 }}>
+        <div key={i} style={{ marginBottom: 14, padding: 14, background: "rgba(255,255,255,.025)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 7 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,.22)" }}>{isMx ? `Experiencia ${i + 1}` : `Experience ${i + 1}`}</span>
             {experiencias.length > 1 && <button type="button" onClick={() => onChange(experiencias.filter((_, j) => j !== i))} style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Puesto" : market === "us" ? "Job Title" : "Position"}</label>
+              <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Puesto" : market === "us" ? "Job Title" : "Position"}</label>
               <input type="text" value={exp.puesto} onChange={e => update(i, "puesto", e.target.value)} placeholder={isMx ? "Diseñadora Gráfica" : "Graphic Designer"} style={base} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Empresa" : "Company"}</label>
+              <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Empresa" : "Company"}</label>
               <input type="text" value={exp.empresa} onChange={e => update(i, "empresa", e.target.value)} placeholder="Agencia Creativa" style={base} />
             </div>
           </div>
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Período" : "Period"}</label>
-            <input type="text" value={exp.periodo} onChange={e => update(i, "periodo", e.target.value)} placeholder={isMx ? "Ej. Ene 2020 – Presente" : "e.g. Jan 2020 – Present"} style={base} />
+            <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Período" : "Period"}</label>
+            <input type="text" value={exp.periodo} onChange={e => update(i, "periodo", e.target.value)} placeholder={isMx ? "Eje. Ene 2020 – Presente" : "e.g. Jan 2020 – Present"} style={base} />
           </div>
           <div>
-            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{market === "mx" ? "¿Qué hacías? Descríbelo brevemente" : market === "us" ? "Achievements (with numbers)" : "Work description"}</label>
+            <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{market === "mx" ? "¿Qué hacías?" : market === "us" ? "Achievements (with numbers)" : "Work description"}</label>
             <textarea value={exp.descripcion} onChange={e => update(i, "descripcion", e.target.value)} rows={3}
               placeholder={market === "mx" ? "Ej. Diseñé identidades de marca, reduje tiempos en 30%..." : market === "us" ? "e.g. Led rebranding for 5 clients, increased engagement by 35%..." : "Ej. Diseñé materiales, lideré equipo de 3 personas..."}
               style={{ ...base, resize: "none" }} />
@@ -522,7 +623,7 @@ function ExperienceSelector({ experiencias, onChange, market }: { experiencias: 
         </div>
       ))}
       <button type="button" onClick={() => onChange([...experiencias, { puesto: "", empresa: "", periodo: "", descripcion: "" }])}
-        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.1)", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
         + {isMx ? "Agregar otra experiencia" : "Add another experience"}
       </button>
     </div>
@@ -530,41 +631,41 @@ function ExperienceSelector({ experiencias, onChange, market }: { experiencias: 
 }
 function EducacionSelector({ educacion, onChange, market }: { educacion: EducacionEntry[]; onChange: (edu: EducacionEntry[]) => void; market: Market }) {
   const isMx = market === "mx";
-  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
+  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   const update = (i: number, field: keyof EducacionEntry, val: string) => onChange(educacion.map((e, j) => j === i ? { ...e, [field]: val } : e));
   return (
     <div>
       {educacion.map((edu, i) => (
-        <div key={i} style={{ marginBottom: 14, padding: 14, background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 6 }}>
+        <div key={i} style={{ marginBottom: 12, padding: 14, background: "rgba(255,255,255,.025)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 7 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,.22)" }}>{isMx ? `Estudio ${i + 1}` : `Degree ${i + 1}`}</span>
             {educacion.length > 1 && <button type="button" onClick={() => onChange(educacion.filter((_, j) => j !== i))} style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>}
           </div>
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Carrera / Título" : market === "us" ? "Degree / Field of Study" : "Degree / Titre"}</label>
+            <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Carrera / Título" : market === "us" ? "Degree / Field of Study" : "Degree / Titre"}</label>
             <input type="text" value={edu.carrera} onChange={e => update(i, "carrera", e.target.value)} placeholder={isMx ? "Ej. Lic. en Diseño Gráfico" : "e.g. B.A. Graphic Design"} style={base} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Institución" : "Institution"}</label>
+              <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Institución" : "Institution"}</label>
               <input type="text" value={edu.institucion} onChange={e => update(i, "institucion", e.target.value)} placeholder={isMx ? "Ej. Universidad de Guanajuato" : "e.g. University of Toronto"} style={base} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>{isMx ? "Año" : "Year"}</label>
+              <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Año" : "Year"}</label>
               <input type="text" value={edu.anio} onChange={e => update(i, "anio", e.target.value)} placeholder="2020" style={{ ...base, width: 80 }} />
             </div>
           </div>
         </div>
       ))}
       <button type="button" onClick={() => onChange([...educacion, { carrera: "", institucion: "", anio: "" }])}
-        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.1)", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
         + {isMx ? "Agregar otro estudio" : "Add another degree"}
       </button>
     </div>
   );
 }
 function SocialLinksSelector({ links, onChange, market }: { links: RedSocial[]; onChange: (links: RedSocial[]) => void; market: Market }) {
-  const base: React.CSSProperties = { background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", width: "100%" };
+  const base: React.CSSProperties = { background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", width: "100%" };
   const isMx = market === "mx";
   const update = (i: number, field: keyof RedSocial, val: string) => onChange(links.map((l, j) => j === i ? { ...l, [field]: val } : l));
   return (
@@ -580,7 +681,7 @@ function SocialLinksSelector({ links, onChange, market }: { links: RedSocial[]; 
         </div>
       ))}
       <button type="button" onClick={() => onChange([...links, { tipo: "LinkedIn", url: "" }])}
-        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.1)", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
         {isMx ? "+ Agregar link" : market === "us" ? "+ Add link" : "+ Ajouter / Add link"}
       </button>
     </div>
@@ -589,88 +690,60 @@ function SocialLinksSelector({ links, onChange, market }: { links: RedSocial[]; 
 function LanguageSelector({ languages, onChange, market }: { languages: Array<{ language: string; level: string }>; onChange: (langs: Array<{ language: string; level: string }>) => void; market: Market }) {
   const isMx = market === "mx";
   const levels = isMx ? LEVELS_ES : LEVELS_EN;
-  const inputBase: React.CSSProperties = { background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", width: "100%" };
+  const base: React.CSSProperties = { background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none", width: "100%" };
   return (
     <div>
       {languages.map((l, i) => (
         <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, marginBottom: 8, alignItems: "center" }}>
           <div>
             <input list={`lang-list-${i}`} placeholder={isMx ? "Ej. Inglés" : "e.g. French"} value={l.language}
-              onChange={e => onChange(languages.map((x, j) => j === i ? { ...x, language: e.target.value } : x))} style={inputBase} />
+              onChange={e => onChange(languages.map((x, j) => j === i ? { ...x, language: e.target.value } : x))} style={base} />
             <datalist id={`lang-list-${i}`}>{COMMON_LANGUAGES.map(lang => <option key={lang} value={lang} />)}</datalist>
           </div>
-          <select value={l.level} onChange={e => onChange(languages.map((x, j) => j === i ? { ...x, level: e.target.value } : x))} style={{ ...inputBase, cursor: "pointer" }}>
+          <select value={l.level} onChange={e => onChange(languages.map((x, j) => j === i ? { ...x, level: e.target.value } : x))} style={{ ...base, cursor: "pointer" }}>
             {levels.map(lv => <option key={lv} value={lv} style={{ background: "#1c1a16" }}>{lv}</option>)}
           </select>
           <button type="button" onClick={() => onChange(languages.filter((_, j) => j !== i))} style={{ fontSize: 16, color: "rgba(255,255,255,.3)", background: "none", border: "none", cursor: "pointer", padding: "0 4px", lineHeight: 1 }}>×</button>
         </div>
       ))}
       <button type="button" onClick={() => onChange([...languages, { language: "", level: levels[0] }])}
-        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 12px", cursor: "pointer", fontFamily: "inherit" }}>
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.1)", borderRadius: 6, padding: "6px 12px", cursor: "pointer", fontFamily: "inherit" }}>
         + {isMx ? "Agregar idioma" : "Add language"}
       </button>
     </div>
   );
 }
-function CertificacionesSelector({ certificaciones, onChange, market }: {
-  certificaciones: CertificacionEntry[];
-  onChange: (c: CertificacionEntry[]) => void;
-  market: Market;
-}) {
+function CertificacionesSelector({ certificaciones, onChange, market }: { certificaciones: CertificacionEntry[]; onChange: (c: CertificacionEntry[]) => void; market: Market }) {
   const isMx = market === "mx";
-  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 5, padding: "8px 11px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
-  const update = (i: number, field: keyof CertificacionEntry, val: string) =>
-    onChange(certificaciones.map((c, j) => j === i ? { ...c, [field]: val } : c));
-  const add = () => onChange([...certificaciones, { nombre: "", institucion: "", anio: "" }]);
-  const remove = (i: number) => onChange(certificaciones.filter((_, j) => j !== i));
-
+  const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
+  const update = (i: number, field: keyof CertificacionEntry, val: string) => onChange(certificaciones.map((c, j) => j === i ? { ...c, [field]: val } : c));
   return (
     <div>
-      {certificaciones.length === 0 && (
-        <p style={{ fontSize: 11, color: "rgba(255,255,255,.2)", marginBottom: 10, lineHeight: 1.5 }}>
-          {isMx ? "Aún no has agregado certificaciones." : "No certifications added yet."}
-        </p>
-      )}
+      {certificaciones.length === 0 && <p style={{ fontSize: 11, color: "rgba(255,255,255,.2)", marginBottom: 10 }}>{isMx ? "Aún no has agregado certificaciones." : "No certifications added yet."}</p>}
       {certificaciones.map((cert, i) => (
-        <div key={i} style={{ marginBottom: 12, padding: 14, background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 6 }}>
+        <div key={i} style={{ marginBottom: 12, padding: 14, background: "rgba(255,255,255,.025)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 7 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span style={{ fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,.22)" }}>
-              {isMx ? `Certificación ${i + 1}` : `Certification ${i + 1}`}
-            </span>
-            <button type="button" onClick={() => remove(i)}
-              style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
+            <span style={{ fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,.22)" }}>{isMx ? `Certificación ${i + 1}` : `Certification ${i + 1}`}</span>
+            <button type="button" onClick={() => onChange(certificaciones.filter((_, j) => j !== i))} style={{ fontSize: 13, color: "rgba(255,255,255,.25)", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
           </div>
-          {/* Nombre */}
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
-              {isMx ? "Nombre de la certificación" : "Certification name"}
-            </label>
-            <input type="text" value={cert.nombre} onChange={e => update(i, "nombre", e.target.value)}
-              placeholder={isMx ? "Ej. IRATA Nivel 1, PMP, Google Analytics..." : "e.g. PMP, AWS Solutions Architect, WHMIS..."}
-              style={base} />
+            <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Nombre de la certificación" : "Certification name"}</label>
+            <input type="text" value={cert.nombre} onChange={e => update(i, "nombre", e.target.value)} placeholder={isMx ? "Ej. IRATA Nivel 1, PMP..." : "e.g. PMP, AWS Solutions Architect..."} style={base} />
           </div>
-          {/* Institución + Año */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
-                {isMx ? "Institución emisora" : "Issuing organization"}
-              </label>
-              <input type="text" value={cert.institucion} onChange={e => update(i, "institucion", e.target.value)}
-                placeholder={isMx ? "Ej. IRATA International, PMI, Google..." : "e.g. PMI, AWS, Google, Coursera..."}
-                style={base} />
+              <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Institución emisora" : "Issuing organization"}</label>
+              <input type="text" value={cert.institucion} onChange={e => update(i, "institucion", e.target.value)} placeholder={isMx ? "Ej. IRATA International, PMI..." : "e.g. PMI, AWS, Google..."} style={base} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: 10, color: "rgba(255,255,255,.28)", marginBottom: 5 }}>
-                {isMx ? "Año" : "Year"}
-              </label>
-              <input type="text" value={cert.anio} onChange={e => update(i, "anio", e.target.value)}
-                placeholder="2023" style={{ ...base, width: 80 }} />
+              <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Año" : "Year"}</label>
+              <input type="text" value={cert.anio} onChange={e => update(i, "anio", e.target.value)} placeholder="2023" style={{ ...base, width: 80 }} />
             </div>
           </div>
         </div>
       ))}
-      <button type="button" onClick={add}
-        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.12)", borderRadius: 5, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
+      <button type="button" onClick={() => onChange([...certificaciones, { nombre: "", institucion: "", anio: "" }])}
+        style={{ fontSize: 10, color: "rgba(255,255,255,.4)", background: "none", border: "1px dashed rgba(255,255,255,.1)", borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit" }}>
         + {isMx ? "Agregar certificación" : "Add certification"}
       </button>
     </div>
