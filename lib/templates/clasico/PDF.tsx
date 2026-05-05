@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet, Font } from "@react-pdf/renderer";
 import { parseCVText, extractHeader, CVItem } from "../parser";
 import type { CVData } from "../types";
 import path from "path";
@@ -19,6 +19,9 @@ const C = {
 
 const s = StyleSheet.create({
   page:    { fontFamily: "DMSans", backgroundColor: C.fondo, paddingTop: 40, paddingBottom: 40, paddingLeft: 44, paddingRight: 44, fontSize: 10 },
+  header:  { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 0 },
+  headerText: { flex: 1 },
+  photo:   { width: 64, height: 64, borderRadius: 4, objectFit: "cover", marginLeft: 16, flexShrink: 0 },
   name:    { fontSize: 26, fontWeight: 700, color: C.primario, letterSpacing: -0.5 },
   sub:     { fontSize: 12, color: C.acento, marginTop: 4, fontWeight: 700 },
   contact: { fontSize: 9, color: C.hint, marginTop: 5 },
@@ -43,14 +46,27 @@ export default function ClasicoPDF({ data }: { data: CVData }) {
   const subtitle = hdr.subtitle || data.puesto;
   const contacts = [...hdr.contacts, ...(hdr.contacts.length ? [] : [data.ciudad, data.email].filter(Boolean) as string[])];
   const main = sections.filter((sec) => sec.title !== "");
+  const isMx = data.mercado === "mx";
+  const showPhoto = isMx && !!data.photoUrl;
 
   return (
     <Document>
-      <Page size={data.mercado === "mx" ? "A4" : "LETTER"} style={s.page}>
-        <Text style={s.name}>{name}</Text>
-        {subtitle ? <Text style={s.sub}>{subtitle}</Text> : null}
-        {contacts.length > 0 ? <Text style={s.contact}>{contacts.join(" · ")}</Text> : null}
+      <Page size={isMx ? "A4" : "LETTER"} style={s.page}>
+
+        {/* Header with optional photo */}
+        <View style={s.header}>
+          <View style={s.headerText}>
+            <Text style={s.name}>{name}</Text>
+            {subtitle ? <Text style={s.sub}>{subtitle}</Text> : null}
+            {contacts.length > 0 ? <Text style={s.contact}>{contacts.join(" · ")}</Text> : null}
+          </View>
+          {showPhoto && (
+            <Image src={data.photoUrl!} style={s.photo} />
+          )}
+        </View>
+
         <View style={s.divider} />
+
         {main.map((sec, i) => (
           <View key={i} style={{ marginBottom: 12 }}>
             <View style={s.secRow}>
@@ -98,7 +114,7 @@ function PDFItem({ item }: { item: CVItem }) {
         {item.content ? <Text style={{ ...s.para, marginTop: 2 }}>{item.content}</Text> : null}
         {(item.bullets ?? []).map((b, i) => (
           <View key={i} style={s.bRow}>
-            <Text style={s.bMark}>-</Text>
+            <Text style={s.bMark}>▸</Text>
             <Text style={s.bTxt}>{b}</Text>
           </View>
         ))}
@@ -108,7 +124,7 @@ function PDFItem({ item }: { item: CVItem }) {
   if (item.type === "bullet") {
     return (
       <View style={s.bRow}>
-        <Text style={s.bMark}>-</Text>
+        <Text style={s.bMark}>▸</Text>
         <Text style={s.bTxt}>{item.content ?? ""}</Text>
       </View>
     );
