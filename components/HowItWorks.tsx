@@ -24,10 +24,25 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section id="como-funciona" style={{ padding: "96px 0", background: "var(--paper)" }}>
-      <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 64px" }}>
+      <style>{`
+        .hiw-inner { max-width: 1320px; margin: 0 auto; padding: 0 64px; }
+        .hiw-header { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: end; margin-bottom: 64px; }
+        .hiw-steps { display: grid; grid-template-columns: 1fr 52px 1fr 52px 1fr; align-items: start; }
+        .hiw-arrow { display: flex; align-items: center; justify-content: center; padding-top: 52px; }
+        @media (max-width: 900px) {
+          .hiw-inner { padding: 0 24px; }
+          .hiw-header { grid-template-columns: 1fr; gap: 20px; margin-bottom: 40px; }
+          .hiw-steps { grid-template-columns: 1fr; gap: 16px; }
+          .hiw-arrow { display: none !important; }
+        }
+        @media (max-width: 480px) {
+          .hiw-inner { padding: 0 16px; }
+        }
+      `}</style>
+      <div className="hiw-inner">
         <SectionLabel>Cómo funciona</SectionLabel>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "end", marginBottom: 64 }}>
+        <div className="hiw-header">
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(34px, 3.8vw, 52px)", fontWeight: 600, color: "var(--ink)", letterSpacing: "-1.2px", lineHeight: 1.08 }}>
             De tus datos a<br />
             <em style={{ color: "var(--green)", fontStyle: "italic" }}>tu primera entrevista</em>
@@ -37,7 +52,7 @@ export default function HowItWorks() {
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 52px 1fr 52px 1fr", alignItems: "start" }}>
+        <div className="hiw-steps">
           {steps.flatMap((s, i) => {
             const card = (
               <div
@@ -49,17 +64,14 @@ export default function HowItWorks() {
                 <span style={{ position: "absolute", top: -6, right: 12, fontFamily: "'Cormorant Garamond', serif", fontSize: 88, fontWeight: 600, color: "rgba(28,26,22,.04)", lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>
                   {s.n}
                 </span>
-
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--green-bg)", border: "1px solid rgba(45,90,61,.15)", borderRadius: 100, padding: "3px 10px", marginBottom: 22 }}>
                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--green-mid)", display: "inline-block" }} />
                   <span style={{ fontSize: 10, color: "var(--green)", fontWeight: 600, letterSpacing: "0.5px" }}>PASO {s.n}</span>
                 </div>
-
                 <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, letterSpacing: "-0.3px", color: "var(--ink)", marginBottom: 10, lineHeight: 1.2 }}>
                   {s.title}
                 </h3>
                 <p style={{ fontSize: 13, color: "var(--body)", lineHeight: 1.7 }}>{s.desc}</p>
-
                 <div style={{ marginTop: 22, paddingTop: 16, borderTop: "1px solid var(--border)", fontSize: 11, color: "var(--green)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.2px" }}>
                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--green-mid)", display: "inline-block" }} />
                   {s.detail}
@@ -70,7 +82,7 @@ export default function HowItWorks() {
             if (i < steps.length - 1) {
               return [
                 card,
-                <div key={`conn-${i}`} style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: 52 }}>
+                <div key={`conn-${i}`} className="hiw-arrow">
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                     <div style={{ width: 24, height: 1, background: "var(--border2)" }} />
                     <span style={{ fontSize: 13, color: "var(--hint)", lineHeight: 1 }}>→</span>
