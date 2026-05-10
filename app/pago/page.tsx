@@ -1,9 +1,29 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 const PLANS = {
-  pro: {
+  pro_mxn_founder: {
+    label: "Pro — Precio Fundador",
+    badge: "🚀 Oferta de lanzamiento",
+    price: 49,
+    originalPrice: 99,
+    period: "/mes",
+    tagline: "Precio especial solo durante el lanzamiento",
+    features: [
+      "CVs ilimitados para México, USA y Canadá",
+      "Todas las plantillas (incluidas premium)",
+      "Carta de presentación con IA",
+      "Edición en línea sin límites",
+      "Descarga en PDF",
+      "CV adaptado por vacante",
+      "Soporte prioritario",
+    ],
+    color: "#4a9060",
+    isFounder: true,
+  },
+  pro_mxn: {
     label: "Pro",
     badge: "Más popular",
     price: 99,
@@ -14,13 +34,32 @@ const PLANS = {
       "Todas las plantillas (incluidas premium)",
       "Carta de presentación con IA",
       "Edición en línea sin límites",
-      "Descarga en PDF y Word",
+      "Descarga en PDF",
       "CV adaptado por vacante",
       "Soporte prioritario",
     ],
     color: "#4a9060",
+    isFounder: false,
   },
-  lifetime: {
+  pro_usd: {
+    label: "Pro",
+    badge: "USA & Canada",
+    price: 4.99,
+    period: "/month",
+    tagline: "For professionals in USA and Canada",
+    features: [
+      "Unlimited CVs for Mexico, USA and Canada",
+      "All templates (including premium)",
+      "AI Cover Letter",
+      "Unlimited online editing",
+      "PDF Download",
+      "Job-specific CV optimizer",
+      "Priority support",
+    ],
+    color: "#4a9060",
+    isFounder: false,
+  },
+  lifetime_mxn: {
     label: "Lifetime",
     badge: "Mejor valor",
     price: 399,
@@ -30,77 +69,88 @@ const PLANS = {
       "Todo lo de Pro incluido",
       "Acceso de por vida sin cargo adicional",
       "Futuras plantillas y funciones",
-      "LinkedIn Optimizer",
+      "Carta de presentación con IA",
       "Soporte VIP prioritario",
     ],
     color: "#2a5236",
+    isFounder: false,
   },
 };
 
 type PlanKey = keyof typeof PLANS;
+const currency = (plan: PlanKey) => plan === "pro_usd" ? "USD" : "MXN";
 
 function CheckoutContent() {
   const params = useSearchParams();
-  const planKey = (params.get("plan") ?? "pro") as PlanKey;
-  const plan = PLANS[planKey] ?? PLANS.pro;
+  const planKey = (params.get("plan") ?? "pro_mxn_founder") as PlanKey;
+  const plan = PLANS[planKey] ?? PLANS.pro_mxn_founder;
 
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const user = data.session?.user;
+      if (user) {
+        setEmail(user.email ?? "");
+        setUserId(user.id);
+      }
+    });
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!email) { setError("Por favor ingresa tu correo electrónico."); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
-    setLoading(false);
-    setDone(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planKey, email, userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al crear sesión de pago");
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error inesperado");
+      setLoading(false);
+    }
   }
 
-  if (done) {
-    return (
-      <div style={{ minHeight: "100vh", background: "var(--cream)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-        <div style={{ maxWidth: 480, width: "100%", textAlign: "center" }}>
-          <div style={{ width: 64, height: 64, borderRadius: "50%", background: "var(--green-bg)", border: "1px solid rgba(45,90,61,.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", fontSize: 28 }}>
-            ✓
-          </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 600, color: "var(--ink)", letterSpacing: "-1px", marginBottom: 12 }}>
-            ¡Solicitud recibida!
-          </h2>
-          <p style={{ fontSize: 14, color: "var(--body)", lineHeight: 1.75, marginBottom: 8 }}>
-            Registramos tu interés en el plan <strong>{plan.label}</strong>.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.75, marginBottom: 32 }}>
-            Te contactaremos a <strong>{email}</strong> en menos de 24 h para completar tu suscripción y darte acceso inmediato.
-          </p>
-          <a href="/" style={{ display: "inline-block", background: "var(--green)", color: "#fff", textDecoration: "none", borderRadius: 8, padding: "12px 32px", fontSize: 14, fontWeight: 500 }}>
-            Volver al inicio
-          </a>
-        </div>
-      </div>
-    );
-  }
+  const curr = currency(planKey);
+  const isEn = planKey === "pro_usd";
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) {
+          .pago-body { flex-direction: column !important; }
+          .pago-left { width: 100% !important; padding: 32px 24px !important; }
+          .pago-right { padding: 32px 24px !important; }
+        }
+      `}</style>
 
       {/* Top bar */}
-      <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", height: 56, display: "flex", alignItems: "center", padding: "0 64px", justifyContent: "space-between", flexShrink: 0 }}>
+      <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", height: 56, display: "flex", alignItems: "center", padding: "0 32px", justifyContent: "space-between", flexShrink: 0 }}>
         <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px" }}>
           curr<span style={{ color: "var(--green)" }}>ivo</span>
         </a>
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--muted)" }}>
           <span style={{ color: "var(--green)", fontSize: 14 }}>🔒</span>
-          Pago seguro con SSL
+          Pago seguro con Stripe
         </div>
       </header>
 
       {/* Body */}
-      <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
+      <div className="pago-body" style={{ flex: 1, display: "flex", minHeight: 0 }}>
 
         {/* Left — Plan summary */}
-        <div style={{ width: "42%", flexShrink: 0, background: "var(--ink)", padding: "56px 64px", display: "flex", flexDirection: "column" }}>
-
+        <div className="pago-left" style={{ width: "42%", flexShrink: 0, background: "var(--ink)", padding: "56px 64px", display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 9, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.25)", fontWeight: 500, marginBottom: 28 }}>
             Resumen del plan
           </div>
@@ -111,25 +161,34 @@ function CheckoutContent() {
             <span style={{ fontSize: 10, color: "#7dd4a0", fontWeight: 600, letterSpacing: "0.5px" }}>{plan.badge}</span>
           </div>
 
-          {/* Plan name */}
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 42, fontWeight: 600, color: "#fff", letterSpacing: "-1px", lineHeight: 1, marginBottom: 6 }}>
             currivo {plan.label}
           </div>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,.45)", marginBottom: 32, lineHeight: 1.5 }}>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,.45)", marginBottom: 28, lineHeight: 1.5 }}>
             {plan.tagline}
           </div>
 
           {/* Price */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 8 }}>
+            {"originalPrice" in plan && plan.originalPrice && (
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: "rgba(255,255,255,.25)", textDecoration: "line-through", letterSpacing: "-1px" }}>
+                ${plan.originalPrice}
+              </span>
+            )}
             <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 56, fontWeight: 600, color: "#7dd4a0", letterSpacing: "-2px", lineHeight: 1 }}>
               ${plan.price}
             </span>
-            <span style={{ fontSize: 13, color: "rgba(255,255,255,.35)" }}>MXN{plan.period}</span>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,.35)" }}>{curr}{plan.period}</span>
           </div>
 
-          <div style={{ height: 1, background: "rgba(255,255,255,.08)", marginBottom: 28 }} />
+          {"isFounder" in plan && plan.isFounder && (
+            <div style={{ fontSize: 11, color: "#7dd4a0", background: "rgba(74,148,96,.12)", border: "1px solid rgba(74,148,96,.25)", borderRadius: 5, padding: "5px 10px", marginBottom: 24, display: "inline-block" }}>
+              ⏳ Precio de fundador — disponible por tiempo limitado
+            </div>
+          )}
 
-          {/* Features */}
+          <div style={{ height: 1, background: "rgba(255,255,255,.08)", marginBottom: 24 }} />
+
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: "auto" }}>
             {plan.features.map(f => (
               <div key={f} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
@@ -139,134 +198,91 @@ function CheckoutContent() {
             ))}
           </div>
 
-          {/* Trust */}
           <div style={{ marginTop: 48, display: "flex", gap: 20, flexWrap: "wrap" }}>
-            {["🔒 SSL seguro", "🇲🇽 Precios en MXN", "↩ Cancela cuando quieras"].map(t => (
+            {["🔒 SSL seguro", "💳 Stripe", isEn ? "↩ Cancel anytime" : "↩ Cancela cuando quieras"].map(t => (
               <span key={t} style={{ fontSize: 11, color: "rgba(255,255,255,.3)" }}>{t}</span>
             ))}
           </div>
         </div>
 
-        {/* Right — Checkout form */}
-        <div style={{ flex: 1, background: "var(--cream)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "56px 64px", overflowY: "auto" }}>
+        {/* Right — Checkout */}
+        <div className="pago-right" style={{ flex: 1, background: "var(--cream)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "56px 64px", overflowY: "auto" }}>
           <div style={{ width: "100%", maxWidth: 440 }}>
-
             <div style={{ fontSize: 9, letterSpacing: "2.5px", textTransform: "uppercase", color: "var(--hint)", fontWeight: 500, marginBottom: 28 }}>
-              Completa tu suscripción
+              {isEn ? "Complete your subscription" : "Completa tu suscripción"}
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-              {/* Name */}
-              <div>
-                <label style={{ display: "block", fontSize: 11, color: "var(--muted)", marginBottom: 6, fontWeight: 500 }}>
-                  Nombre completo
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  required
-                  placeholder="Tu nombre"
-                  style={{ width: "100%", padding: "11px 14px", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13, fontFamily: "inherit", background: "var(--paper)", color: "var(--ink)", outline: "none", boxSizing: "border-box" }}
-                />
-              </div>
-
               {/* Email */}
               <div>
                 <label style={{ display: "block", fontSize: 11, color: "var(--muted)", marginBottom: 6, fontWeight: 500 }}>
-                  Correo electrónico
+                  {isEn ? "Email address" : "Correo electrónico"}
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
-                  placeholder="tu@correo.com"
+                  placeholder={isEn ? "your@email.com" : "tu@correo.com"}
                   style={{ width: "100%", padding: "11px 14px", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13, fontFamily: "inherit", background: "var(--paper)", color: "var(--ink)", outline: "none", boxSizing: "border-box" }}
                 />
-              </div>
-
-              {/* Card placeholder — ready for Stripe Elements */}
-              <div>
-                <label style={{ display: "block", fontSize: 11, color: "var(--muted)", marginBottom: 6, fontWeight: 500 }}>
-                  Datos de tarjeta
-                </label>
-                <div style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", background: "var(--paper)" }}>
-                  <div style={{ padding: "11px 14px", borderBottom: "1px solid var(--border)", fontSize: 13, color: "var(--hint)", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 16 }}>💳</span>
-                    <span>Número de tarjeta</span>
-                    <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
-                      {["VISA", "MC"].map(b => (
-                        <span key={b} style={{ fontSize: 9, fontWeight: 700, color: "var(--hint)", border: "1px solid var(--border)", borderRadius: 3, padding: "1px 5px" }}>{b}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex" }}>
-                    <div style={{ flex: 1, padding: "11px 14px", borderRight: "1px solid var(--border)", fontSize: 13, color: "var(--hint)" }}>MM / AA</div>
-                    <div style={{ width: 80, padding: "11px 14px", fontSize: 13, color: "var(--hint)" }}>CVV</div>
-                  </div>
-                </div>
-                <p style={{ fontSize: 11, color: "var(--hint)", marginTop: 8, lineHeight: 1.5 }}>
-                  Integración con Stripe en configuración. Al enviar, un asesor te contactará para completar el pago de forma segura.
+                <p style={{ fontSize: 11, color: "var(--hint)", marginTop: 5 }}>
+                  {isEn ? "You'll be redirected to Stripe to enter your card details securely." : "Serás redirigido a Stripe para ingresar tus datos de tarjeta de forma segura."}
                 </p>
               </div>
 
               {/* Order summary */}
               <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: planKey !== "lifetime_mxn" ? 8 : 0 }}>
                   <span style={{ fontSize: 13, color: "var(--body)" }}>currivo {plan.label}</span>
-                  <span style={{ fontSize: 13, color: "var(--body)" }}>${plan.price} MXN</span>
+                  <span style={{ fontSize: 13, color: "var(--body)" }}>${plan.price} {curr}</span>
                 </div>
-                {planKey === "pro" && (
+                {planKey !== "lifetime_mxn" && (
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, color: "var(--muted)" }}>Renovación automática</span>
-                    <span style={{ fontSize: 12, color: "var(--muted)" }}>mensual</span>
+                    <span style={{ fontSize: 12, color: "var(--muted)" }}>{isEn ? "Auto-renewal" : "Renovación automática"}</span>
+                    <span style={{ fontSize: 12, color: "var(--muted)" }}>{isEn ? "monthly" : "mensual"}</span>
                   </div>
                 )}
                 <div style={{ height: 1, background: "var(--border)", margin: "10px 0" }} />
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>Total hoy</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{isEn ? "Total today" : "Total hoy"}</span>
                   <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: "var(--green)", letterSpacing: "-0.5px" }}>
-                    ${plan.price} MXN
+                    ${plan.price} {curr}
                   </span>
                 </div>
               </div>
 
+              {error && (
+                <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#b91c1c" }}>
+                  {error}
+                </div>
+              )}
+
               {/* CTA */}
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  background: loading ? "rgba(42,82,54,.6)" : "var(--green)",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "14px",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  fontFamily: "inherit",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  transition: "background .2s",
-                }}
-              >
+              <button type="submit" disabled={loading}
+                style={{ background: loading ? "rgba(42,82,54,.6)" : "var(--green)", color: "#fff", border: "none", borderRadius: 8, padding: "14px", fontSize: 14, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background .2s" }}>
                 {loading ? (
                   <>
                     <span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid rgba(255,255,255,.3)", borderTopColor: "#fff", animation: "spin .65s linear infinite", display: "inline-block" }} />
-                    Procesando...
+                    {isEn ? "Redirecting to Stripe..." : "Redirigiendo a Stripe..."}
                   </>
                 ) : (
-                  <>Reservar mi lugar en {plan.label} →</>
+                  <>{isEn ? `Subscribe to ${plan.label} →` : `Suscribirme a ${plan.label} →`}</>
                 )}
               </button>
 
+              {/* Stripe badge */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                <span style={{ fontSize: 11, color: "var(--hint)" }}>Pago procesado por</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#635bff" }}>stripe</span>
+                <span style={{ fontSize: 11, color: "var(--hint)" }}>— cifrado SSL</span>
+              </div>
+
               <p style={{ fontSize: 11, color: "var(--hint)", textAlign: "center", lineHeight: 1.6 }}>
-                🔒 Tus datos están protegidos con cifrado SSL.{" "}
-                {planKey === "pro" ? "Cancela en cualquier momento sin penalización." : "Pago único, sin renovaciones."}
+                {planKey === "lifetime_mxn"
+                  ? "Pago único, sin renovaciones. Acceso de por vida garantizado."
+                  : isEn ? "Cancel anytime, no questions asked." : "Cancela en cualquier momento sin penalización."}
               </p>
             </form>
 
