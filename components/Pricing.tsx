@@ -14,12 +14,14 @@ const plans = [
   {
     label: "Pro",
     badge: "Más popular",
-    amount: "$99",
+    amount: "$49",
+    originalAmount: "$99",
+    founderBadge: "🚀 Precio de lanzamiento",
     period: "MXN por mes",
     feats: [["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","PDF + Word"],["✓","CV adaptado por vacante"]],
     cta: "Suscribirme →",
     featured: true,
-    href: "/pago?plan=pro",
+    href: "/pago?plan=pro_mxn_founder",
   },
   {
     label: "Lifetime",
@@ -28,7 +30,7 @@ const plans = [
     feats: [["✓","Todo lo de Pro"],["✓","Acceso de por vida"],["✓","Futuras plantillas"],["✓","LinkedIn Optimizer"],["✓","Soporte prioritario"],["✓","Sin renovaciones"]],
     cta: "Comprar ahora",
     featured: false,
-    href: "/pago?plan=lifetime",
+    href: "/pago?plan=lifetime_mxn",
   },
 ];
 
@@ -50,7 +52,6 @@ export default function Pricing() {
       `}</style>
       <div className="pricing-inner">
         <SectionLabel>Precios</SectionLabel>
-
         <div className="pricing-header">
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(34px, 3.8vw, 52px)", fontWeight: 600, color: "var(--ink)", letterSpacing: "-1.2px", lineHeight: 1.08 }}>
             Invierte en<br />
@@ -60,7 +61,6 @@ export default function Pricing() {
             Empieza gratis y escala cuando lo necesites. Sin contratos ni sorpresas — cancela cuando quieras.
           </p>
         </div>
-
         <div className="pricing-cards">
           {plans.map(p => <PlanCard key={p.label} plan={p} />)}
         </div>
@@ -72,31 +72,39 @@ export default function Pricing() {
 function PlanCard({ plan: p }: { plan: typeof plans[0] }) {
   return (
     <div
-      style={{
-        background: p.featured ? "var(--green)" : "var(--paper)",
-        borderRadius: 12,
-        padding: p.featured ? "36px 30px 32px" : "32px 30px",
-        border: p.featured ? "none" : "1px solid var(--border)",
-        boxShadow: p.featured ? "0 20px 60px rgba(45,90,61,.28)" : "none",
-        transform: p.featured ? "translateY(-8px)" : "none",
-        transition: "transform .2s, box-shadow .2s",
-        position: "relative",
-      }}
+      style={{ background: p.featured ? "var(--green)" : "var(--paper)", borderRadius: 12, padding: p.featured ? "36px 30px 32px" : "32px 30px", border: p.featured ? "none" : "1px solid var(--border)", boxShadow: p.featured ? "0 20px 60px rgba(45,90,61,.28)" : "none", transform: p.featured ? "translateY(-8px)" : "none", transition: "transform .2s, box-shadow .2s", position: "relative" }}
       onMouseEnter={e => { if (!p.featured) { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,.07)"; } }}
       onMouseLeave={e => { if (!p.featured) { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; } }}
     >
       {"badge" in p && p.badge && (
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,.18)", borderRadius: 100, padding: "3px 10px", marginBottom: 14 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,.18)", borderRadius: 100, padding: "3px 10px", marginBottom: 10 }}>
           <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#a3e4bc", display: "inline-block" }} />
           <span style={{ fontSize: 10, color: "#fff", fontWeight: 600, letterSpacing: "0.5px" }}>{p.badge}</span>
         </div>
       )}
+
+      {"founderBadge" in p && p.founderBadge && (
+        <div style={{ display: "block", background: "rgba(255,255,255,.12)", borderRadius: 5, padding: "4px 10px", marginBottom: 10, fontSize: 10, color: "rgba(255,255,255,.9)", fontWeight: 500, width: "fit-content" }}>
+          {p.founderBadge}
+        </div>
+      )}
+
       <div style={{ fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: p.featured ? "rgba(255,255,255,.5)" : "var(--hint)", fontWeight: 500, marginBottom: 8 }}>
         {p.label}
       </div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 52, fontWeight: 600, letterSpacing: "-2px", color: p.featured ? "#fff" : "var(--ink)", lineHeight: 1, margin: "12px 0 4px" }}>
-        {p.amount}
+
+      {/* Price with strikethrough original */}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "12px 0 4px" }}>
+        {"originalAmount" in p && p.originalAmount && (
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: "rgba(255,255,255,.3)", textDecoration: "line-through", letterSpacing: "-1px" }}>
+            {p.originalAmount}
+          </span>
+        )}
+        <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 52, fontWeight: 600, letterSpacing: "-2px", color: p.featured ? "#fff" : "var(--ink)", lineHeight: 1 }}>
+          {p.amount}
+        </span>
       </div>
+
       <div style={{ fontSize: 11, color: p.featured ? "rgba(255,255,255,.5)" : "var(--hint)" }}>{p.period}</div>
       <hr style={{ border: "none", borderTop: `1px solid ${p.featured ? "rgba(255,255,255,.15)" : "var(--border)"}`, margin: "22px 0" }} />
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
