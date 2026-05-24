@@ -48,7 +48,7 @@ export default function Hero() {
               ))}
             </div>
             <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.5 }}>
-              <strong style={{ color: "var(--ink)", fontWeight: 600 }}>+4,200 personas</strong> ya generaron<br />su CV con currivo
+              <strong style={{ color: "var(--ink)", fontWeight: 600 }}>+4,200 personas</strong> ya generaron<br />su CV con resumika
             </div>
             <div style={{ width: 1, height: 32, background: "var(--border)" }} />
             <Stat n="4.8/5" l="Calificación" />

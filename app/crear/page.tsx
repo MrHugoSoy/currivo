@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 
 export const metadata: Metadata = {
-  title: "Crear CV · currivo",
+  title: "Crear CV · resumika",
   description: "Genera tu currículum profesional con IA en menos de 3 minutos.",
 };
 

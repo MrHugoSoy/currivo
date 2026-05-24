@@ -204,7 +204,7 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
 
   const filename = hasUserData && formData?.nombre
     ? `${formData.nombre.toLowerCase().replace(/\s+/g, "_")}_cv.pdf`
-    : market === "mx" ? "currivo_cv_mexico.pdf"
+    : market === "mx" ? "resumika_cv_mexico.pdf"
     : market === "us" ? "maria_garcia_resume.pdf"
     : "maria_garcia_canada.pdf";
 
@@ -231,7 +231,7 @@ export default function CVPreview({ market = "mx", photoUrl, templateId = "clasi
       {/* Footer */}
       <div style={{ padding: "8px 14px", background: "var(--warm)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 8, color: "var(--hint)", letterSpacing: "0.5px" }}>
-          currivo.mx · {templateId}
+          resumika.com · {templateId}
           {hasUserData && <span style={{ marginLeft: 6, color: "var(--green)", fontWeight: 500 }}>● en vivo</span>}
         </span>
         <div style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--green-mid)" }} />

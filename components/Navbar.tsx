@@ -49,7 +49,7 @@ export default function Navbar() {
         <div className="nav-inner" style={{ padding: "0 64px", height: "100%", display: "flex", alignItems: "center" }}>
 
           <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px", flexShrink: 0 }}>
-            curr<span style={{ color: "var(--green)" }}>ivo</span>
+            resumi<span style={{ color: "var(--green)" }}>ka</span>
           </a>
 
           <div className="nav-links">

@@ -10,14 +10,14 @@ export default function Footer() {
       `}</style>
       <div className="footer-inner">
         <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600, fontStyle: "italic", color: "var(--ink)" }}>
-          curr<span style={{ color: "var(--green)" }}>ivo</span>
+          resumi<span style={{ color: "var(--green)" }}>ka</span>
         </span>
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center" }}>
           <a href="/terminos"   style={{ fontSize: 12, color: "var(--hint)", textDecoration: "none" }}>Términos</a>
           <a href="/privacidad" style={{ fontSize: 12, color: "var(--hint)", textDecoration: "none" }}>Privacidad</a>
-          <a href="mailto:hola@currivo.mx" style={{ fontSize: 12, color: "var(--hint)", textDecoration: "none" }}>Contacto</a>
+          <a href="mailto:hola@resumika.com" style={{ fontSize: 12, color: "var(--hint)", textDecoration: "none" }}>Contacto</a>
         </div>
-        <span style={{ fontSize: 11, color: "var(--hint)" }}>© 2026 currivo · México</span>
+        <span style={{ fontSize: 11, color: "var(--hint)" }}>© 2026 resumika · México</span>
       </div>
     </footer>
   );

@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from "react";
 
 const TESTIMONIALS = [
   { name: "Mariana González", role: "Diseñadora UX", location: "Ciudad de México", market: "mx", text: "En menos de 5 minutos tenía un CV que nunca hubiera podido redactar sola. Me llamaron a entrevista al día siguiente de enviarlo.", initials: "MG", bg: "#d4e8da", color: "#2d5a3d" },
-  { name: "Jorge Ramírez", role: "Ingeniero de Software", location: "Toronto, Canadá", market: "ca", text: "Llegué a Canadá sin saber cómo estructurar mi CV para el mercado local. currivo entendió exactamente lo que los reclutadores canadienses buscan.", initials: "JR", bg: "#dde8f4", color: "#2d4a7a" },
+  { name: "Jorge Ramírez", role: "Ingeniero de Software", location: "Toronto, Canadá", market: "ca", text: "Llegué a Canadá sin saber cómo estructurar mi CV para el mercado local. resumika entendió exactamente lo que los reclutadores canadienses buscan.", initials: "JR", bg: "#dde8f4", color: "#2d4a7a" },
   { name: "Andrea López", role: "Gerente de Marketing", location: "Monterrey, México", market: "mx", text: "Lo que más me sorprendió fue el tono. Sonaba exactamente como yo quería sonar: profesional pero con personalidad. Lo recomiendo a todos.", initials: "AL", bg: "#f0e8d4", color: "#7a4a2d" },
   { name: "Carlos Peña", role: "Contador Público", location: "Miami, Estados Unidos", market: "us", text: "Necesitaba un resume en inglés para aplicar en EE.UU. y el resultado fue impresionante. Conseguí trabajo en 3 semanas.", initials: "CP", bg: "#e8d4e8", color: "#5a2d7a" },
-  { name: "Sofía Herrera", role: "Enfermera", location: "Guadalajara, México", market: "mx", text: "Nunca me gustó redactar mi CV, siempre me bloqueaba. Con currivo solo llené el formulario y listo. Fue liberador.", initials: "SH", bg: "#f4ddd8", color: "#7a2d2d" },
+  { name: "Sofía Herrera", role: "Enfermera", location: "Guadalajara, México", market: "mx", text: "Nunca me gustó redactar mi CV, siempre me bloqueaba. Con resumika solo llené el formulario y listo. Fue liberador.", initials: "SH", bg: "#f4ddd8", color: "#7a2d2d" },
   { name: "Tomás Vargas", role: "Arquitecto", location: "Vancouver, Canadá", market: "ca", text: "El CV que generó destacó mi experiencia internacional como un activo, no como una desventaja. Ese cambio de perspectiva lo cambió todo.", initials: "TV", bg: "#d8f0e8", color: "#2d7a5a" },
 ];
 

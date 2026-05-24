@@ -138,7 +138,7 @@ function CheckoutContent() {
       {/* Top bar */}
       <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", height: 56, display: "flex", alignItems: "center", padding: "0 32px", justifyContent: "space-between", flexShrink: 0 }}>
         <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px" }}>
-          curr<span style={{ color: "var(--green)" }}>ivo</span>
+          resumi<span style={{ color: "var(--green)" }}>ka</span>
         </a>
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--muted)" }}>
           <span style={{ color: "var(--green)", fontSize: 14 }}>🔒</span>
@@ -162,7 +162,7 @@ function CheckoutContent() {
           </div>
 
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 42, fontWeight: 600, color: "#fff", letterSpacing: "-1px", lineHeight: 1, marginBottom: 6 }}>
-            currivo {plan.label}
+            resumika {plan.label}
           </div>
           <div style={{ fontSize: 13, color: "rgba(255,255,255,.45)", marginBottom: 28, lineHeight: 1.5 }}>
             {plan.tagline}
@@ -235,7 +235,7 @@ function CheckoutContent() {
               {/* Order summary */}
               <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 16px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: planKey !== "lifetime_mxn" ? 8 : 0 }}>
-                  <span style={{ fontSize: 13, color: "var(--body)" }}>currivo {plan.label}</span>
+                  <span style={{ fontSize: 13, color: "var(--body)" }}>resumika {plan.label}</span>
                   <span style={{ fontSize: 13, color: "var(--body)" }}>${plan.price} {curr}</span>
                 </div>
                 {planKey !== "lifetime_mxn" && (

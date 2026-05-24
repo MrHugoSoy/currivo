@@ -18,7 +18,7 @@ export default function CTASection() {
         </h2>
 
         <p style={{ fontSize: 16, color: "rgba(255,255,255,.5)", lineHeight: 1.7, marginBottom: 36, maxWidth: 460, margin: "0 auto 36px" }}>
-          Únete a miles de profesionales que ya generaron su CV con currivo. Sin tarjeta de crédito, resultado en 3 minutos.
+          Únete a miles de profesionales que ya generaron su CV con resumika. Sin tarjeta de crédito, resultado en 3 minutos.
         </p>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>

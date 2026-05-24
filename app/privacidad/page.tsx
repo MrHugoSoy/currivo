@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Política de Privacidad · currivo.mx",
-  description: "Conoce cómo currivo.mx recopila, usa y protege tus datos personales conforme a la legislación mexicana.",
+  title: "Política de Privacidad · resumika.com",
+  description: "Conoce cómo resumika.com recopila, usa y protege tus datos personales conforme a la legislación mexicana.",
 };
 
 const UPDATED = "27 de abril de 2026";
@@ -33,8 +33,8 @@ export default function PrivacidadPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
 
           <Section title="1. Responsable del tratamiento">
-            <P>currivo.mx ("nosotros", "el Responsable") trata sus datos personales de acuerdo con la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento.</P>
-            <P>Para cualquier asunto relacionado con el tratamiento de sus datos, puede contactarnos en: <strong>privacidad@currivo.mx</strong></P>
+            <P>resumika.com ("nosotros", "el Responsable") trata sus datos personales de acuerdo con la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento.</P>
+            <P>Para cualquier asunto relacionado con el tratamiento de sus datos, puede contactarnos en: <strong>privacidad@resumika.com</strong></P>
           </Section>
 
           <Section title="2. Datos personales que recopilamos">
@@ -72,7 +72,7 @@ export default function PrivacidadPage() {
 
           <Section title="5. Derechos ARCO">
             <P>Conforme a la LFPDPPP, usted tiene derecho a <strong>Acceder, Rectificar, Cancelar u Oponerse</strong> al tratamiento de sus datos personales (derechos ARCO).</P>
-            <P>Para ejercerlos, envíe una solicitud a <strong>privacidad@currivo.mx</strong> con:</P>
+            <P>Para ejercerlos, envíe una solicitud a <strong>privacidad@resumika.com</strong> con:</P>
             <ul style={ulStyle}>
               <li>Nombre completo y correo electrónico registrado.</li>
               <li>Descripción clara del derecho que desea ejercer.</li>
@@ -82,7 +82,7 @@ export default function PrivacidadPage() {
           </Section>
 
           <Section title="6. Retención de datos">
-            <P>Conservamos sus datos durante el tiempo que mantenga una cuenta activa o sea necesario para prestar el Servicio. Puede solicitar la eliminación de su cuenta y datos en cualquier momento a través de <strong>privacidad@currivo.mx</strong>.</P>
+            <P>Conservamos sus datos durante el tiempo que mantenga una cuenta activa o sea necesario para prestar el Servicio. Puede solicitar la eliminación de su cuenta y datos en cualquier momento a través de <strong>privacidad@resumika.com</strong>.</P>
             <P>Los CVs públicos compartidos mediante un enlace pueden tener un período de retención adicional de hasta 90 días tras la solicitud de eliminación, por razones de caché y copias de seguridad.</P>
           </Section>
 
@@ -97,7 +97,7 @@ export default function PrivacidadPage() {
           </Section>
 
           <Section title="8. Cookies y tecnologías similares">
-            <P>currivo.mx utiliza cookies estrictamente necesarias para la autenticación de sesión. No utilizamos cookies de rastreo publicitario ni de terceros con fines comerciales.</P>
+            <P>resumika.com utiliza cookies estrictamente necesarias para la autenticación de sesión. No utilizamos cookies de rastreo publicitario ni de terceros con fines comerciales.</P>
             <P>Puede configurar su navegador para rechazar cookies; sin embargo, esto puede afectar algunas funcionalidades del Servicio, como mantener la sesión iniciada.</P>
           </Section>
 
@@ -106,7 +106,7 @@ export default function PrivacidadPage() {
           </Section>
 
           <Section title="10. Contacto y autoridad">
-            <P>Para cualquier consulta sobre privacidad: <strong>privacidad@currivo.mx</strong></P>
+            <P>Para cualquier consulta sobre privacidad: <strong>privacidad@resumika.com</strong></P>
             <P>Si considera que su derecho a la protección de datos ha sido vulnerado, puede presentar una queja ante el <strong>Instituto Nacional de Transparencia, Acceso a la Información y Protección de Datos Personales (INAI)</strong> en <a href="https://www.inai.org.mx" target="_blank" rel="noreferrer" style={{ color: "var(--green)" }}>www.inai.org.mx</a>.</P>
           </Section>
 
@@ -166,7 +166,7 @@ function Table({ rows, headers }: { rows: string[][]; headers?: string[] }) {
 function LegalFooter() {
   return (
     <div style={{ borderTop: "1px solid var(--border)", padding: "24px 48px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: 740, margin: "0 auto" }}>
-      <span style={{ fontSize: 11, color: "var(--hint)" }}>© 2026 currivo · México</span>
+      <span style={{ fontSize: 11, color: "var(--hint)" }}>© 2026 resumika · México</span>
       <div style={{ display: "flex", gap: 20 }}>
         <a href="/terminos" style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none" }}>Términos</a>
         <a href="/privacidad" style={{ fontSize: 12, color: "var(--green)", textDecoration: "none", fontWeight: 500 }}>Privacidad</a>

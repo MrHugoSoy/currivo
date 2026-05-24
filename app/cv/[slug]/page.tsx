@@ -14,16 +14,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .select("nombre, puesto, ciudad")
     .eq("slug", slug)
     .single();
-  if (!data) return { title: "CV no encontrado · currivo.mx" };
-  const title = `${data.nombre} — ${data.puesto} | currivo`;
-  const description = `CV profesional de ${data.nombre}, ${data.puesto}${data.ciudad ? ` en ${data.ciudad}` : ""}. Creado con currivo.mx.`;
+  if (!data) return { title: "CV no encontrado · resumika.com" };
+  const title = `${data.nombre} — ${data.puesto} | resumika`;
+  const description = `CV profesional de ${data.nombre}, ${data.puesto}${data.ciudad ? ` en ${data.ciudad}` : ""}. Creado con resumika.com.`;
   return {
     title,
     description,
     openGraph: {
       title: `${data.nombre} — ${data.puesto}`,
-      description: "CV profesional creado con currivo.mx",
-      siteName: "currivo.mx",
+      description: "CV profesional creado con resumika.com",
+      siteName: "resumika.com",
     },
   };
 }
@@ -73,7 +73,7 @@ export default async function CVPage({ params }: PageProps) {
       {/* Nav */}
       <header className="no-print" style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 64px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
         <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", letterSpacing: "-0.5px", textDecoration: "none" }}>
-          curr<span style={{ color: "var(--green)" }}>ivo</span>
+          resumi<span style={{ color: "var(--green)" }}>ka</span>
         </a>
         <a href="/" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(45,90,61,.25)", borderRadius: 5, padding: "6px 14px", background: "var(--green-bg)" }}>
           ✦ Crear mi CV
@@ -95,7 +95,7 @@ export default async function CVPage({ params }: PageProps) {
       <div className="no-print" style={{ textAlign: "center", padding: "0 0 36px", fontSize: 11, color: "var(--hint)" }}>
         Creado con{" "}
         <a href="/" style={{ color: "var(--green2)", textDecoration: "none", fontWeight: 500 }}>
-          currivo.mx
+          resumika.com
         </a>
       </div>
     </div>
