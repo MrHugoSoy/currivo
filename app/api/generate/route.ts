@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false } }
+);
 
 export const dynamic = "force-dynamic";
 
@@ -345,6 +352,26 @@ export async function POST(req: NextRequest) {
 
     if (!nombre || !puesto) {
       return NextResponse.json({ error: "Faltan campos obligatorios." }, { status: 400 });
+    }
+
+    // ── Límite de 1 CV gratis para usuarios no Pro ──
+    if (body.userId && !body.editSlug) {
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("is_pro")
+        .eq("user_id", body.userId)
+        .single();
+
+      if (!profile?.is_pro) {
+        const { count } = await supabaseAdmin
+          .from("cvs")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", body.userId);
+
+        if ((count ?? 0) >= 1) {
+          return NextResponse.json({ error: "LIMIT_REACHED" }, { status: 403 });
+        }
+      }
     }
 
     const rawLangs = body.languages;

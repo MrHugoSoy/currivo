@@ -100,6 +100,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const [result, setResult] = useState<string | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [authLoaded, setAuthLoaded] = useState(false);
@@ -154,14 +155,17 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     if (!form.sinExperiencia && form.experiencias.every(e => !e.descripcion.trim())) {
       setError("Describe al menos una experiencia, o marca que no tienes experiencia."); return;
     }
-    setError(null); setLoading(true);
+    setError(null); setLimitReached(false); setLoading(true);
     try {
       const res = await fetch("/api/generate", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, editSlug: editSlug ?? undefined, userId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error generando CV");
+      if (!res.ok) {
+        if (data.error === "LIMIT_REACHED") { setLimitReached(true); return; }
+        throw new Error(data.error || "Error generando CV");
+      }
       setResult(data.cv); setSlug(data.slug ?? null);
       setTimeout(() => previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     } catch (e: unknown) {
@@ -436,8 +440,18 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                 </div>
 
                 {error && <p style={{ fontSize: 12, color: "#f87171", marginBottom: 8 }}>{error}</p>}
-                <button onClick={handleGenerate} disabled={loading}
-                  style={{ width: "100%", background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 8, padding: 14, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1, transition: "background .2s" }}>
+                {limitReached && (
+                  <div style={{ background: "rgba(74,144,96,.1)", border: "1px solid rgba(74,144,96,.3)", borderRadius: 8, padding: "14px 16px", marginBottom: 10 }}>
+                    <p style={{ fontSize: 13, color: "rgba(248,245,239,.9)", marginBottom: 10, lineHeight: 1.5 }}>
+                      Ya usaste tu CV gratis. Actualiza a Pro para generar CVs ilimitados.
+                    </p>
+                    <a href="/#precios" style={{ display: "inline-block", background: "var(--green-mid)", color: "#fff", borderRadius: 6, padding: "8px 18px", fontSize: 12, fontWeight: 500, textDecoration: "none" }}>
+                      Ver planes →
+                    </a>
+                  </div>
+                )}
+                <button onClick={handleGenerate} disabled={loading || limitReached}
+                  style={{ width: "100%", background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 8, padding: 14, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: (loading || limitReached) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: (loading || limitReached) ? 0.4 : 1, transition: "background .2s" }}>
                   {loading ? <><Spinner />Generando...</>
                     : editSlug ? <>✦ Actualizar mi CV</>
                     : vacanteActiva ? <>🎯 Generar CV optimizado para la vacante</>
