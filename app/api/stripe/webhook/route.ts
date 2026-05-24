@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 // Use service role key for webhook — can bypass RLS
 const supabaseAdmin = createClient(
@@ -12,7 +13,6 @@ const supabaseAdmin = createClient(
 );
 
 async function activatePro(email: string, userId: string, plan: string, customerId: string, subscriptionId?: string, expiresAt?: Date) {
-  // Update by userId if available, fallback to email
   const update = {
     is_pro: true,
     pro_plan: plan,
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   const sig = req.headers.get("stripe-signature");
 
   if (!sig) {
-    return NextResponse.json({ error: "No signature" }, { status: 400 });
+    return new NextResponse("No signature", { status: 400 });
   }
 
   let event: Stripe.Event;
@@ -49,13 +49,12 @@ export async function POST(req: NextRequest) {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err) {
     console.error("Webhook signature error:", err);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    return new NextResponse("Invalid signature", { status: 400 });
   }
 
   try {
     switch (event.type) {
 
-      // ── Pago único completado (lifetime) ──
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.mode === "payment" && session.payment_status === "paid") {
@@ -65,14 +64,11 @@ export async function POST(req: NextRequest) {
             userId ?? "",
             plan ?? "lifetime_mxn",
             session.customer as string,
-            undefined,
-            undefined // lifetime = no expiry
           );
         }
         break;
       }
 
-      // ── Suscripción activada ──
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
@@ -92,7 +88,6 @@ export async function POST(req: NextRequest) {
         break;
       }
 
-      // ── Suscripción cancelada o fallida ──
       case "customer.subscription.deleted":
       case "invoice.payment_failed": {
         const obj = event.data.object as { customer: string };
@@ -100,7 +95,6 @@ export async function POST(req: NextRequest) {
         break;
       }
 
-      // ── Renovación exitosa ──
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
         const subRef = invoice.parent?.subscription_details?.subscription;
@@ -125,9 +119,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ received: true });
+    return new NextResponse("OK", { status: 200 });
   } catch (error) {
     console.error("Webhook handler error:", error);
-    return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
+    return new NextResponse("Webhook handler failed", { status: 500 });
   }
 }
