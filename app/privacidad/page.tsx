@@ -14,7 +14,7 @@ export default function PrivacidadPage() {
       {/* Top bar */}
       <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 48px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 21, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px" }}>
-          curr<span style={{ color: "var(--green)" }}>ivo</span>
+          resumi<span style={{ color: "var(--green)" }}>ka</span>
         </a>
         <a href="/" style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none" }}>← Volver al inicio</a>
       </header>
