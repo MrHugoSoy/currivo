@@ -10,8 +10,23 @@ type CV = {
   puesto: string; ciudad: string | null; mercado: string; created_at: string;
 };
 
+type Profile = {
+  is_pro: boolean;
+  pro_plan: string | null;
+  pro_expires_at: string | null;
+  stripe_customer_id: string | null;
+};
+
 const FLAG: Record<string, string> = { mx: "🇲🇽", us: "🇺🇸", ca: "🇨🇦" };
 const MARKET: Record<string, string> = { mx: "México", us: "USA", ca: "Canadá" };
+
+const PLAN_LABELS: Record<string, string> = {
+  pro_mxn_founder: "Pro Fundador",
+  pro_mxn: "Pro",
+  pro_usd_founder: "Pro Fundador",
+  pro_usd: "Pro",
+  lifetime_mxn: "Lifetime",
+};
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -24,6 +39,8 @@ export default function PerfilPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -51,6 +68,11 @@ export default function PerfilPage() {
       setUsername(u.user_metadata?.username ?? "");
       setAvatarUrl(u.user_metadata?.avatar_url ?? null);
       loadCVs(u.id, u.email ?? "");
+      supabase.from("profiles")
+        .select("is_pro, pro_plan, pro_expires_at, stripe_customer_id")
+        .eq("user_id", u.id)
+        .single()
+        .then(({ data: p }) => setProfile(p as Profile | null));
     });
   }, [router]);
 
@@ -89,6 +111,18 @@ export default function PerfilPage() {
 
   const signOut = async () => { await supabase.auth.signOut(); router.replace("/"); };
   const handleDeleteCV = (id: string) => setCvs(prev => prev.filter(c => c.id !== id));
+
+  const handlePortal = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.location.href = data.url;
+    } catch {
+      setPortalLoading(false);
+    }
+  };
 
   if (!user) return null;
 
@@ -137,7 +171,12 @@ export default function PerfilPage() {
               {displayAvatar ? <img src={displayAvatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 700, color: "#7dd4a0" }}>{initial}</span>}
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 500, color: "#f8f5ef" }}>{user.user_metadata?.username ? `@${user.user_metadata.username}` : user.email}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 16, fontWeight: 500, color: "#f8f5ef" }}>{user.user_metadata?.username ? `@${user.user_metadata.username}` : user.email}</span>
+                {profile?.is_pro && (
+                  <span style={{ fontSize: 10, fontWeight: 600, background: "var(--green-bg)", color: "var(--green)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 100, padding: "2px 9px", letterSpacing: "0.3px" }}>✦ Pro</span>
+                )}
+              </div>
               <div style={{ fontSize: 11, color: "rgba(255,255,255,.3)", marginTop: 3 }}>Miembro desde {memberSince}</div>
             </div>
             <div className="perfil-hero-count" style={{ marginLeft: "auto", textAlign: "right" }}>
@@ -194,6 +233,36 @@ export default function PerfilPage() {
                 style={{ width: "100%", background: saveSuccess ? "var(--green-bg)" : "var(--green)", color: saveSuccess ? "var(--green)" : "#fff", border: saveSuccess ? "1px solid rgba(45,90,61,.25)" : "none", borderRadius: 6, padding: "10px 0", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: (saving || (!hasChanges && !saveSuccess)) ? "default" : "pointer", opacity: saving ? 0.7 : 1, transition: "all .2s" }}>
                 {saving ? "Guardando..." : saveSuccess ? "✓ Guardado" : "Guardar cambios"}
               </button>
+            </div>
+
+            {/* Plan section */}
+            <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 22px", marginTop: 12 }}>
+              <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--hint)", marginBottom: 14, fontWeight: 600 }}>Mi plan</div>
+              {profile?.is_pro ? (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{PLAN_LABELS[profile.pro_plan ?? ""] ?? profile.pro_plan}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, background: "var(--green-bg)", color: "var(--green)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 100, padding: "1px 8px" }}>Activo</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--hint)", marginBottom: 16 }}>
+                    {profile.pro_expires_at
+                      ? `Renueva el ${new Date(profile.pro_expires_at).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`
+                      : "Sin vencimiento"}
+                  </div>
+                  <button onClick={handlePortal} disabled={portalLoading}
+                    style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "9px 0", fontSize: 12, color: "var(--muted)", fontFamily: "inherit", cursor: portalLoading ? "default" : "pointer", opacity: portalLoading ? 0.6 : 1 }}>
+                    {portalLoading ? "Cargando..." : "Gestionar suscripción →"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 14 }}>Plan gratuito</div>
+                  <a href="/pago?plan=pro_mxn_founder"
+                    style={{ display: "block", textAlign: "center", background: "var(--green)", color: "#fff", borderRadius: 6, padding: "9px 0", fontSize: 12, fontWeight: 500, textDecoration: "none" }}>
+                    Actualizar a Pro →
+                  </a>
+                </>
+              )}
             </div>
           </div>
 
