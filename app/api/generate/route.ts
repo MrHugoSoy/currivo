@@ -271,6 +271,13 @@ ${sinExperiencia
 - Use American English
 ${formatRuleEn}
 
+LANGUAGE DETECTION AND CORRECTION:
+- The user may have filled the form in Spanish
+- Regardless of the input language, the entire resume MUST be written in professional American English
+- Translate any Spanish input (job titles, descriptions, company names, skills) to English
+- Keep proper nouns as-is (company names, city names, certifications)
+- Do NOT mention that a translation was made
+
 Generate ONLY the resume content, no additional comments.`;
   }
 
@@ -341,6 +348,14 @@ ${ciudad?.toLowerCase().includes("montreal") || ciudad?.toLowerCase().includes("
   ? "Alberta: Energy/tech sector — highlight technical certifications."
   : "General Canada: Highlight adaptability and multicultural communication."}
 ${formatRuleEn}
+
+LANGUAGE DETECTION AND CORRECTION:
+- The user may have filled the form in Spanish
+- Regardless of the input language, the entire resume MUST be written in professional Canadian English
+- Translate any Spanish input (job titles, descriptions, company names, skills) to English
+- Keep proper nouns as-is (company names, city names, certifications)
+- Do NOT mention that a translation was made
+${langList?.toLowerCase().includes("french") ? `- The user speaks French — add a brief French version of the Professional Summary at the very end, labeled "RÉSUMÉ PROFESSIONNEL"` : ""}
 
 Generate ONLY the resume. No explanations. Section headers in ALL CAPS.`;
 }
