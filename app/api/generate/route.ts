@@ -167,13 +167,6 @@ FORMATO — MUY IMPORTANTE:
 - Títulos de sección en MAYÚSCULAS
 - Usa guion (-) o barra (|) para estructura, nunca asteriscos (*)`;
 
-  const formatRuleEn = `
-FORMATTING — CRITICAL:
-- Plain text ONLY. Never use markdown syntax.
-- Forbidden: **bold**, *italic*, _underline_, # hash headers
-- Section headers in ALL CAPS
-- Use dash (-) or pipe (|) for structure. Never asterisks (*).`;
-
   // ── MÉXICO ──
   if (mercado === "mx") {
     return `Eres un experto redactor de CVs profesionales para el mercado laboral mexicano.
@@ -229,15 +222,15 @@ Genera SOLO el contenido del CV, sin comentarios adicionales.`;
 
   // ── USA ──
   if (mercado === "us") {
-    return `You are an expert resume writer for the US job market.
+    return `You are an expert resume writer specialized in the US job market and ATS optimization.
 
-Generate a professional, ATS-optimized resume in English:
+Generate a professional, ATS-optimized resume in American English with this information:
 - Name: ${nombre}
 - Target Position: ${puesto}
-- Location: ${ciudad || "Not specified"}
+- Location: ${ciudad || "Not specified"} (City, State only — never full address)
 - Email: ${email || "Not specified"}
 - Phone: ${telefono || "Not specified"}
-${redesStr ? `- Profiles/Links: ${redesStr}` : ""}
+${redesStr ? `- LinkedIn/Portfolio: ${redesStr}` : ""}
 - Tone: ${tono} — ${toneDesc[tono] || tono}
 - Industry: ${industria}
 
@@ -248,50 +241,88 @@ EDUCATION:
 ${eduStr}
 
 CRITICAL — NEVER FABRICATE INFORMATION:
-- Use ONLY the information provided by the user
-- If no education provided, write "Education details not provided"
-- NEVER create fake: companies, universities, dates, projects or achievements
+- Use ONLY the information the user provided
+- If no education was provided, write "Education details not provided"
+- NEVER invent: companies, universities, dates, projects or achievements
 - A short honest resume beats a long fabricated one
+- If no experience provided and sinExperiencia is true, focus on education and skills only
 ${vacanteRule_en}
-
 ${certRule_en}
 
-US RESUME RULES:
-- NO photo, NO age, NO marital status — illegal to include
-- Maximum 1 page
-- PROFESSIONAL SUMMARY (2-3 lines) at the top
-${redesStr ? "- Include provided profile links in the header" : "- Include City, State — NOT full address"}
-- Phone: ${telefono || "provided by candidate"}
-${sinExperiencia
-  ? `- No work experience. Focus on EDUCATION, SKILLS, PERSONAL PROJECTS for ${puesto}.`
-  : `- EXPERIENCE: bullet points with quantified achievements ("Increased X by 40%", "Managed team of 8")`}
-- Action verbs: Led, Developed, Implemented, Optimized, Delivered, Achieved...
-- SKILLS: ${skillsNote}
-- EDUCATION: use provided data only; if none write "Education details not provided"
-- Use American English
-${formatRuleEn}
+═══ US RESUME RULES — FOLLOW STRICTLY ═══
 
-LANGUAGE DETECTION AND CORRECTION:
-- The user may have filled the form in Spanish
-- Regardless of the input language, the entire resume MUST be written in professional American English
-- Translate any Spanish input (job titles, descriptions, company names, skills) to English
-- Keep proper nouns as-is (company names, city names, certifications)
-- Do NOT mention that a translation was made
+WHAT NEVER TO INCLUDE (US anti-discrimination laws):
+- NO photo, NO age, NO date of birth
+- NO marital status, NO nationality, NO religion
+- NO immigration status
+- NO "References available upon request"
+- NO generic objective statements ("seeking a dynamic company...")
 
-Generate ONLY the resume content, no additional comments.`;
+FORMAT RULES (ATS compatibility is critical):
+- Maximum 1 page if less than 10 years experience; 2 pages maximum for senior profiles
+- Clean single-column layout — NO tables, NO text boxes, NO multiple columns
+- NO graphics, NO skill bars, NO icons
+- Section headers in ALL CAPS
+- Use dash (-) for bullets, never asterisks or symbols
+- Plain text only — NO markdown, NO bold (**), NO italics, NO # headers
+
+STRUCTURE (in this exact order):
+1. HEADER
+   - Full name (prominent)
+   - City, State (never full address)
+   - Phone | Email${redesStr ? " | LinkedIn" : ""}
+
+2. PROFESSIONAL SUMMARY (2-3 lines maximum)
+   - NOT "I am passionate and committed..."
+   - YES: synthesis of who they are professionally and what value they bring
+   - Example format: "[Profession] with [X]+ years of experience in [specialization]. [Key achievement or value proposition]."
+
+3. ${sinExperiencia ? "SKILLS\n   - Technical and soft skills relevant to " + puesto : "WORK EXPERIENCE\n   - Reverse chronological order (most recent first)\n   - Format: Job Title | Company Name | City, State | Month Year – Month Year\n   - 3-5 bullet points per role\n   - EVERY bullet starts with a strong past-tense action verb\n   - Focus on ACHIEVEMENTS, not tasks\n   - Quantify everything possible: numbers, %, $, team sizes, timeframes\n   - BAD: 'Responsible for managing social media'\n   - GOOD: 'Grew social media engagement by 35% through targeted content strategy, adding 2,400 followers in 6 months'\n   - Use the X-Y-Z Google formula: Accomplished [X] as measured by [Y] by doing [Z]\n   - Use aggressive action verbs: Led, Spearheaded, Executed, Generated, Maximized, Delivered, Optimized, Launched"}
+
+4. SKILLS
+   - Divide in categories if many: Technical Skills | Tools | Languages
+   - Only real, relevant skills — no inflating with obvious ones
+   - ${skillsNote}
+
+5. EDUCATION
+   - Degree | Institution | Location | Year
+   - No GPA unless exceptional and recent graduate
+   - No course list
+   - ${eduStr !== "No especificada" ? "Use provided data" : "Write: Education details not provided"}
+
+${certTexto ? `6. CERTIFICATIONS\n   - ${certTexto}\n   - Certifications carry huge weight in US market — make them visible` : ""}
+
+ATS OPTIMIZATION RULES:
+- Mirror exact keywords from the job title: ${puesto}
+- Use standard section headers (Experience, Education, Skills) — ATS may not recognize creative names
+- Avoid headers/footers for contact info — some ATS ignore them
+- Each bullet point maximum 1.5 lines — if longer, cut it
+${vacanteActiva ? "- This resume is tailored to a specific job posting — use exact keywords from the job description naturally throughout" : ""}
+
+LANGUAGE RULES:
+- Entire resume MUST be in professional American English regardless of input language
+- Translate any Spanish input naturally — do NOT mention translation was made
+- Keep proper nouns as-is (company names, cities, certification names)
+- Use US corporate vocabulary: "Spearheaded", "Cross-functional", "Stakeholder", "ROI", "KPIs"
+
+BULLET LENGTH RULE:
+- Each bullet must fit in maximum 1.5 lines
+- If it needs more, it's a paragraph — cut it
+
+Generate ONLY the resume content. No explanations. No comments. Section headers in ALL CAPS.`;
   }
 
   // ── CANADÁ ──
-  return `You are a Canadian resume expert specializing in helping immigrants land jobs in Canada.
+  return `You are a Canadian resume expert specializing in helping immigrants and international professionals land jobs in Canada. You know Canadian HR culture, ATS systems, and multicultural workplace values deeply.
 
-Generate a professional Canadian resume in English:
+Generate a professional Canadian resume in English with this information:
 
 Name: ${nombre}
 Target Position: ${puesto}
-Location: ${ciudad || "Canada"}
+Location: ${ciudad || "Canada"} (City, Province only)
 Email: ${email || "Not specified"}
 Phone: ${telefono || "Not specified"}
-${redesStr ? `Profiles/Links: ${redesStr}` : ""}
+${redesStr ? `LinkedIn/Portfolio: ${redesStr}` : ""}
 Volunteer Work: ${voluntariado || "Not specified"}
 Languages: ${langList || "English (Fluent)"}
 Tone: ${tono} — ${toneDesc[tono] || tono}
@@ -304,60 +335,106 @@ EDUCATION:
 ${eduStr}
 
 CRITICAL — NEVER FABRICATE INFORMATION:
-- Use ONLY the information provided by the user
-- If no education, write "Education details not provided"
+- Use ONLY information provided by the user
+- If no education details given, write "Education details not provided"
 - NEVER invent: company names, dates, universities, projects or achievements
-- A short honest resume is always better than a fabricated one
+- A short honest resume always beats a fabricated one
 ${vacanteRule_en}
-
 ${certRule_en}
 
-CANADIAN RESUME RULES — FOLLOW STRICTLY:
+═══ CANADIAN RESUME RULES — FOLLOW STRICTLY ═══
 
-NEVER INCLUDE: photo, age, date of birth, marital status, nationality, SIN, full address, "References available upon request"
+WHAT NEVER TO INCLUDE (Canadian Human Rights laws):
+- NO photo, NO age, NO date of birth
+- NO marital status, NO nationality, NO religion
+- NO Social Insurance Number (SIN)
+- NO full address (City, Province only)
+- NO "References available upon request"
 
-STRUCTURE:
-1. HEADER — Name, City/Province, Phone (${telefono || "provided"}), Email${redesStr ? ", profiles" : ""}
-2. PROFESSIONAL SUMMARY (3-4 lines) — experience years, achievements, multicultural value, keywords for ${industria}
-3. CORE COMPETENCIES — 9-12 keywords | pipe-separated — ${skillsNote}
-4. PROFESSIONAL EXPERIENCE
-${sinExperiencia
-  ? `   - No work experience. Include ACADEMIC/PERSONAL PROJECTS for ${puesto}.`
-  : `   - Format: Title | Company | City, Province | Month Year – Month Year
-   - 3-5 bullets: Context + Action + Result format
-   - Quantify: numbers, %, $, team sizes
-   - Highlight multicultural collaboration`}
-5. VOLUNTEER WORK — ${voluntariado ? "use provided info with 1-2 impact bullets" : 'write ONLY "Open to volunteer opportunities" — do NOT invent organizations'}
-6. EDUCATION — provided data only + "International credential — equivalent to Canadian Bachelor's Degree" if applicable
-7. LANGUAGES — ${langList || "English (Fluent)"}${langList?.toLowerCase().includes("french") ? "\n   — Highlight French bilingualism prominently (major asset in Quebec/Ottawa)" : ""}
+FORMAT RULES (ATS compatibility):
+- Maximum 1 page if under 10 years experience; 2 pages for senior profiles
+- Clean single-column layout — NO tables, NO text boxes, NO multiple columns
+- NO graphics, NO skill bars, NO icons, NO percentage bars
+- Section headers in ALL CAPS
+- Plain text only — NO markdown, NO bold (**), NO italics, NO # headers
 
-ATS RULES:
-- Standard headers (Experience, Education, Skills)
-- No tables, columns or text boxes
-- Dates: Jan 2020 – Mar 2023
-- Mirror keywords from ${puesto}
+STRUCTURE (in this exact order):
+1. HEADER
+   - Full name (prominent)
+   - City, Province (never full address)
+   - Phone | Email${redesStr ? " | LinkedIn" : ""}${redesStr?.toLowerCase().includes("github") || redesStr?.toLowerCase().includes("portfolio") ? " | Portfolio" : ""}
 
-PROVINCE NOTES:
+2. PROFESSIONAL SUMMARY (3-4 lines maximum)
+   - Start with years of experience and specialization
+   - Include multicultural background as an asset — this is valued in Canada
+   - 1-2 quantified achievements
+   - NO first person ("I" statements)
+   - Keywords relevant to ${industria} and ${puesto}
+
+3. CORE COMPETENCIES
+   - 9-12 keywords separated by | pipes in a single line or two
+   - Mix technical and soft skills
+   - ATS-friendly single keywords or short phrases
+   - ${skillsNote}
+   - Canadian soft skills to include: Cross-cultural communication, Adaptability, Community involvement, Team collaboration
+
+4. ${sinExperiencia
+  ? `ACADEMIC & PERSONAL PROJECTS\n   - No work experience — focus on relevant projects for ${puesto}\n   - Use same bullet format: Action verb + what you did + result/impact`
+  : `PROFESSIONAL EXPERIENCE\n   - Reverse chronological order\n   - Format: Job Title | Company Name | City, Province/Country | Month Year – Month Year\n   - 3-5 bullet points per role\n   - EVERY bullet starts with a strong past-tense action verb\n   - Follow Context + Action + Result format\n   - Quantify: numbers, %, $CAD, team sizes, timelines\n   - Highlight cross-cultural collaboration and adaptability\n   - BAD: "Responsible for managing the design team"\n   - GOOD: "Led cross-functional design team of 4, delivering 12 brand identity projects on time and 15% under budget"\n   - Each bullet maximum 1.5 lines`}
+
+5. VOLUNTEER WORK (very important in Canada — shows community integration)
+   ${voluntariado
+     ? `- Use provided volunteer info: ${voluntariado}\n   - 1-2 bullet points showing community impact`
+     : `- Write ONLY: "Open to volunteer opportunities"\n   - DO NOT invent organizations or activities`}
+
+6. EDUCATION
+   - Degree | Institution | Location | Year
+   - If international credential, add: "(International credential — equivalent to Canadian Bachelor's Degree)" if applicable
+   - If WES evaluated, mention it: "(WES Evaluated — Canadian equivalency: [degree])"
+   - ${eduStr !== "No especificada" ? "Use only provided data" : "Write: Education details not provided"}
+
+7. LANGUAGES
+   - ${langList || "English (Fluent)"}
+   ${langList?.toLowerCase().includes("french")
+     ? "- HIGHLIGHT French prominently — major competitive advantage in Quebec, Ottawa, and federal government positions\n   - Format: French — [level] | English — [level]"
+     : "- Format: Language — Level (e.g. Spanish — Native | English — Professional)"}
+
+${certTexto ? `8. CERTIFICATIONS\n   - ${certTexto}\n   - Format: Certification Name | Issuing Organization | Year` : ""}
+
+ATS OPTIMIZATION:
+- Use standard section headers — ATS may not recognize creative names
+- Mirror exact keywords from job title: ${puesto}
+- Avoid headers/footers — some ATS ignore them
+- Single column only
+
+PROVINCE-SPECIFIC NOTES:
 ${ciudad?.toLowerCase().includes("montreal") || ciudad?.toLowerCase().includes("quebec")
-  ? "Quebec: Emphasize French prominently — many employers require it."
+  ? "QUEBEC: French is essential — emphasize French language skills prominently. Many Quebec employers require French for most positions."
   : ciudad?.toLowerCase().includes("ottawa")
-  ? "Ottawa: Federal hub — bilingualism (EN/FR) is a major asset."
+  ? "OTTAWA: Federal government hub — bilingualism (EN/FR) is a major competitive advantage. Highlight any French skills."
   : ciudad?.toLowerCase().includes("vancouver") || ciudad?.toLowerCase().includes("bc")
-  ? "BC/Vancouver: Tech-forward — include GitHub, portfolio links prominently."
+  ? "BC/VANCOUVER: Tech-forward market — highlight GitHub, portfolio, and digital skills prominently."
   : ciudad?.toLowerCase().includes("calgary") || ciudad?.toLowerCase().includes("alberta")
-  ? "Alberta: Energy/tech sector — highlight technical certifications."
-  : "General Canada: Highlight adaptability and multicultural communication."}
-${formatRuleEn}
+  ? "ALBERTA: Energy, tech and trades sector — highlight technical certifications and safety training."
+  : ciudad?.toLowerCase().includes("toronto") || ciudad?.toLowerCase().includes("ontario")
+  ? "TORONTO/ONTARIO: Most competitive market — quantify everything, emphasize multicultural teamwork and adaptability."
+  : "CANADA (General): Highlight adaptability, multicultural communication, and community involvement."}
 
-LANGUAGE DETECTION AND CORRECTION:
-- The user may have filled the form in Spanish
-- Regardless of the input language, the entire resume MUST be written in professional Canadian English
-- Translate any Spanish input (job titles, descriptions, company names, skills) to English
-- Keep proper nouns as-is (company names, city names, certifications)
-- Do NOT mention that a translation was made
-${langList?.toLowerCase().includes("french") ? `- The user speaks French — add a brief French version of the Professional Summary at the very end, labeled "RÉSUMÉ PROFESSIONNEL"` : ""}
+LANGUAGE RULES:
+- Entire resume MUST be in professional Canadian English regardless of input language
+- Translate any Spanish input naturally — do NOT mention translation was made
+- Keep proper nouns as-is (company names, cities, certification names)
+${langList?.toLowerCase().includes("french")
+  ? "- User speaks French — add a brief French version of the Professional Summary at the very end, labeled 'RÉSUMÉ PROFESSIONNEL' (3-4 lines maximum)"
+  : ""}
 
-Generate ONLY the resume. No explanations. Section headers in ALL CAPS.`;
+CULTURAL NOTES FOR CANADIAN MARKET:
+- Canadian employers value collaboration over individual achievement
+- Multicultural background is an asset — frame it positively
+- Community involvement (volunteer work) demonstrates integration
+- Avoid overly aggressive US-style language — balance achievement with teamwork
+
+Generate ONLY the resume. No explanations. No comments. Section headers in ALL CAPS.`;
 }
 
 export async function POST(req: NextRequest) {
