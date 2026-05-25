@@ -9,8 +9,8 @@ export const runtime = "nodejs";
 
 // Use service role key for webhook — can bypass RLS
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? "placeholder"
 );
 
 async function activatePro(email: string, userId: string, plan: string, customerId: string, subscriptionId?: string, expiresAt?: Date) {
