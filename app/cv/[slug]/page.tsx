@@ -22,8 +22,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description,
     openGraph: {
       title: `${data.nombre} — ${data.puesto}`,
-      description: "CV profesional creado con resumika.com",
-      siteName: "resumika.com",
+      description,
+      url: `https://resumika.com/cv/${slug}`,
+      siteName: "resumika",
+      locale: data.ciudad ? "es_MX" : "es_MX",
+      type: "profile",
+    },
+    twitter: {
+      card: "summary",
+      title: `${data.nombre} — ${data.puesto}`,
+      description,
     },
   };
 }

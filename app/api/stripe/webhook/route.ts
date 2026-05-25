@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
+import { sendProEmail } from "@/lib/emails";
 import type Stripe from "stripe";
 
 export const dynamic = "force-dynamic";
@@ -59,31 +60,32 @@ export async function POST(req: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.mode === "payment" && session.payment_status === "paid") {
           const { userId, email, plan } = session.metadata ?? {};
-          await activatePro(
-            email ?? session.customer_email ?? "",
-            userId ?? "",
-            plan ?? "lifetime_mxn",
-            session.customer as string,
-          );
+          const resolvedEmail = email ?? session.customer_email ?? "";
+          await activatePro(resolvedEmail, userId ?? "", plan ?? "lifetime_mxn", session.customer as string);
+          if (resolvedEmail) sendProEmail(resolvedEmail, resolvedEmail).then(() => {}, () => {});
         }
         break;
       }
 
-      case "customer.subscription.created":
+      case "customer.subscription.created": {
+        const sub = event.data.object as Stripe.Subscription;
+        if (sub.status === "active" || sub.status === "trialing") {
+          const { userId, email, plan } = sub.metadata ?? {};
+          const periodEnd = sub.items.data[0]?.current_period_end ?? 0;
+          const expiresAt = new Date(periodEnd * 1000);
+          await activatePro(email ?? "", userId ?? "", plan ?? "pro_mxn", sub.customer as string, sub.id, expiresAt);
+          if (email) sendProEmail(email, email).then(() => {}, () => {});
+        }
+        break;
+      }
+
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
         if (sub.status === "active" || sub.status === "trialing") {
           const { userId, email, plan } = sub.metadata ?? {};
           const periodEnd = sub.items.data[0]?.current_period_end ?? 0;
           const expiresAt = new Date(periodEnd * 1000);
-          await activatePro(
-            email ?? "",
-            userId ?? "",
-            plan ?? "pro_mxn",
-            sub.customer as string,
-            sub.id,
-            expiresAt
-          );
+          await activatePro(email ?? "", userId ?? "", plan ?? "pro_mxn", sub.customer as string, sub.id, expiresAt);
         }
         break;
       }
