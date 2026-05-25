@@ -56,6 +56,9 @@ export default function Navbar() {
             <a href="/#como-funciona" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Cómo funciona</a>
             <a href="/crear" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Plantillas</a>
             <a href="/#precios" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Precios</a>
+            {user && (
+              <a href="/carta" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Carta de presentación</a>
+            )}
           </div>
 
           <div className="nav-ctas">
@@ -108,6 +111,7 @@ export default function Navbar() {
             { href: "/#como-funciona", label: "Cómo funciona" },
             { href: "/crear", label: "Plantillas" },
             { href: "/#precios", label: "Precios" },
+            ...(user ? [{ href: "/carta", label: "Carta de presentación" }] : []),
           ].map(({ href, label }) => (
             <a key={label} href={href} onClick={() => setMobileOpen(false)}
               style={{ fontSize: 16, color: "var(--body)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
