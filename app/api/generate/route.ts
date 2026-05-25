@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabase } from "@/lib/supabase";
 import { createClient } from "@supabase/supabase-js";
+import { generateLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
+import { generateSchema } from "@/lib/validators";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -439,7 +441,24 @@ Generate ONLY the resume. No explanations. No comments. Section headers in ALL C
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    // ── Rate limiting ──
+    const { blocked, limit, remaining } = await isRateLimited(generateLimiter, getIP(req));
+    if (blocked) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes. Espera un momento e intenta de nuevo." },
+        { status: 429, headers: { "X-RateLimit-Limit": limit.toString(), "X-RateLimit-Remaining": remaining.toString() } },
+      );
+    }
+
+    const rawBody = await req.json();
+
+    // ── Validate & sanitize ──
+    const parseResult = generateSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      return NextResponse.json({ error: "Datos inválidos. Verifica los campos e intenta de nuevo." }, { status: 400 });
+    }
+    const body = parseResult.data;
+
     const { nombre, puesto } = body;
 
     if (!nombre || !puesto) {
@@ -468,7 +487,7 @@ export async function POST(req: NextRequest) {
 
     const rawLangs = body.languages;
     const langStr: string = Array.isArray(rawLangs) && rawLangs.length > 0
-      ? (rawLangs as Array<{ language: string; level: string }>).map(l => `${l.language} (${l.level})`).join(", ")
+      ? rawLangs.map(l => `${l.language} (${l.level})`).join(", ")
       : "";
 
     const prompt = buildPrompt({ ...body, languages: langStr });
@@ -486,7 +505,7 @@ export async function POST(req: NextRequest) {
         .join("\n")
     );
 
-    const { photoUrl: _photo, editSlug, userId, vacante: _vacante, ...formDataToStore } = body;
+    const { editSlug, userId, vacante: _vacante, ...formDataToStore } = body;
     const savedFormData = {
       ...formDataToStore,
       languages: langStr || undefined,

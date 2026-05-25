@@ -53,11 +53,15 @@ export default async function CVPage({ params }: PageProps) {
   const formData = data.form_data as Record<string, unknown> | null;
   const photoUrl = (formData?.photoUrl as string | undefined) ?? undefined;
 
+  const emailDisplay = data.email
+    ? data.email.replace(/(.{2})(.*)(@.*)/, "$1***$3")
+    : undefined;
+
   const cvData: CVData = {
     nombre:   data.nombre,
     puesto:   data.puesto,
     ciudad:   data.ciudad  ?? undefined,
-    email:    data.email   ?? undefined,
+    email:    emailDisplay,
     mercado:  data.mercado,
     cv_text:  data.cv_text,
     photoUrl,

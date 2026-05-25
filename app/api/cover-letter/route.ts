@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabase } from "@/lib/supabase";
 import { createClient } from "@supabase/supabase-js";
+import { coverLetterLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -123,6 +124,15 @@ LANGUAGE DETECTION:
 
 export async function POST(req: NextRequest) {
   try {
+    // ── Rate limiting ──
+    const { blocked, limit, remaining } = await isRateLimited(coverLetterLimiter, getIP(req));
+    if (blocked) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes. Espera un momento e intenta de nuevo." },
+        { status: 429, headers: { "X-RateLimit-Limit": limit.toString(), "X-RateLimit-Remaining": remaining.toString() } },
+      );
+    }
+
     const body = await req.json() as Record<string, unknown>;
     const nombre  = body.nombre as string;
     const puesto  = body.puesto as string;

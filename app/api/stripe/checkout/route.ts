@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe, STRIPE_PRICES } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
+import { checkoutLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,15 @@ type PlanKey = "pro_mxn_founder" | "pro_mxn" | "pro_usd" | "lifetime_mxn";
 
 export async function POST(req: NextRequest) {
   try {
+    // ── Rate limiting ──
+    const { blocked, limit, remaining } = await isRateLimited(checkoutLimiter, getIP(req));
+    if (blocked) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes. Espera un momento e intenta de nuevo." },
+        { status: 429, headers: { "X-RateLimit-Limit": limit.toString(), "X-RateLimit-Remaining": remaining.toString() } },
+      );
+    }
+
     const { plan, email, userId } = await req.json() as {
       plan: PlanKey;
       email: string;
