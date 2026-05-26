@@ -73,7 +73,7 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
           {/* Breadcrumb */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, overflow: "hidden" }}>
             <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px", flexShrink: 0 }}>
-              curr<span style={{ color: "var(--green)" }}>ivo</span>
+              resumi<span style={{ color: "var(--green)" }}>ka</span>
             </a>
             <span style={{ color: "var(--border2)", fontSize: 16, flexShrink: 0 }}>/</span>
             <a href={`/cv/${slug}`} style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none", flexShrink: 0 }}>
