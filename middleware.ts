@@ -1,31 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const PROTECTED_ROUTES = ["/perfil", "/dashboard", "/carta"];
-
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  const isProtected = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
-
-  if (isProtected) {
-    const hasSession = req.cookies.getAll().some(
-      cookie => cookie.name.includes("sb-") && cookie.name.includes("auth-token"),
-    );
-
-    if (!hasSession) {
-      const loginUrl = new URL("/", req.url);
-      loginUrl.searchParams.set("auth", "login");
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
+export function middleware(_req: NextRequest) {
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/perfil/:path*",
-    "/dashboard/:path*",
-    "/carta/:path*",
-  ],
+  matcher: [],
 };
