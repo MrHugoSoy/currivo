@@ -128,6 +128,7 @@ function buildPrompt(data: Record<string, unknown>): string {
 
   // ── Adaptador por vacante ──
   const vacanteActiva = vacante?.trim() && vacante.length > 50;
+  const idiomaFormulario = (data.idiomaFormulario as string | undefined) || "es";
 
   const vacanteRule_es = vacanteActiva
     ? `\nADAPTACIÓN A VACANTE ESPECÍFICA — MUY IMPORTANTE:
@@ -301,11 +302,11 @@ ATS OPTIMIZATION RULES:
 - Each bullet point maximum 1.5 lines — if longer, cut it
 ${vacanteActiva ? "- This resume is tailored to a specific job posting — use exact keywords from the job description naturally throughout" : ""}
 
-LANGUAGE RULES:
-- Entire resume MUST be in professional American English regardless of input language
-- Translate any Spanish input naturally — do NOT mention translation was made
-- Keep proper nouns as-is (company names, cities, certification names)
-- Use US corporate vocabulary: "Spearheaded", "Cross-functional", "Stakeholder", "ROI", "KPIs"
+LANGUAGE DETECTION:
+- The user filled this form in: ${idiomaFormulario === "es" ? "Spanish" : idiomaFormulario === "fr" ? "French" : "English"}
+- Regardless of input language, generate the ENTIRE resume in professional American English
+- Translate naturally — do NOT mention that translation was made
+- Keep proper nouns as-is (company names, cities, certifications)
 
 BULLET LENGTH RULE:
 - Each bullet must fit in maximum 1.5 lines
@@ -422,13 +423,12 @@ ${ciudad?.toLowerCase().includes("montreal") || ciudad?.toLowerCase().includes("
   ? "TORONTO/ONTARIO: Most competitive market — quantify everything, emphasize multicultural teamwork and adaptability."
   : "CANADA (General): Highlight adaptability, multicultural communication, and community involvement."}
 
-LANGUAGE RULES:
-- Entire resume MUST be in professional Canadian English regardless of input language
-- Translate any Spanish input naturally — do NOT mention translation was made
-- Keep proper nouns as-is (company names, cities, certification names)
-${langList?.toLowerCase().includes("french")
-  ? "- User speaks French — add a brief French version of the Professional Summary at the very end, labeled 'RÉSUMÉ PROFESSIONNEL' (3-4 lines maximum)"
-  : ""}
+LANGUAGE DETECTION:
+- The user filled this form in: ${idiomaFormulario === "es" ? "Spanish" : idiomaFormulario === "fr" ? "French" : "English"}
+- Regardless of input language, generate the ENTIRE resume in professional Canadian English
+- Translate naturally — do NOT mention that translation was made
+- Keep proper nouns as-is
+${idiomaFormulario === "fr" ? "- User is comfortable in French — consider this when highlighting language skills" : ""}
 
 CULTURAL NOTES FOR CANADIAN MARKET:
 - Canadian employers value collaboration over individual achievement

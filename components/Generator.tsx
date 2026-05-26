@@ -63,6 +63,7 @@ export interface CVFormData {
   habilidades?: string[];
   educacion?: EducacionEntry[];
   vacante?: string;
+  idiomaFormulario?: "es" | "en" | "fr";
 }
 const DEFAULT_FORM: CVFormData = {
   nombre: "", puesto: "", ciudad: "", email: "", telefono: "",
@@ -73,6 +74,7 @@ const DEFAULT_FORM: CVFormData = {
   redesSociales: [], habilidades: [],
   educacion: [{ carrera: "", institucion: "", anio: "" }],
   certificaciones: [], disponibilidad: "Inmediata", vacante: "",
+  idiomaFormulario: "es",
 };
 
 interface GeneratorProps { initialData?: Record<string, unknown>; editSlug?: string; }
@@ -295,6 +297,40 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
 
               {/* 1. DATOS PERSONALES */}
               <FB step={1} total={TOTAL_STEPS} title={steps[0]} icon={BLOCK_META.personal.icon} iconBg={BLOCK_META.personal.color}>
+                {form.mercado !== "mx" && (
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.38)", marginBottom: 4 }}>
+                      ¿En qué idioma vas a llenar el formulario?
+                    </label>
+                    <p style={{ fontSize: 10, color: "rgba(255,255,255,.25)", marginBottom: 8, marginTop: 0 }}>
+                      El CV se generará en inglés sin importar tu elección
+                    </p>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {(["es", "en", ...(form.mercado === "ca" ? ["fr"] : [])] as Array<"es" | "en" | "fr">).map(lang => {
+                        const labels: Record<string, string> = { es: "🇲🇽 Español", en: "🇺🇸 English", fr: "🇫🇷 Français" };
+                        const active = (form.idiomaFormulario ?? "es") === lang;
+                        return (
+                          <button key={lang} type="button" onClick={() => setForm(f => ({ ...f, idiomaFormulario: lang }))}
+                            style={{
+                              padding: "6px 14px", borderRadius: 6, fontFamily: "inherit", fontSize: 12, cursor: "pointer", transition: "all .15s",
+                              border: `1px solid ${active ? "rgba(74,144,96,.55)" : "rgba(255,255,255,.12)"}`,
+                              background: active ? "rgba(42,82,54,.25)" : "rgba(255,255,255,.03)",
+                              color: active ? "#7dd4a0" : "rgba(255,255,255,.55)",
+                            }}>
+                            {labels[lang]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p style={{ fontSize: 10, color: "rgba(255,255,255,.35)", marginTop: 6, marginBottom: 0, display: "flex", gap: 5, alignItems: "center" }}>
+                      {(form.idiomaFormulario ?? "es") === "fr"
+                        ? "✓ Remplissez en français — le CV sera généré en anglais professionnel"
+                        : (form.idiomaFormulario ?? "es") === "en"
+                        ? "✓ Fill in English — the CV will be generated in professional English"
+                        : "✓ Llenarás en español — el CV se generará en inglés profesional automáticamente"}
+                    </p>
+                  </div>
+                )}
                 <FR>
                   <F label={isMx ? "Nombre completo" : isUs ? "Full Name" : "Full Name / Nom complet"} placeholder="María García López" value={form.nombre} onChange={set("nombre")} />
                   <F label={isMx ? "Puesto deseado" : isUs ? "Job Title" : "Job Title / Titre"} placeholder={isUs ? "Graphic Designer" : "Diseñadora Gráfica"} value={form.puesto} onChange={set("puesto")} />

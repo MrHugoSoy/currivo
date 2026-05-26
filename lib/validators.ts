@@ -56,9 +56,10 @@ export const generateSchema = z.object({
   })).max(10).optional(),
   templateId:      z.string().max(30).optional(),
   sinExperiencia:  z.boolean().optional(),
-  anosExperiencia: z.string().max(10).optional(),
-  editSlug:        z.string().max(50).optional(),
-  userId:          z.string().uuid().optional(),
+  anosExperiencia:   z.string().max(10).optional(),
+  idiomaFormulario:  z.enum(["es", "en", "fr"]).optional(),
+  editSlug:          z.string().max(50).optional(),
+  userId:            z.string().uuid().optional(),
 });
 
 export type GenerateInput = z.infer<typeof generateSchema>;
