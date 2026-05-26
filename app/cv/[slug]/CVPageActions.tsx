@@ -1,26 +1,34 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface Props {
   slug: string;
   mercado: string;
   templateId: string;
+  cvUserId?: string;
 }
 
-export function CVPageActions({ slug, mercado, templateId }: Props) {
+export function CVPageActions({ slug, mercado, templateId, cvUserId }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    if (!cvUserId) return;
+    supabase.auth.getSession().then(({ data }) => {
+      const userId = data.session?.user?.id;
+      if (userId && userId === cvUserId) setIsOwner(true);
+    });
+  }, [cvUserId]);
 
   function shareWhatsApp() {
+
     const url = `https://resumika.com/cv/${slug}`;
     const text = mercado === "us" || mercado === "ca"
       ? `Check out my professional resume: ${url}`
       : `Mira mi CV profesional: ${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  }
-
-  function handleEdit() {
-    window.location.href = `/editar/${slug}`;
   }
 
   async function downloadPDF() {
@@ -119,17 +127,20 @@ export function CVPageActions({ slug, mercado, templateId }: Props) {
         Compartir
       </button>
 
-      <button
-        onClick={handleEdit}
-        style={{
-          fontSize: 12, color: "var(--muted)",
-          border: "1px solid var(--border)", borderRadius: 5,
-          padding: "7px 14px", cursor: "pointer",
-          fontFamily: "inherit", background: "none",
-        }}
-      >
-        ✏ Editar
-      </button>
+      {isOwner && (
+        <a
+          href={`/crear?edit=${slug}`}
+          style={{
+            fontSize: 12, color: "var(--muted)",
+            border: "1px solid var(--border)", borderRadius: 5,
+            padding: "7px 14px", cursor: "pointer",
+            fontFamily: "inherit", background: "none",
+            textDecoration: "none", display: "inline-flex", alignItems: "center",
+          }}
+        >
+          ✏ Editar CV
+        </a>
+      )}
     </div>
   );
 }

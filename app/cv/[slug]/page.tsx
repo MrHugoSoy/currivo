@@ -40,7 +40,7 @@ export default async function CVPage({ params }: PageProps) {
   const { slug } = await params;
   const { data, error } = await supabase
     .from("cvs")
-    .select("nombre, puesto, ciudad, email, mercado, cv_text, template, form_data, created_at")
+    .select("nombre, puesto, ciudad, email, mercado, cv_text, template, form_data, created_at, user_id")
     .eq("slug", slug)
     .single();
 
@@ -94,7 +94,7 @@ export default async function CVPage({ params }: PageProps) {
 
       {/* Content */}
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 24px 72px" }}>
-        <CVPageActions slug={slug} mercado={data.mercado} templateId={templateId} />
+        <CVPageActions slug={slug} mercado={data.mercado} templateId={templateId} cvUserId={data.user_id ?? undefined} />
         <div style={{ borderRadius: 8, overflow: "hidden", boxShadow: "0 2px 4px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08)" }}>
           <Preview data={cvData} />
         </div>

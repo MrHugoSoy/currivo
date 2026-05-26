@@ -502,7 +502,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
             <div className="gen-preview-col" ref={previewRef} style={{ position: "sticky", top: 72, maxHeight: "calc(100vh - 90px)", overflowY: "auto" }}>
               {result ? (
                 <>
-                  <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} nombre={form.nombre} puesto={form.puesto} ciudad={form.ciudad} email={form.email} photoUrl={form.photoUrl} />
+                  <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} nombre={form.nombre} puesto={form.puesto} ciudad={form.ciudad} email={form.email} photoUrl={form.photoUrl} userId={userId} />
                   {!userId && slug && (
                     <div style={{ margin: "10px 0", padding: "20px 24px", background: "linear-gradient(135deg, var(--green-bg), #fff)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 8 }}>
                       <div style={{ fontSize: 28, marginBottom: 10 }}>📄</div>
@@ -863,16 +863,44 @@ function Spinner({ large }: { large?: boolean }) {
   const s = large ? 28 : 13;
   return <div style={{ width: s, height: s, borderRadius: "50%", border: "2px solid rgba(255,255,255,.15)", borderTopColor: "var(--green-mid)", animation: "spin .65s linear infinite", flexShrink: 0 }} />;
 }
-function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciudad, email, photoUrl }: {
+function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciudad, email, photoUrl, userId }: {
   text: string; market: Market; slug: string | null; templateId: TemplateId;
-  nombre: string; puesto: string; ciudad?: string; email?: string; photoUrl?: string;
+  nombre: string; puesto: string; ciudad?: string; email?: string; photoUrl?: string; userId?: string;
 }) {
   const m = MARKETS.find(x => x.id === market)!;
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState(text);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const Preview = PREVIEW_TEMPLATES[templateId] ?? PREVIEW_TEMPLATES.clasico;
-  const cvData: CVData = { nombre, puesto, ciudad, email, mercado: market, cv_text: text, photoUrl };
+  const cvData: CVData = { nombre, puesto, ciudad, email, mercado: market, cv_text: editedText, photoUrl };
+  const hasEdits = editedText !== text;
+
+  const handleSave = async () => {
+    if (!slug) return;
+    if (!userId) { alert("Necesitas una cuenta para guardar cambios."); return; }
+    setSaving(true);
+    try {
+      const { supabase: sb } = await import("@/lib/supabase");
+      await sb.from("cvs").update({ cv_text: editedText }).eq("slug", slug);
+      setSaved(true);
+      setIsEditing(false);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      console.error(err);
+      alert("Error al guardar. Intenta de nuevo.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditedText(text);
+    setIsEditing(false);
+  };
 
   const handleDownload = async () => {
     if (!slug) return;
@@ -889,20 +917,83 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
 
   return (
     <div style={{ background: "var(--paper)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--border)", boxShadow: "0 20px 56px rgba(0,0,0,.5)" }}>
+
+      {/* ── Toolbar ── */}
       <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 500 }}>✦ CV listo para {m.flag} {m.label}</span>
-        <button onClick={() => navigator.clipboard.writeText(text)} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>Copiar texto</button>
+        {isEditing ? (
+          <>
+            <span style={{ fontSize: 11, color: "var(--body)", fontWeight: 500 }}>✏ Editando CV</span>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={handleSave} disabled={saving}
+                style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 10, fontFamily: "inherit", cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}>
+                {saving ? "Guardando..." : "✓ Guardar cambios"}
+              </button>
+              <button onClick={handleCancel}
+                style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
+                ✕ Cancelar
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 500 }}>✦ CV listo para {m.flag} {m.label}</span>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => setIsEditing(true)}
+                style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
+                ✏ Editar texto
+              </button>
+              <button onClick={() => navigator.clipboard.writeText(editedText)}
+                style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
+                Copiar texto
+              </button>
+            </div>
+          </>
+        )}
       </div>
-      <div style={{ overflow: "hidden" }}>
-        <Preview data={cvData} />
-      </div>
+
+      {/* ── Body — template preview or textarea ── */}
+      {isEditing ? (
+        <div style={{ padding: 16 }}>
+          <textarea
+            value={editedText}
+            onChange={e => setEditedText(e.target.value)}
+            style={{
+              width: "100%", minHeight: 480, resize: "vertical",
+              background: "var(--paper)", border: "1px solid var(--border)",
+              borderRadius: 6, padding: 16, fontFamily: "inherit",
+              fontSize: 12, color: "var(--body)", lineHeight: 1.7, outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+      ) : (
+        <div style={{ overflow: "hidden" }}>
+          <Preview data={cvData} />
+        </div>
+      )}
+
+      {/* ── Saved / edits indicator ── */}
+      {(saved || (hasEdits && !isEditing)) && (
+        <div style={{ padding: "6px 16px", display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--green)", flexShrink: 0 }} />
+          <span style={{ fontSize: 10, color: "var(--green)" }}>
+            {saved ? "✓ Cambios guardados" : "● Tienes cambios guardados"}
+          </span>
+        </div>
+      )}
+
       {pdfError && <p style={{ fontSize: 11, color: "#b91c1c", background: "#fef2f2", margin: "0 16px", padding: "6px 10px", borderRadius: 5, border: "1px solid #fecaca" }}>{pdfError}</p>}
+
+      {/* ── Actions ── */}
       <div style={{ padding: "12px 16px", background: "var(--warm)", borderTop: "1px solid var(--border)", display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button onClick={handleDownload} disabled={pdfLoading || !slug}
           style={{ flex: 1, minWidth: 140, background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: 10, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
           {pdfLoading ? <><Spinner />Generando PDF...</> : "⬇ Descargar PDF"}
         </button>
-        <button style={{ flex: 1, minWidth: 120, background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: 10, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>Editar datos</button>
+        <button onClick={() => { if (slug) window.location.href = `/crear?edit=${slug}`; }}
+          style={{ flex: 1, minWidth: 120, background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: 10, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>
+          ← Editar formulario
+        </button>
       </div>
     </div>
   );
