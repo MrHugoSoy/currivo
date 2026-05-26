@@ -466,6 +466,34 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
               {result ? (
                 <>
                   <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} />
+                  {!userId && slug && (
+                    <div style={{ margin: "10px 0", padding: "20px 24px", background: "linear-gradient(135deg, var(--green-bg), #fff)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 8 }}>
+                      <div style={{ fontSize: 28, marginBottom: 10 }}>📄</div>
+                      <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "var(--ink)", margin: 0 }}>
+                        Guarda tu CV antes de perderlo
+                      </p>
+                      <p style={{ fontSize: 13, color: "var(--body)", lineHeight: 1.6, marginTop: 6, marginBottom: 0 }}>
+                        Regístrate gratis para editarlo, compartirlo con reclutadores y acceder desde cualquier dispositivo.
+                      </p>
+                      <div style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
+                        <button
+                          onClick={() => setShowAuth("register")}
+                          style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 7, padding: "11px 22px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
+                        >
+                          Crear cuenta gratis →
+                        </button>
+                        <button
+                          onClick={() => setShowAuth("login")}
+                          style={{ background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 7, padding: "11px 22px", fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}
+                        >
+                          Ya tengo cuenta
+                        </button>
+                      </div>
+                      <p style={{ fontSize: 11, color: "var(--hint)", textAlign: "center", marginTop: 12, marginBottom: 0 }}>
+                        ✓ Gratis para siempre · ✓ Sin tarjeta · ✓ Listo en 30 segundos
+                      </p>
+                    </div>
+                  )}
                   {slug && <ShareCard slug={slug} market={form.mercado} />}
                 </>
               ) : (
