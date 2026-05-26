@@ -113,13 +113,21 @@ export default function PerfilPage() {
   const handleDeleteCV = (id: string) => setCvs(prev => prev.filter(c => c.id !== id));
 
   const handlePortal = async () => {
+    if (!user) return;
     setPortalLoading(true);
     try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       window.location.href = data.url;
-    } catch {
+    } catch (err) {
+      console.error(err);
+      alert("Error al abrir el portal. Intenta de nuevo.");
+    } finally {
       setPortalLoading(false);
     }
   };
@@ -249,10 +257,12 @@ export default function PerfilPage() {
                       ? `Renueva el ${new Date(profile.pro_expires_at).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`
                       : "Sin vencimiento"}
                   </div>
-                  <button onClick={handlePortal} disabled={portalLoading}
-                    style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "9px 0", fontSize: 12, color: "var(--muted)", fontFamily: "inherit", cursor: portalLoading ? "default" : "pointer", opacity: portalLoading ? 0.6 : 1 }}>
-                    {portalLoading ? "Cargando..." : "Gestionar suscripción →"}
-                  </button>
+                  {profile.pro_plan !== "lifetime_mxn" && (
+                    <button onClick={handlePortal} disabled={portalLoading}
+                      style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "9px 0", fontSize: 12, color: "var(--muted)", fontFamily: "inherit", cursor: portalLoading ? "default" : "pointer", opacity: portalLoading ? 0.6 : 1 }}>
+                      {portalLoading ? "Cargando..." : "Gestionar suscripción →"}
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
