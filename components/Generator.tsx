@@ -2,7 +2,8 @@
 import { useState, useRef, useEffect } from "react";
 import CVPreview from "./CVPreview";
 import { AuthModal } from "./AuthModal";
-import type { TemplateId } from "@/lib/templates/types";
+import type { TemplateId, CVData } from "@/lib/templates/types";
+import { PREVIEW_TEMPLATES } from "@/lib/templates/previews";
 import { supabase } from "@/lib/supabase";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
@@ -501,7 +502,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
             <div className="gen-preview-col" ref={previewRef} style={{ position: "sticky", top: 72, maxHeight: "calc(100vh - 90px)", overflowY: "auto" }}>
               {result ? (
                 <>
-                  <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} />
+                  <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} nombre={form.nombre} puesto={form.puesto} ciudad={form.ciudad} email={form.email} photoUrl={form.photoUrl} />
                   {!userId && slug && (
                     <div style={{ margin: "10px 0", padding: "20px 24px", background: "linear-gradient(135deg, var(--green-bg), #fff)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 8 }}>
                       <div style={{ fontSize: 28, marginBottom: 10 }}>📄</div>
@@ -862,10 +863,17 @@ function Spinner({ large }: { large?: boolean }) {
   const s = large ? 28 : 13;
   return <div style={{ width: s, height: s, borderRadius: "50%", border: "2px solid rgba(255,255,255,.15)", borderTopColor: "var(--green-mid)", animation: "spin .65s linear infinite", flexShrink: 0 }} />;
 }
-function GeneratedResult({ text, market, slug, templateId }: { text: string; market: Market; slug: string | null; templateId: TemplateId }) {
+function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciudad, email, photoUrl }: {
+  text: string; market: Market; slug: string | null; templateId: TemplateId;
+  nombre: string; puesto: string; ciudad?: string; email?: string; photoUrl?: string;
+}) {
   const m = MARKETS.find(x => x.id === market)!;
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
+
+  const Preview = PREVIEW_TEMPLATES[templateId] ?? PREVIEW_TEMPLATES.clasico;
+  const cvData: CVData = { nombre, puesto, ciudad, email, mercado: market, cv_text: text, photoUrl };
+
   const handleDownload = async () => {
     if (!slug) return;
     setPdfLoading(true); setPdfError(null);
@@ -878,14 +886,15 @@ function GeneratedResult({ text, market, slug, templateId }: { text: string; mar
       URL.revokeObjectURL(url);
     } catch (e: unknown) { setPdfError(e instanceof Error ? e.message : "Error"); } finally { setPdfLoading(false); }
   };
+
   return (
     <div style={{ background: "var(--paper)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--border)", boxShadow: "0 20px 56px rgba(0,0,0,.5)" }}>
       <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
         <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 500 }}>✦ CV listo para {m.flag} {m.label}</span>
         <button onClick={() => navigator.clipboard.writeText(text)} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>Copiar texto</button>
       </div>
-      <div style={{ padding: 24, maxHeight: 480, overflowY: "auto" }}>
-        <pre style={{ fontFamily: "inherit", fontSize: 12, color: "var(--body)", lineHeight: 1.7, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{text}</pre>
+      <div style={{ overflow: "hidden" }}>
+        <Preview data={cvData} />
       </div>
       {pdfError && <p style={{ fontSize: 11, color: "#b91c1c", background: "#fef2f2", margin: "0 16px", padding: "6px 10px", borderRadius: 5, border: "1px solid #fecaca" }}>{pdfError}</p>}
       <div style={{ padding: "12px 16px", background: "var(--warm)", borderTop: "1px solid var(--border)", display: "flex", gap: 8, flexWrap: "wrap" }}>
