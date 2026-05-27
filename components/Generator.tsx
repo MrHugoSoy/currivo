@@ -105,6 +105,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const [error, setError] = useState<string | null>(null);
   const [limitReached, setLimitReached] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isPro, setIsPro] = useState(false);
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [authLoaded, setAuthLoaded] = useState(false);
   const [showAuth, setShowAuth] = useState<"register" | "login" | null>(null);
@@ -112,16 +113,26 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       const user = data.session?.user;
       setIsAdmin(ADMIN_EMAILS.includes(user?.email ?? ""));
       setUserId(user?.id);
       setAuthLoaded(true);
+      if (user?.id) {
+        const { data: profile } = await supabase.from("profiles").select("is_pro").eq("user_id", user.id).single();
+        setIsPro(profile?.is_pro ?? false);
+      }
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_e, session) => {
       setIsAdmin(ADMIN_EMAILS.includes(session?.user?.email ?? ""));
       setUserId(session?.user?.id);
       setAuthLoaded(true);
+      if (session?.user?.id) {
+        const { data: profile } = await supabase.from("profiles").select("is_pro").eq("user_id", session.user.id).single();
+        setIsPro(profile?.is_pro ?? false);
+      } else {
+        setIsPro(false);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -425,11 +436,11 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                     {TEMPLATE_DEFS.map(t => {
                       const isSelected = form.templateId === t.id;
-                      const isPro = !t.libre && !isAdmin;
+                      const isLocked = !t.libre && !isAdmin && !isPro;
                       return (
                         <button key={t.id} type="button"
-                          onClick={() => { if (!isPro) setForm(f => ({ ...f, templateId: t.id })); }}
-                          style={{ border: `1px solid ${isSelected ? "rgba(74,144,96,.5)" : "rgba(255,255,255,.08)"}`, borderRadius: 8, overflow: "hidden", cursor: isPro ? "default" : "pointer", background: "none", padding: 0, position: "relative", textAlign: "left", transition: "border-color .15s", opacity: isPro ? 0.6 : 1 }}>
+                          onClick={() => { if (!isLocked) setForm(f => ({ ...f, templateId: t.id })); }}
+                          style={{ border: `1px solid ${isSelected ? "rgba(74,144,96,.5)" : "rgba(255,255,255,.08)"}`, borderRadius: 8, overflow: "hidden", cursor: isLocked ? "default" : "pointer", background: "none", padding: 0, position: "relative", textAlign: "left", transition: "border-color .15s", opacity: isLocked ? 0.6 : 1 }}>
                           {isSelected && (
                             <div style={{ position: "absolute", top: 7, right: 7, width: 16, height: 16, borderRadius: "50%", background: "var(--green-mid)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: "#fff", zIndex: 2 }}>✓</div>
                           )}
