@@ -313,12 +313,12 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                 {form.mercado === "ca" && (
                   <div style={{ marginBottom: 14 }}>
                     <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.38)", marginBottom: 8 }}>
-                      ¿En qué idioma quieres tu CV?
+                      In which language do you want your CV? / Dans quelle langue voulez-vous votre CV?
                     </label>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {(["en", "fr"] as const).map(lang => {
                         const labels = { en: "🇨🇦 English", fr: "🇫🇷 Français" };
-                        const hints  = { en: "Para la mayoría de provincias — Ontario, BC, Alberta", fr: "Para Quebec y posiciones del gobierno federal" };
+                        const hints  = { en: "For most provinces — Ontario, BC, Alberta", fr: "Pour le Québec et les postes du gouvernement fédéral" };
                         const active = (form.idiomaCv ?? "en") === lang;
                         return (
                           <button key={lang} type="button" onClick={() => setForm(f => ({ ...f, idiomaCv: lang }))}
@@ -336,8 +336,8 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                     </div>
                     <p style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginTop: 8, marginBottom: 0 }}>
                       {(form.idiomaCv ?? "en") === "fr"
-                        ? "✓ Ton CV sera rédigé en français professionnel canadien"
-                        : "✓ Tu CV se generará en inglés profesional canadiense"}
+                        ? "✓ Votre CV sera rédigé en français professionnel canadien"
+                        : "✓ Your CV will be generated in professional Canadian English"}
                     </p>
                   </div>
                 )}
