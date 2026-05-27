@@ -189,7 +189,7 @@ export function extractHeader(cvText: string): {
   for (const raw of cvText.split("\n")) {
     const line = raw.trim();
     if (!line) continue;
-    if (isAllCaps(line) && !isBullet(line) && line.length > 2) break;
+    if (isAllCaps(line) && !isBullet(line) && line.length > 2 && result.name && result.subtitle) break;
     if (!result.name) {
       result.name = line;
     } else if (
