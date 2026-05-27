@@ -440,7 +440,7 @@ FRENCH CV SPECIFIC RULES:
 - Use French action verbs: Dirigé, Développé, Optimisé, Coordonné, Réalisé, Géré, Amélioré, Mis en place, Augmenté
 - Dates format: jan. 2020 – mars 2023
 - Professional French tone — formal but not archaic
-- If user speaks English, add brief English summary at the end labeled "PROFESSIONAL SUMMARY (English)"
+- Do NOT add any English section at the end. The entire CV must be in French only.
 - COMPÉTENCES CLÉS section: keywords MUST be separated by " | " pipes on a single line (e.g. "Gestion de projet | Communication | Leadership")
 
 TRADUCTION OBLIGATOIRE — CRITIQUE:

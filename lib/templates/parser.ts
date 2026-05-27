@@ -31,7 +31,7 @@ function cleanBullet(line: string): string {
 // Matches date ranges with optional month name prefix:
 // "2020 – 2023", "2020 — 2023", "Jan 2020 – Mar 2023", "Enero 2020 – Marzo 2023"
 const DATE_RE =
-  /(?:[A-Za-záéíóúüñÁÉÍÓÚÜÑ]{3,}\.?\s+)?\b\d{4}\s*[–—\-]\s*(?:(?:[A-Za-záéíóúüñÁÉÍÓÚÜÑ]{3,}\.?\s+)?\d{4}|Present|Presente|Actual|Actualmente|Current)\b/i;
+  /(?:[A-Za-záéíóúüñÁÉÍÓÚÜÑ]{3,}\.?\s+)?\b\d{4}\s*[–—\-]\s*(?:(?:[A-Za-záéíóúüñÁÉÍÓÚÜÑ]{3,}\.?\s+)?\d{4}|Present|Pr[eé]sent|Presente|Actual|Actuel|Actualmente|Current)\b/i;
 
 // Matches a standalone 4-digit year (e.g. education graduation year)
 const YEAR_RE = /^\d{4}$/;
@@ -57,6 +57,9 @@ export function parseCVText(text: string): CVSection[] {
 
   const isEduSection = () =>
     current !== null && /educ|formation/i.test(current.title);
+
+  const isSkillsSection = () =>
+    current !== null && /skill|habilidad|comp[eé]tenc|core/i.test(current.title);
 
   for (const raw of text.split("\n")) {
     const line = raw.trim();
@@ -110,7 +113,7 @@ export function parseCVText(text: string): CVSection[] {
         const hasDateRange = parts.some((p) => DATE_RE.test(p));
         const allShort = parts.every((p) => p.length < 35);
 
-        if (!hasDateRange && allShort) {
+        if (!hasDateRange && (allShort || isSkillsSection())) {
           // Skills / competencies line
           pushJob();
           current.items.push({ type: "skills", content: line });

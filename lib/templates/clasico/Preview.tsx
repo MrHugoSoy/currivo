@@ -16,7 +16,7 @@ export default function ClasicoPreview({ data }: { data: CVData }) {
   const sections  = parseCVText(data.cv_text);
   const hdr       = extractHeader(data.cv_text);
   const name      = hdr.name     || data.nombre;
-  const subtitle  = hdr.subtitle || data.puesto;
+  const subtitle  = data.mercado === "mx" ? (hdr.subtitle || data.puesto) : (hdr.subtitle || "");
   const contacts  = hdr.contacts.length
     ? hdr.contacts
     : [data.ciudad, data.email].filter(Boolean) as string[];
