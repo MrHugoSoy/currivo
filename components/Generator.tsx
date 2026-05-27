@@ -551,12 +551,14 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                   <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 500 }}>✦ CV guardado — actualiza para regenerar</span>
                   </div>
-                  <div style={{ overflow: "hidden" }}>
-                    {(() => {
-                      const Preview = PREVIEW_TEMPLATES[form.templateId] ?? PREVIEW_TEMPLATES.clasico;
-                      const cvData: CVData = { nombre: form.nombre, puesto: form.puesto, ciudad: form.ciudad, email: form.email, mercado: form.mercado, cv_text: initialCvText, photoUrl: form.photoUrl };
-                      return <Preview data={cvData} />;
-                    })()}
+                  <div style={{ overflowX: "auto", overflowY: "visible" }}>
+                    <div style={{ minWidth: 680 }}>
+                      {(() => {
+                        const Preview = PREVIEW_TEMPLATES[form.templateId] ?? PREVIEW_TEMPLATES.clasico;
+                        const cvData: CVData = { nombre: form.nombre, puesto: form.puesto, ciudad: form.ciudad, email: form.email, mercado: form.mercado, cv_text: initialCvText, photoUrl: form.photoUrl };
+                        return <Preview data={cvData} />;
+                      })()}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -986,8 +988,10 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
           />
         </div>
       ) : (
-        <div style={{ overflow: "hidden" }}>
-          <Preview data={cvData} />
+        <div style={{ overflowX: "auto", overflowY: "visible" }}>
+          <div style={{ minWidth: 680 }}>
+            <Preview data={cvData} />
+          </div>
         </div>
       )}
 
