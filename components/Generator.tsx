@@ -884,6 +884,11 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  useEffect(() => {
+    setEditedText(text);
+    setIsEditing(false);
+  }, [text]);
+
   const Preview = PREVIEW_TEMPLATES[templateId] ?? PREVIEW_TEMPLATES.clasico;
   const cvData: CVData = { nombre, puesto, ciudad, email, mercado: market, cv_text: editedText, photoUrl };
   const hasEdits = editedText !== text;
