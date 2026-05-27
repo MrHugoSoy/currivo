@@ -96,6 +96,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     if (!Array.isArray(merged.educacion) || !merged.educacion.length) merged.educacion = DEFAULT_FORM.educacion;
     if (!Array.isArray(merged.redesSociales)) merged.redesSociales = [];
     if (!Array.isArray(merged.habilidades)) merged.habilidades = [];
+    if (!merged.idiomaCv) merged.idiomaCv = "en";
     return merged as CVFormData;
   });
 
