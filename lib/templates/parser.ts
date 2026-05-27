@@ -59,7 +59,7 @@ export function parseCVText(text: string): CVSection[] {
     current !== null && /educ|formation/i.test(current.title);
 
   const isSkillsSection = () =>
-    current !== null && /skill|habilidad|comp[eé]tenc|core/i.test(current.title);
+    current !== null && /skill|habilidad|comp[eé]t[eé]nc|core|cl[eé]s/i.test(current.title);
 
   for (const raw of text.split("\n")) {
     const line = raw.trim();
@@ -195,10 +195,12 @@ export function extractHeader(cvText: string): {
     } else if (
       !result.subtitle &&
       !line.includes("@") &&
-      !line.includes("·") &&
+      !/\d{7,}/.test(line) &&
       !line.includes("📍") &&
       !line.includes("☎") &&
-      !line.includes("✉")
+      !line.includes("✉") &&
+      !line.includes("linkedin.com") &&
+      !line.includes("github.com")
     ) {
       result.subtitle = line;
     } else {
@@ -212,7 +214,7 @@ export function extractHeader(cvText: string): {
 
 export function extractSkills(sections: CVSection[]): string[] {
   const skillSection = sections.find((s) =>
-    /skill|habilidad|competenc|comp[eé]tenc|core/i.test(s.title)
+    /skill|habilidad|comp[eé]t[eé]nc|core|cl[eé]s/i.test(s.title)
   );
   if (!skillSection) return [];
   const raw = skillSection.items
