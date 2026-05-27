@@ -100,6 +100,9 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     return merged as CVFormData;
   });
 
+  const [initialCvText, setInitialCvText] = useState<string | null>(
+    (initialData?.cv_text as string) ?? null
+  );
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
@@ -181,7 +184,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
         if (data.error === "LIMIT_REACHED") { setLimitReached(true); return; }
         throw new Error(data.error || "Error generando CV");
       }
-      setResult(data.cv); setSlug(data.slug ?? null);
+      setResult(data.cv); setInitialCvText(null); setSlug(data.slug ?? null);
       setTimeout(() => previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Error inesperado");
@@ -542,6 +545,19 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                   )}
                   {slug && <ShareCard slug={slug} market={form.mercado} />}
                 </>
+              ) : initialCvText ? (
+                <div style={{ background: "var(--paper)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--border)", boxShadow: "0 20px 56px rgba(0,0,0,.5)" }}>
+                  <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 500 }}>✦ CV guardado — actualiza para regenerar</span>
+                  </div>
+                  <div style={{ overflow: "hidden" }}>
+                    {(() => {
+                      const Preview = PREVIEW_TEMPLATES[form.templateId] ?? PREVIEW_TEMPLATES.clasico;
+                      const cvData: CVData = { nombre: form.nombre, puesto: form.puesto, ciudad: form.ciudad, email: form.email, mercado: form.mercado, cv_text: initialCvText, photoUrl: form.photoUrl };
+                      return <Preview data={cvData} />;
+                    })()}
+                  </div>
+                </div>
               ) : (
                 <>
                   <CVPreview market={form.mercado} photoUrl={form.photoUrl} templateId={form.templateId} formData={form} />
