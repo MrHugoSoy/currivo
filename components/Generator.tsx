@@ -227,6 +227,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
         @media (max-width: 600px) {
           .gen-wrap { padding: 0 16px !important; }
           .gen-section { padding: 48px 0 !important; }
+          .actions-grid { grid-template-columns: 1fr !important; }
           .field-row { grid-template-columns: 1fr !important; }
         }
       `}</style>
@@ -947,38 +948,27 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
   return (
     <div style={{ background: "var(--paper)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--border)", boxShadow: "0 20px 56px rgba(0,0,0,.5)" }}>
 
-      {/* ── Toolbar ── */}
-      <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-        {isEditing ? (
-          <>
-            <span style={{ fontSize: 11, color: "var(--body)", fontWeight: 500 }}>✏ Editando CV</span>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={handleSave} disabled={saving}
-                style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 10, fontFamily: "inherit", cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}>
-                {saving ? "Guardando..." : "✓ Guardar cambios"}
-              </button>
-              <button onClick={handleCancel}
-                style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
-                ✕ Cancelar
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 500 }}>✦ CV listo para {m.flag} {m.label}</span>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={() => setIsEditing(true)}
-                style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
-                ✏ Editar texto
-              </button>
-              <button onClick={() => navigator.clipboard.writeText(editedText)}
-                style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
-                Copiar texto
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+      {/* ── Toolbar — solo visible en modo edición ── */}
+      {isEditing && (
+        <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+          <span style={{ fontSize: 11, color: "var(--body)", fontWeight: 500 }}>✏ Editando CV</span>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={handleSave} disabled={saving}
+              style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 4, padding: "4px 12px", fontSize: 10, fontFamily: "inherit", cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}>
+              {saving ? "Guardando..." : "✓ Guardar cambios"}
+            </button>
+            <button onClick={handleCancel}
+              style={{ background: "none", border: "1px solid var(--border)", borderRadius: 4, padding: "4px 10px", fontSize: 10, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
+              ✕ Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+      {!isEditing && (
+        <div style={{ background: "var(--warm)", padding: "10px 16px", borderBottom: "1px solid var(--border)" }}>
+          <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 500 }}>✦ CV listo para {m.flag} {m.label}</span>
+        </div>
+      )}
 
       {/* ── Body — template preview or textarea ── */}
       {isEditing ? (
@@ -1011,19 +1001,35 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
         </div>
       )}
 
-      {pdfError && <p style={{ fontSize: 11, color: "#b91c1c", background: "#fef2f2", margin: "0 16px", padding: "6px 10px", borderRadius: 5, border: "1px solid #fecaca" }}>{pdfError}</p>}
-
       {/* ── Actions ── */}
-      <div style={{ padding: "12px 16px", background: "var(--warm)", borderTop: "1px solid var(--border)", display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <button onClick={handleDownload} disabled={pdfLoading || !slug}
-          style={{ flex: 1, minWidth: 140, background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: 10, fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-          {pdfLoading ? <><Spinner />Generando PDF...</> : "⬇ Descargar PDF"}
-        </button>
-        <button onClick={() => { if (slug) window.location.href = `/crear?edit=${slug}`; }}
-          style={{ flex: 1, minWidth: 120, background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: 10, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>
-          ← Editar formulario
-        </button>
-      </div>
+      {!isEditing && (
+        <div style={{ padding: "16px", background: "var(--warm)", borderTop: "1px solid var(--border)" }}>
+          <p style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--hint)", marginBottom: 12, fontWeight: 600 }}>¿Qué quieres hacer?</p>
+          <div className="actions-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+            <button onClick={handleDownload} disabled={pdfLoading || !slug}
+              style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 8, padding: "12px 10px", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.7 : 1, fontFamily: "inherit", textAlign: "left" }}>
+              <div style={{ fontSize: 16, marginBottom: 6 }}>{pdfLoading ? "⏳" : "⬇"}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 3 }}>{pdfLoading ? "Generando..." : "Descargar PDF"}</div>
+              <div style={{ fontSize: 10, opacity: 0.7, lineHeight: 1.4 }}>Descarga tu CV listo para enviar</div>
+            </button>
+            <button onClick={() => setIsEditing(true)}
+              style={{ background: "var(--paper)", color: "var(--ink)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 10px", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
+              <div style={{ fontSize: 16, marginBottom: 6 }}>✏</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 3 }}>Editar texto</div>
+              <div style={{ fontSize: 10, color: "var(--muted)", lineHeight: 1.4 }}>Cambia palabras o frases del CV generado</div>
+            </button>
+            <button onClick={() => { if (slug) window.location.href = `/crear?edit=${slug}`; }}
+              style={{ background: "var(--paper)", color: "var(--ink)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 10px", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
+              <div style={{ fontSize: 16, marginBottom: 6 }}>📋</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 3 }}>Editar formulario</div>
+              <div style={{ fontSize: 10, color: "var(--muted)", lineHeight: 1.4 }}>Cambia tus datos y regenera el CV con IA</div>
+            </button>
+          </div>
+          {pdfError && (
+            <p style={{ fontSize: 11, color: "#b91c1c", background: "#fef2f2", marginTop: 10, padding: "6px 10px", borderRadius: 5, border: "1px solid #fecaca" }}>{pdfError}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
