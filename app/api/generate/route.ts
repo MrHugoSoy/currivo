@@ -273,6 +273,7 @@ FORMAT RULES (ATS compatibility is critical):
 STRUCTURE (in this exact order):
 1. HEADER
    - Full name (prominent)
+   - Target position title in English (translated from: ${puesto})
    - City, State (never full address)
    - Phone | Email${redesStr ? " | LinkedIn" : ""}
 
@@ -368,6 +369,7 @@ FORMAT RULES (ATS compatibility):
 STRUCTURE (in this exact order):
 1. ${isFr ? "EN-TÊTE" : "HEADER"}
    - Full name (prominent)
+   - ${isFr ? `Titre du poste cible en français (traduit depuis: ${puesto})` : `Target position title in English (translated from: ${puesto})`}
    - City, Province (never full address)
    - Phone | Email${redesStr ? ` | ${isFr ? "LinkedIn" : "LinkedIn"}` : ""}${redesStr?.toLowerCase().includes("github") || redesStr?.toLowerCase().includes("portfolio") ? " | Portfolio" : ""}
 
