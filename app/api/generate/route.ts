@@ -441,6 +441,22 @@ FRENCH CV SPECIFIC RULES:
 - Dates format: jan. 2020 – mars 2023
 - Professional French tone — formal but not archaic
 - If user speaks English, add brief English summary at the end labeled "PROFESSIONAL SUMMARY (English)"
+- COMPÉTENCES CLÉS section: keywords MUST be separated by " | " pipes on a single line (e.g. "Gestion de projet | Communication | Leadership")
+
+TRADUCTION OBLIGATOIRE — CRITIQUE:
+Tous ces éléments DOIVENT être traduits en français canadien:
+- Le titre/poste du candidat (ex: "Software Engineer" → "Ingénieur logiciel")
+- Les intitulés de diplômes et noms de programmes académiques
+- Les descriptions d'expérience professionnelle
+- Les compétences et habiletés
+- Le résumé professionnel
+- TOUS les textes sauf les noms propres
+
+Éléments qui NE SE traduisent PAS:
+- Noms d'entreprises (ex: "Amazon", "TD Bank")
+- Noms de villes (ex: "Toronto", "Vancouver")
+- Noms de certifications officielles (ex: "PMP", "AWS Certified")
+- Prénom et nom du candidat
 ` : `
 ENGLISH CV SPECIFIC RULES:
 - Use Canadian English spelling (colour, centre, analyse, programme)
