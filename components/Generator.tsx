@@ -1007,22 +1007,34 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
           <p style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--hint)", marginBottom: 12, fontWeight: 600 }}>¿Qué quieres hacer?</p>
           <div className="actions-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
             <button onClick={handleDownload} disabled={pdfLoading || !slug}
-              style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 8, padding: "12px 10px", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.7 : 1, fontFamily: "inherit", textAlign: "left" }}>
-              <div style={{ fontSize: 16, marginBottom: 6 }}>{pdfLoading ? "⏳" : "⬇"}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 3 }}>{pdfLoading ? "Generando..." : "Descargar PDF"}</div>
-              <div style={{ fontSize: 10, opacity: 0.7, lineHeight: 1.4 }}>Descarga tu CV listo para enviar</div>
+              style={{ background: "var(--ink)", color: "#fff", border: "none", borderRadius: 10, padding: "14px 12px", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.6 : 1, fontFamily: "inherit", textAlign: "left", display: "flex", flexDirection: "column", gap: 8, transition: "opacity .15s" }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(74,144,96,.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>
+                {pdfLoading ? "⏳" : "⬇"}
+              </div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 3, color: "#fff" }}>{pdfLoading ? "Generando..." : "Descargar PDF"}</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", lineHeight: 1.5 }}>Listo para enviar a reclutadores</div>
+              </div>
             </button>
             <button onClick={() => setIsEditing(true)}
-              style={{ background: "var(--paper)", color: "var(--ink)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 10px", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
-              <div style={{ fontSize: 16, marginBottom: 6 }}>✏</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 3 }}>Editar texto</div>
-              <div style={{ fontSize: 10, color: "var(--muted)", lineHeight: 1.4 }}>Cambia palabras o frases del CV generado</div>
+              style={{ background: "var(--paper)", color: "var(--ink)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 12px", cursor: "pointer", fontFamily: "inherit", textAlign: "left", display: "flex", flexDirection: "column", gap: 8, transition: "border-color .15s" }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(42,82,54,.4)")}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--green-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>✏</div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 3 }}>Editar texto</div>
+                <div style={{ fontSize: 10, color: "var(--muted)", lineHeight: 1.5 }}>Ajusta palabras o frases directamente</div>
+              </div>
             </button>
             <button onClick={() => { if (slug) window.location.href = `/crear?edit=${slug}`; }}
-              style={{ background: "var(--paper)", color: "var(--ink)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 10px", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
-              <div style={{ fontSize: 16, marginBottom: 6 }}>📋</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 3 }}>Editar formulario</div>
-              <div style={{ fontSize: 10, color: "var(--muted)", lineHeight: 1.4 }}>Cambia tus datos y regenera el CV con IA</div>
+              style={{ background: "var(--paper)", color: "var(--ink)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 12px", cursor: "pointer", fontFamily: "inherit", textAlign: "left", display: "flex", flexDirection: "column", gap: 8, transition: "border-color .15s" }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(42,82,54,.4)")}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--green-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>↺</div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 3 }}>Editar formulario</div>
+                <div style={{ fontSize: 10, color: "var(--muted)", lineHeight: 1.5 }}>Cambia datos y regenera con IA</div>
+              </div>
             </button>
           </div>
           {pdfError && (
