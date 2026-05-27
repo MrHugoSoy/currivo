@@ -129,6 +129,7 @@ function buildPrompt(data: Record<string, unknown>): string {
   // ── Adaptador por vacante ──
   const vacanteActiva = vacante?.trim() && vacante.length > 50;
   const idiomaFormulario = (data.idiomaFormulario as string | undefined) || "es";
+  const idiomaCv = (data.idiomaCv as string | undefined) || "en";
 
   const vacanteRule_es = vacanteActiva
     ? `\nADAPTACIÓN A VACANTE ESPECÍFICA — MUY IMPORTANTE:
@@ -316,9 +317,11 @@ Generate ONLY the resume content. No explanations. No comments. Section headers 
   }
 
   // ── CANADÁ ──
+  const isFr = idiomaCv === "fr";
+
   return `You are a Canadian resume expert specializing in helping immigrants and international professionals land jobs in Canada. You know Canadian HR culture, ATS systems, and multicultural workplace values deeply.
 
-Generate a professional Canadian resume in English with this information:
+Generate a professional Canadian resume in ${isFr ? "French (Français canadien)" : "English"} with this information:
 
 Name: ${nombre}
 Target Position: ${puesto}
@@ -330,6 +333,7 @@ Volunteer Work: ${voluntariado || "Not specified"}
 Languages: ${langList || "English (Fluent)"}
 Tone: ${tono} — ${toneDesc[tono] || tono}
 Industry: ${industria}
+CV Language: ${isFr ? "French (Français)" : "English"}
 
 WORK EXPERIENCE:
 ${expStr}
@@ -339,7 +343,7 @@ ${eduStr}
 
 CRITICAL — NEVER FABRICATE INFORMATION:
 - Use ONLY information provided by the user
-- If no education details given, write "Education details not provided"
+- If no education details given, write "${isFr ? "Formation non précisée" : "Education details not provided"}"
 - NEVER invent: company names, dates, universities, projects or achievements
 - A short honest resume always beats a fabricated one
 ${vacanteRule_en}
@@ -362,47 +366,47 @@ FORMAT RULES (ATS compatibility):
 - Plain text only — NO markdown, NO bold (**), NO italics, NO # headers
 
 STRUCTURE (in this exact order):
-1. HEADER
+1. ${isFr ? "EN-TÊTE" : "HEADER"}
    - Full name (prominent)
    - City, Province (never full address)
-   - Phone | Email${redesStr ? " | LinkedIn" : ""}${redesStr?.toLowerCase().includes("github") || redesStr?.toLowerCase().includes("portfolio") ? " | Portfolio" : ""}
+   - Phone | Email${redesStr ? ` | ${isFr ? "LinkedIn" : "LinkedIn"}` : ""}${redesStr?.toLowerCase().includes("github") || redesStr?.toLowerCase().includes("portfolio") ? " | Portfolio" : ""}
 
-2. PROFESSIONAL SUMMARY (3-4 lines maximum)
-   - Start with years of experience and specialization
-   - Include multicultural background as an asset — this is valued in Canada
-   - 1-2 quantified achievements
-   - NO first person ("I" statements)
+2. ${isFr ? "RÉSUMÉ PROFESSIONNEL" : "PROFESSIONAL SUMMARY"} (${isFr ? "3-4 lignes maximum" : "3-4 lines maximum"})
+   - ${isFr ? "Commencer par les années d'expérience et la spécialisation" : "Start with years of experience and specialization"}
+   - ${isFr ? "Inclure le parcours multiculturel comme atout" : "Include multicultural background as an asset — this is valued in Canada"}
+   - 1-2 ${isFr ? "réalisations quantifiées" : "quantified achievements"}
+   - NO first person ("I" / "Je" statements)
    - Keywords relevant to ${industria} and ${puesto}
 
-3. CORE COMPETENCIES
+3. ${isFr ? "COMPÉTENCES CLÉS" : "CORE COMPETENCIES"}
    - 9-12 keywords separated by | pipes in a single line or two
    - Mix technical and soft skills
    - ATS-friendly single keywords or short phrases
    - ${skillsNote}
-   - Canadian soft skills to include: Cross-cultural communication, Adaptability, Community involvement, Team collaboration
+   - ${isFr ? "Compétences humaines canadiennes: Communication interculturelle, Adaptabilité, Implication communautaire, Collaboration en équipe" : "Canadian soft skills to include: Cross-cultural communication, Adaptability, Community involvement, Team collaboration"}
 
 4. ${sinExperiencia
-  ? `ACADEMIC & PERSONAL PROJECTS\n   - No work experience — focus on relevant projects for ${puesto}\n   - Use same bullet format: Action verb + what you did + result/impact`
-  : `PROFESSIONAL EXPERIENCE\n   - Reverse chronological order\n   - Format: Job Title | Company Name | City, Province/Country | Month Year – Month Year\n   - 3-5 bullet points per role\n   - EVERY bullet starts with a strong past-tense action verb\n   - Follow Context + Action + Result format\n   - Quantify: numbers, %, $CAD, team sizes, timelines\n   - Highlight cross-cultural collaboration and adaptability\n   - BAD: "Responsible for managing the design team"\n   - GOOD: "Led cross-functional design team of 4, delivering 12 brand identity projects on time and 15% under budget"\n   - Each bullet maximum 1.5 lines`}
+  ? (isFr ? `PROJETS ACADÉMIQUES ET PERSONNELS\n   - Pas d'expérience professionnelle — concentrez-vous sur les projets pertinents pour ${puesto}\n   - Format: Verbe d'action + ce que vous avez fait + résultat/impact` : `ACADEMIC & PERSONAL PROJECTS\n   - No work experience — focus on relevant projects for ${puesto}\n   - Use same bullet format: Action verb + what you did + result/impact`)
+  : (isFr ? `EXPÉRIENCE PROFESSIONNELLE\n   - Ordre chronologique inverse\n   - Format: Titre du poste | Nom de l'entreprise | Ville, Province/Pays | mois année – mois année\n   - 3-5 points par rôle\n   - CHAQUE point commence par un verbe d'action fort au passé\n   - Suivre le format Contexte + Action + Résultat\n   - Quantifier: chiffres, %, $CAD, tailles d'équipe, délais\n   - Mettre en avant la collaboration interculturelle et l'adaptabilité\n   - MAUVAIS: "Responsable de la gestion de l'équipe de conception"\n   - BON: "Dirigé une équipe de conception interfonctionnelle de 4 personnes, livrant 12 projets d'identité de marque dans les délais et 15% sous le budget"\n   - Chaque point: maximum 1,5 lignes` : `PROFESSIONAL EXPERIENCE\n   - Reverse chronological order\n   - Format: Job Title | Company Name | City, Province/Country | Month Year – Month Year\n   - 3-5 bullet points per role\n   - EVERY bullet starts with a strong past-tense action verb\n   - Follow Context + Action + Result format\n   - Quantify: numbers, %, $CAD, team sizes, timelines\n   - Highlight cross-cultural collaboration and adaptability\n   - BAD: "Responsible for managing the design team"\n   - GOOD: "Led cross-functional design team of 4, delivering 12 brand identity projects on time and 15% under budget"\n   - Each bullet maximum 1.5 lines`)}
 
-5. VOLUNTEER WORK (very important in Canada — shows community integration)
+5. ${isFr ? "BÉNÉVOLAT" : "VOLUNTEER WORK"} (${isFr ? "très important au Canada — démontre l'intégration communautaire" : "very important in Canada — shows community integration"})
    ${voluntariado
-     ? `- Use provided volunteer info: ${voluntariado}\n   - 1-2 bullet points showing community impact`
-     : `- Write ONLY: "Open to volunteer opportunities"\n   - DO NOT invent organizations or activities`}
+     ? `- ${isFr ? "Utiliser les informations de bénévolat fournies" : "Use provided volunteer info"}: ${voluntariado}\n   - 1-2 bullet points showing community impact`
+     : `- ${isFr ? 'Écrire SEULEMENT: "Ouvert aux opportunités de bénévolat"' : 'Write ONLY: "Open to volunteer opportunities"'}\n   - DO NOT invent organizations or activities`}
 
-6. EDUCATION
-   - Degree | Institution | Location | Year
-   - If international credential, add: "(International credential — equivalent to Canadian Bachelor's Degree)" if applicable
-   - If WES evaluated, mention it: "(WES Evaluated — Canadian equivalency: [degree])"
-   - ${eduStr !== "No especificada" ? "Use only provided data" : "Write: Education details not provided"}
+6. ${isFr ? "FORMATION" : "EDUCATION"}
+   - ${isFr ? "Diplôme | Établissement | Lieu | Année" : "Degree | Institution | Location | Year"}
+   - ${isFr ? "Si accréditation internationale, ajouter: \"(Diplôme international — équivalent au baccalauréat canadien)\" si applicable" : "If international credential, add: \"(International credential — equivalent to Canadian Bachelor's Degree)\" if applicable"}
+   - ${isFr ? "Si évalué par le WES, mentionner: \"(Évalué par le WES — équivalence canadienne: [diplôme])\"" : "If WES evaluated, mention it: \"(WES Evaluated — Canadian equivalency: [degree])\""}
+   - ${eduStr !== "No especificada" ? (isFr ? "Utiliser uniquement les données fournies" : "Use only provided data") : (isFr ? "Écrire: Formation non précisée" : "Write: Education details not provided")}
 
-7. LANGUAGES
-   - ${langList || "English (Fluent)"}
+7. ${isFr ? "LANGUES" : "LANGUAGES"}
+   - ${langList || (isFr ? "Anglais (Courant)" : "English (Fluent)")}
    ${langList?.toLowerCase().includes("french")
-     ? "- HIGHLIGHT French prominently — major competitive advantage in Quebec, Ottawa, and federal government positions\n   - Format: French — [level] | English — [level]"
-     : "- Format: Language — Level (e.g. Spanish — Native | English — Professional)"}
+     ? (isFr ? "- METTRE EN VALEUR le français en tête — avantage majeur au Québec, Ottawa et postes gouvernementaux fédéraux\n   - Format: Français — [niveau] | Anglais — [niveau]" : "- HIGHLIGHT French prominently — major competitive advantage in Quebec, Ottawa, and federal government positions\n   - Format: French — [level] | English — [level]")
+     : (isFr ? "- Format: Langue — Niveau (ex. Espagnol — Langue maternelle | Anglais — Professionnel)" : "- Format: Language — Level (e.g. Spanish — Native | English — Professional)")}
 
-${certTexto ? `8. CERTIFICATIONS\n   - ${certTexto}\n   - Format: Certification Name | Issuing Organization | Year` : ""}
+${certTexto ? `8. ${isFr ? "CERTIFICATIONS\n   - " + certTexto + "\n   - Format: Nom de la certification | Organisation émettrice | Année" : "CERTIFICATIONS\n   - " + certTexto + "\n   - Format: Certification Name | Issuing Organization | Year"}` : ""}
 
 ATS OPTIMIZATION:
 - Use standard section headers — ATS may not recognize creative names
@@ -412,29 +416,43 @@ ATS OPTIMIZATION:
 
 PROVINCE-SPECIFIC NOTES:
 ${ciudad?.toLowerCase().includes("montreal") || ciudad?.toLowerCase().includes("quebec")
-  ? "QUEBEC: French is essential — emphasize French language skills prominently. Many Quebec employers require French for most positions."
+  ? (isFr ? "QUÉBEC: Le français est essentiel — c'est la langue de travail principale. Mettre en valeur les compétences en français en tête de CV." : "QUEBEC: French is essential — emphasize French language skills prominently. Many Quebec employers require French for most positions.")
   : ciudad?.toLowerCase().includes("ottawa")
-  ? "OTTAWA: Federal government hub — bilingualism (EN/FR) is a major competitive advantage. Highlight any French skills."
+  ? (isFr ? "OTTAWA: Centre du gouvernement fédéral — le bilinguisme (FR/EN) est un avantage majeur. Mettre en avant le français en priorité." : "OTTAWA: Federal government hub — bilingualism (EN/FR) is a major competitive advantage. Highlight any French skills.")
   : ciudad?.toLowerCase().includes("vancouver") || ciudad?.toLowerCase().includes("bc")
   ? "BC/VANCOUVER: Tech-forward market — highlight GitHub, portfolio, and digital skills prominently."
   : ciudad?.toLowerCase().includes("calgary") || ciudad?.toLowerCase().includes("alberta")
   ? "ALBERTA: Energy, tech and trades sector — highlight technical certifications and safety training."
   : ciudad?.toLowerCase().includes("toronto") || ciudad?.toLowerCase().includes("ontario")
   ? "TORONTO/ONTARIO: Most competitive market — quantify everything, emphasize multicultural teamwork and adaptability."
-  : "CANADA (General): Highlight adaptability, multicultural communication, and community involvement."}
+  : (isFr ? "CANADA (Général): Mettre en avant l'adaptabilité, la communication interculturelle et l'implication communautaire." : "CANADA (General): Highlight adaptability, multicultural communication, and community involvement.")}
 
-LANGUAGE DETECTION:
+LANGUAGE AND OUTPUT RULES:
 - The user filled this form in: ${idiomaFormulario === "es" ? "Spanish" : idiomaFormulario === "fr" ? "French" : "English"}
-- Regardless of input language, generate the ENTIRE resume in professional Canadian English
-- Translate naturally — do NOT mention that translation was made
-- Keep proper nouns as-is
-${idiomaFormulario === "fr" ? "- User is comfortable in French — consider this when highlighting language skills" : ""}
+- THE ENTIRE CV MUST BE WRITTEN IN: ${isFr ? "PROFESSIONAL CANADIAN FRENCH (FRANÇAIS CANADIEN)" : "PROFESSIONAL CANADIAN ENGLISH"}
+- Translate ALL content to the target language naturally
+- Keep proper nouns as-is (company names, cities, certification names)
+- Do NOT mention that translation was made
+${isFr ? `
+FRENCH CV SPECIFIC RULES:
+- Use Quebec/Canadian French terminology, not European French
+- Section headers in French: EXPÉRIENCE PROFESSIONNELLE, FORMATION, COMPÉTENCES CLÉS, BÉNÉVOLAT, LANGUES, RÉSUMÉ PROFESSIONNEL
+- Use French action verbs: Dirigé, Développé, Optimisé, Coordonné, Réalisé, Géré, Amélioré, Mis en place, Augmenté
+- Dates format: jan. 2020 – mars 2023
+- Professional French tone — formal but not archaic
+- If user speaks English, add brief English summary at the end labeled "PROFESSIONAL SUMMARY (English)"
+` : `
+ENGLISH CV SPECIFIC RULES:
+- Use Canadian English spelling (colour, centre, analyse, programme)
+- If user speaks French, highlight bilingualism prominently
+- Standard Canadian English professional tone
+`}
 
 CULTURAL NOTES FOR CANADIAN MARKET:
-- Canadian employers value collaboration over individual achievement
-- Multicultural background is an asset — frame it positively
-- Community involvement (volunteer work) demonstrates integration
-- Avoid overly aggressive US-style language — balance achievement with teamwork
+- ${isFr ? "Les employeurs canadiens valorisent la collaboration plutôt que la réussite individuelle" : "Canadian employers value collaboration over individual achievement"}
+- ${isFr ? "Le parcours multiculturel est un atout — le présenter positivement" : "Multicultural background is an asset — frame it positively"}
+- ${isFr ? "L'implication communautaire (bénévolat) démontre l'intégration" : "Community involvement (volunteer work) demonstrates integration"}
+- ${isFr ? "Éviter un langage trop agressif à l'américaine — équilibrer réalisations et esprit d'équipe" : "Avoid overly aggressive US-style language — balance achievement with teamwork"}
 
 Generate ONLY the resume. No explanations. No comments. Section headers in ALL CAPS.`;
 }

@@ -58,6 +58,7 @@ export const generateSchema = z.object({
   sinExperiencia:  z.boolean().optional(),
   anosExperiencia:   z.string().max(10).optional(),
   idiomaFormulario:  z.enum(["es", "en", "fr"]).optional(),
+  idiomaCv:          z.enum(["en", "fr"]).optional(),
   editSlug:          z.string().max(50).optional(),
   userId:            z.string().uuid().optional(),
 });

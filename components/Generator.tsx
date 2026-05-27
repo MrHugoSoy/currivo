@@ -65,6 +65,7 @@ export interface CVFormData {
   educacion?: EducacionEntry[];
   vacante?: string;
   idiomaFormulario?: "es" | "en" | "fr";
+  idiomaCv?: "en" | "fr";
 }
 const DEFAULT_FORM: CVFormData = {
   nombre: "", puesto: "", ciudad: "", email: "", telefono: "",
@@ -75,7 +76,7 @@ const DEFAULT_FORM: CVFormData = {
   redesSociales: [], habilidades: [],
   educacion: [{ carrera: "", institucion: "", anio: "" }],
   certificaciones: [], disponibilidad: "Inmediata", vacante: "",
-  idiomaFormulario: "es",
+  idiomaFormulario: "es", idiomaCv: "en",
 };
 
 interface GeneratorProps { initialData?: Record<string, unknown>; editSlug?: string; }
@@ -344,6 +345,37 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                   <F label={isMx ? "Teléfono" : isUs ? "Phone" : "Phone / Téléphone"} placeholder={isMx ? "+52 477 123 4567" : isUs ? "+1 (555) 123-4567" : "+1 (416) 123-4567"} value={form.telefono ?? ""} onChange={set("telefono")} />
                   {isMx ? <F label="Edad (opcional)" placeholder="28 años" value={form.edad ?? ""} onChange={set("edad")} /> : <div />}
                 </FR>
+                {form.mercado === "ca" && (
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.38)", marginBottom: 8 }}>
+                      ¿En qué idioma quieres tu CV?
+                    </label>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {(["en", "fr"] as const).map(lang => {
+                        const labels = { en: "🇨🇦 English", fr: "🇫🇷 Français" };
+                        const hints  = { en: "Para la mayoría de provincias — Ontario, BC, Alberta", fr: "Para Quebec y posiciones del gobierno federal" };
+                        const active = (form.idiomaCv ?? "en") === lang;
+                        return (
+                          <button key={lang} type="button" onClick={() => setForm(f => ({ ...f, idiomaCv: lang }))}
+                            style={{
+                              padding: "6px 14px", borderRadius: 6, fontFamily: "inherit", fontSize: 12, cursor: "pointer", transition: "all .15s",
+                              border: `1px solid ${active ? "rgba(74,144,96,.55)" : "rgba(255,255,255,.12)"}`,
+                              background: active ? "rgba(42,82,54,.25)" : "rgba(255,255,255,.03)",
+                              color: active ? "#7dd4a0" : "rgba(255,255,255,.55)",
+                            }}>
+                            <div>{labels[lang]}</div>
+                            <div style={{ fontSize: 9, color: active ? "rgba(125,212,160,.7)" : "rgba(255,255,255,.25)", marginTop: 2 }}>{hints[lang]}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginTop: 8, marginBottom: 0 }}>
+                      {(form.idiomaCv ?? "en") === "fr"
+                        ? "✓ Ton CV sera rédigé en français professionnel canadien"
+                        : "✓ Tu CV se generará en inglés profesional canadiense"}
+                    </p>
+                  </div>
+                )}
                 {isMx && (
                   <>
                     <FR>
