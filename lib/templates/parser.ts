@@ -186,29 +186,37 @@ export function extractHeader(cvText: string): {
   contacts: string[];
 } {
   const result = { name: "", subtitle: "", contacts: [] as string[] };
-  for (const raw of cvText.split("\n")) {
-    const line = raw.trim();
-    if (!line) continue;
-    if (isAllCaps(line) && !isBullet(line) && line.length > 2 && result.name && result.subtitle) break;
-    if (!result.name) {
-      result.name = line;
-    } else if (
-      !result.subtitle &&
-      !line.includes("@") &&
-      !/\d{7,}/.test(line) &&
-      !line.includes("📍") &&
-      !line.includes("☎") &&
-      !line.includes("✉") &&
-      !line.includes("linkedin.com") &&
-      !line.includes("github.com")
-    ) {
+  const lines = cvText.split("\n").map(l => l.trim()).filter(Boolean);
+
+  // Collect header lines until we hit an ALL CAPS section (after name is set)
+  const headerLines: string[] = [];
+  for (const line of lines) {
+    if (isAllCaps(line) && !isBullet(line) && result.name) break;
+    headerLines.push(line);
+    if (!result.name) result.name = line;
+  }
+
+  // Process lines after the name
+  for (const line of headerLines.slice(1)) {
+    const isContact =
+      line.includes("@") ||
+      /\d{7,}/.test(line) ||
+      line.includes("·") ||
+      line.includes("📍") ||
+      line.includes("☎") ||
+      line.includes("✉") ||
+      line.includes("linkedin.com") ||
+      line.includes("github.com") ||
+      line.includes(" | ") ||
+      /^[A-Za-zÀ-ÿ\s]+,\s*[A-Za-zÀ-ÿ\s]+$/.test(line);
+
+    if (!result.subtitle && !isContact) {
       result.subtitle = line;
     } else {
-      result.contacts.push(
-        ...line.split("·").map((c) => c.trim()).filter(Boolean)
-      );
+      result.contacts.push(...line.split(/[·|]/).map(c => c.trim()).filter(Boolean));
     }
   }
+
   return result;
 }
 
