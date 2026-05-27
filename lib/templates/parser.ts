@@ -13,6 +13,14 @@ export interface CVItem {
   bullets?: string[];
 }
 
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 function isAllCaps(line: string): boolean {
   const letters = line.replace(/[^a-zA-ZÀ-ÿ]/g, "");
   // Require at least 4 letters to exclude short abbreviations like MBA, GTO, CV
@@ -193,7 +201,7 @@ export function extractHeader(cvText: string): {
   for (const line of lines) {
     if (isAllCaps(line) && !isBullet(line) && result.name) break;
     headerLines.push(line);
-    if (!result.name) result.name = line;
+    if (!result.name) result.name = isAllCaps(line) ? toTitleCase(line) : line;
   }
 
   // Process lines after the name
