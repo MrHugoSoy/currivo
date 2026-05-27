@@ -898,8 +898,7 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
     if (!userId) { alert("Necesitas una cuenta para guardar cambios."); return; }
     setSaving(true);
     try {
-      const { supabase: sb } = await import("@/lib/supabase");
-      await sb.from("cvs").update({ cv_text: editedText }).eq("slug", slug);
+      await supabase.from("cvs").update({ cv_text: editedText }).eq("slug", slug);
       setSaved(true);
       setIsEditing(false);
       setTimeout(() => setSaved(false), 2500);
