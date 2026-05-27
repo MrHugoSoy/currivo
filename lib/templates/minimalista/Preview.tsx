@@ -19,7 +19,7 @@ export default function MinimalistaPreview({ data }: { data: CVData }) {
     ? hdr.contacts
     : [data.ciudad, data.email].filter(Boolean) as string[];
   const skills = extractSkills(sections);
-  const main = sections.filter((s) => s.title !== "");
+  const main = sections.filter((s) => s.title !== "" && s.title.toLowerCase() !== name.toLowerCase());
 
   return (
     <div style={{ width: 680, background: C.fondo, fontFamily: "'DM Sans','Nunito Sans',sans-serif", color: C.texto, fontSize: 12, lineHeight: 1.8, padding: "48px 52px", boxSizing: "border-box" }}>

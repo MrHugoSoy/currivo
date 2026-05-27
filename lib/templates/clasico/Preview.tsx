@@ -20,7 +20,7 @@ export default function ClasicoPreview({ data }: { data: CVData }) {
   const contacts  = hdr.contacts.length
     ? hdr.contacts
     : [data.ciudad, data.email].filter(Boolean) as string[];
-  const main      = sections.filter(s => s.title !== "");
+  const main      = sections.filter(s => s.title !== "" && s.title.toLowerCase() !== name.toLowerCase());
   const isMx      = data.mercado === "mx";
 
   return (

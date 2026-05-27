@@ -27,7 +27,7 @@ export default function ModernoPreview({ data }: { data: CVData }) {
   const skills = extractSkills(sections);
   const langs = extractLanguages(sections);
   const mainSections = sections.filter(
-    (s) => s.title !== "" && !/skill|habilidad|idioma|language|langue/i.test(s.title)
+    (s) => s.title !== "" && s.title.toLowerCase() !== name.toLowerCase() && !/skill|habilidad|idioma|language|langue/i.test(s.title)
   );
 
   return (

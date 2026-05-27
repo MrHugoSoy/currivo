@@ -21,7 +21,7 @@ export default function OscuroPreview({ data }: { data: CVData }) {
   const contacts = hdr.contacts.length
     ? hdr.contacts
     : [data.ciudad, data.email].filter(Boolean) as string[];
-  const main = sections.filter((s) => s.title !== "");
+  const main = sections.filter((s) => s.title !== "" && s.title.toLowerCase() !== name.toLowerCase());
 
   return (
     <div style={{ width: 680, background: C.fondo, fontFamily: "'DM Sans','Nunito Sans',sans-serif", color: C.texto, fontSize: 12, lineHeight: 1.5, padding: "40px 44px", boxSizing: "border-box" }}>
