@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabase";
 
 const TESTIMONIALS = [
   { name: "Laura Hernández", role: "Project Manager", location: "Toronto, Canadá", market: "ca", text: "Conseguí entrevistas en 3 empresas de Toronto en 2 semanas. El CV destacó mi experiencia internacional como un activo, no como una desventaja.", initials: "LH", bg: "#d4e8da", color: "#2d5a3d" },
@@ -17,9 +18,34 @@ const VISIBLE = 3;
 export default function Testimonials() {
   const [index, setIndex] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [reviews, setReviews] = useState(TESTIMONIALS);
   const dragStart = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const total = TESTIMONIALS.length;
+  const total = reviews.length;
+
+  useEffect(() => {
+    supabase
+      .from("reviews")
+      .select("*")
+      .eq("approved", true)
+      .gte("stars", 4)
+      .order("created_at", { ascending: false })
+      .limit(8)
+      .then(({ data }) => {
+        if (data && data.length >= 3) {
+          setReviews(data.map(r => ({
+            name: r.nombre,
+            role: r.puesto ?? "",
+            location: r.mercado === "mx" ? "México" : r.mercado === "us" ? "USA" : "Canadá",
+            market: r.mercado,
+            text: r.text,
+            initials: r.nombre.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase(),
+            bg: r.mercado === "mx" ? "#edf4ef" : r.mercado === "us" ? "#dde8f4" : "#fef8ec",
+            color: r.mercado === "mx" ? "#2d5a3d" : r.mercado === "us" ? "#2d4a7a" : "#5a3000",
+          })));
+        }
+      });
+  }, []);
 
   const next = () => setIndex(i => (i + 1) % total);
   const prev = () => setIndex(i => (i - 1 + total) % total);
@@ -49,7 +75,7 @@ export default function Testimonials() {
     else if (delta < -40) { prev(); resetTimer(); }
   };
 
-  const getVisible = () => Array.from({ length: VISIBLE }, (_, i) => TESTIMONIALS[(index + i) % total]);
+  const getVisible = () => Array.from({ length: VISIBLE }, (_, i) => reviews[(index + i) % total]);
 
   return (
     <section style={{ background: "var(--ink)", padding: "80px 0 88px", overflow: "hidden" }}>
@@ -130,7 +156,7 @@ export default function Testimonials() {
 
         {/* Dots */}
         <div style={{ display: "flex", justifyContent: "center", gap: 7, marginTop: 36 }}>
-          {TESTIMONIALS.map((_, i) => (
+          {reviews.map((_, i) => (
             <button key={i} onClick={() => { setIndex(i); resetTimer(); }}
               style={{ width: i === index ? 20 : 6, height: 6, borderRadius: 3, border: "none", background: i === index ? "var(--green-mid)" : "rgba(255,255,255,.2)", cursor: "pointer", transition: "all .25s", padding: 0 }}
             />

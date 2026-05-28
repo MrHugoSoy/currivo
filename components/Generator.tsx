@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import CVPreview from "./CVPreview";
 import { AuthModal } from "./AuthModal";
+import ReviewModal from "./ReviewModal";
 import type { TemplateId, CVData } from "@/lib/templates/types";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/previews";
 import { supabase } from "@/lib/supabase";
@@ -902,6 +903,7 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
   const [editedText, setEditedText] = useState(text);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showReview, setShowReview] = useState(false);
 
   useEffect(() => {
     setEditedText(text);
@@ -944,10 +946,15 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url; a.download = `${slug}.pdf`; a.click();
       URL.revokeObjectURL(url);
+      if (!localStorage.getItem("resumika_reviewed") && userId) {
+        setShowReview(true);
+        localStorage.setItem("resumika_reviewed", "true");
+      }
     } catch (e: unknown) { setPdfError(e instanceof Error ? e.message : "Error"); } finally { setPdfLoading(false); }
   };
 
   return (
+    <>
     <div style={{ background: "var(--paper)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--border)", boxShadow: "0 20px 56px rgba(0,0,0,.5)" }}>
 
       {/* ── Toolbar — solo visible en modo edición ── */}
@@ -1047,5 +1054,15 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
         </div>
       )}
     </div>
+    {showReview && userId && (
+      <ReviewModal
+        userId={userId}
+        nombre={nombre}
+        puesto={puesto}
+        mercado={market}
+        onClose={() => setShowReview(false)}
+      />
+    )}
+    </>
   );
 }
