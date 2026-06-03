@@ -35,6 +35,16 @@ export default function ModernoPreview({ data }: { data: CVData }) {
 
       {/* Sidebar */}
       <div style={{ width: "30%", padding: "36px 22px", flexShrink: 0 }}>
+        {data.mercado === "mx" && data.photoUrl && (
+          <div style={{ marginBottom: 16 }}>
+            <img src={data.photoUrl} alt={name} style={{ width: 72, height: 72, borderRadius: 6, objectFit: "cover", border: "2px solid rgba(255,255,255,.2)", display: "block" }} />
+          </div>
+        )}
+        {data.mercado === "mx" && !data.photoUrl && (
+          <div style={{ width: 72, height: 72, borderRadius: 6, border: "1.5px dashed rgba(255,255,255,.2)", background: "rgba(255,255,255,.05)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "rgba(255,255,255,.3)", marginBottom: 16, textAlign: "center", lineHeight: 1.3 }}>
+            <span>📷<br/>Foto</span>
+          </div>
+        )}
         <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 24, fontWeight: 600, color: "#fff", letterSpacing: "-0.5px", lineHeight: 1.15, marginBottom: 6 }}>
           {name}
         </div>

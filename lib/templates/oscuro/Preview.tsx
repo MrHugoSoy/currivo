@@ -27,16 +27,26 @@ export default function OscuroPreview({ data }: { data: CVData }) {
     <div style={{ width: 680, background: C.fondo, fontFamily: "'DM Sans','Nunito Sans',sans-serif", color: C.texto, fontSize: 12, lineHeight: 1.5, padding: "40px 44px", boxSizing: "border-box" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 36, fontWeight: 600, color: C.texto, letterSpacing: "-0.5px", lineHeight: 1.1 }}>
-          {name}
+      <div style={{ marginBottom: 18, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 36, fontWeight: 600, color: C.texto, letterSpacing: "-0.5px", lineHeight: 1.1 }}>
+            {name}
+          </div>
+          {subtitle && (
+            <div style={{ fontSize: 14, color: C.acentoLight, marginTop: 5, fontWeight: 500 }}>{subtitle}</div>
+          )}
+          {contacts.length > 0 && (
+            <div style={{ fontSize: 11, color: C.muted, marginTop: 7 }}>
+              {contacts.join(" · ")}
+            </div>
+          )}
         </div>
-        {subtitle && (
-          <div style={{ fontSize: 14, color: C.acentoLight, marginTop: 5, fontWeight: 500 }}>{subtitle}</div>
+        {data.mercado === "mx" && data.photoUrl && (
+          <img src={data.photoUrl} alt={name} style={{ width: 80, height: 80, borderRadius: 6, objectFit: "cover", border: `2px solid ${C.border}`, flexShrink: 0, display: "block" }} />
         )}
-        {contacts.length > 0 && (
-          <div style={{ fontSize: 11, color: C.muted, marginTop: 7 }}>
-            {contacts.join(" · ")}
+        {data.mercado === "mx" && !data.photoUrl && (
+          <div style={{ flexShrink: 0, width: 80, height: 80, borderRadius: 6, border: `1.5px dashed ${C.border}`, background: "rgba(255,255,255,.04)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: C.hint, textAlign: "center", lineHeight: 1.3 }}>
+            <span>📷<br/>Foto</span>
           </div>
         )}
       </div>

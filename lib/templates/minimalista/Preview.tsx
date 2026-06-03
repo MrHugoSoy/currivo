@@ -25,19 +25,29 @@ export default function MinimalistaPreview({ data }: { data: CVData }) {
     <div style={{ width: 680, background: C.fondo, fontFamily: "'DM Sans','Nunito Sans',sans-serif", color: C.texto, fontSize: 12, lineHeight: 1.8, padding: "48px 52px", boxSizing: "border-box" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 40, fontWeight: 600, color: C.primario, letterSpacing: "0.5px", lineHeight: 1.1 }}>
-          {name}
+      <div style={{ marginBottom: 32, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 40, fontWeight: 600, color: C.primario, letterSpacing: "0.5px", lineHeight: 1.1 }}>
+            {name}
+          </div>
+          {subtitle && (
+            <div style={{ fontSize: 13, color: C.muted, marginTop: 6 }}>{subtitle}</div>
+          )}
+          {contacts.length > 0 && (
+            <div style={{ fontSize: 11, color: C.hint, marginTop: 8 }}>
+              {contacts.join("  ·  ")}
+            </div>
+          )}
+          <div style={{ height: 1, background: C.border, marginTop: 20 }} />
         </div>
-        {subtitle && (
-          <div style={{ fontSize: 13, color: C.muted, marginTop: 6 }}>{subtitle}</div>
+        {data.mercado === "mx" && data.photoUrl && (
+          <img src={data.photoUrl} alt={name} style={{ width: 80, height: 80, borderRadius: 6, objectFit: "cover", border: `2px solid ${C.border}`, flexShrink: 0, display: "block" }} />
         )}
-        {contacts.length > 0 && (
-          <div style={{ fontSize: 11, color: C.hint, marginTop: 8 }}>
-            {contacts.join("  ·  ")}
+        {data.mercado === "mx" && !data.photoUrl && (
+          <div style={{ flexShrink: 0, width: 80, height: 80, borderRadius: 6, border: `1.5px dashed ${C.border}`, background: "#edf4ef", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: C.hint, textAlign: "center", lineHeight: 1.3 }}>
+            <span>📷<br/>Foto</span>
           </div>
         )}
-        <div style={{ height: 1, background: C.border, marginTop: 20 }} />
       </div>
 
       {main.map((section, idx) => (
