@@ -221,6 +221,17 @@ ${sinExperiencia
 ${languages ? "- Sección IDIOMAS al final con los idiomas y niveles proporcionados" : ""}
 ${formatRule}
 
+ORTOGRAFÍA Y REDACCIÓN — MUY IMPORTANTE:
+- Corrige TODOS los errores ortográficos que el usuario haya escrito
+- Usa acentos correctamente en español mexicano (é, á, í, ó, ú, ü, ñ)
+- Reformula frases informales o coloquiales a lenguaje profesional
+- Convierte verbos en infinitivo a primera persona pasada:
+  "diseñar logos" → "Diseñé logotipos corporativos"
+  "trabajar con clientes" → "Gestioné relaciones con clientes clave"
+- Nunca copies errores ortográficos del input del usuario
+- Si una frase no tiene sentido, infiere el significado más probable y redáctala de forma profesional
+- Puntuación correcta en todo el documento
+
 Genera SOLO el contenido del CV, sin comentarios adicionales.`;
   }
 
