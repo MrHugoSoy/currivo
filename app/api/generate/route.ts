@@ -205,6 +205,23 @@ ${vacanteRule_es}
 
 ${certRule_es}
 
+ESTRUCTURA DEL DOCUMENTO — CRÍTICO:
+- El CV debe empezar DIRECTAMENTE con el nombre del candidato
+- NO escribas "Currículum Vitae" ni "CV" como título al inicio
+- La primera línea del documento es el nombre: "${nombre}"
+- La segunda línea es el puesto: "${puesto}"
+- La tercera línea son los datos de contacto
+
+CORRECTO:
+${nombre}
+${puesto}
+${ciudad ? `${ciudad} · ` : ""}${telefono ? `${telefono} · ` : ""}${email || ""}
+
+INCORRECTO:
+CURRÍCULUM VITAE
+${nombre}
+...
+
 REGLAS PARA CV MEXICANO:
 - Incluye sección DATOS PERSONALES al inicio: nombre, ciudad, email, teléfono${edad ? ", edad" : ""}${estadoCivil ? ", estado civil" : ""}, disponibilidad: ${disponibilidad}
 ${redesStr ? "- Incluye los perfiles/redes en la sección de contacto" : ""}

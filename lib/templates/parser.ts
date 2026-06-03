@@ -196,9 +196,17 @@ export function extractHeader(cvText: string): {
   const result = { name: "", subtitle: "", contacts: [] as string[] };
   const lines = cvText.split("\n").map(l => l.trim()).filter(Boolean);
 
+  function isCVTitle(line: string): boolean {
+    return /^curr[ií]culum\s+vitae$/i.test(line) ||
+      /^curr[ií]culum$/i.test(line) ||
+      /^hoja\s+de\s+vida$/i.test(line) ||
+      /^resume$/i.test(line);
+  }
+
   // Collect header lines until we hit an ALL CAPS section (after name is set)
   const headerLines: string[] = [];
   for (const line of lines) {
+    if (isCVTitle(line)) continue;
     if (isAllCaps(line) && !isBullet(line) && result.name) break;
     headerLines.push(line);
     if (!result.name) result.name = isAllCaps(line) ? toTitleCase(line) : line;
