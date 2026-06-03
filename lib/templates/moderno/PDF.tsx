@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet, Font } from "@react-pdf/renderer";
 import { parseCVText, extractHeader, extractSkills, extractLanguages, skillLevel, CVItem } from "../parser";
 import type { CVData } from "../types";
 import path from "path";
@@ -56,6 +56,7 @@ export default function ModernoPDF({ data }: { data: CVData }) {
       <Page size={data.mercado === "mx" ? "A4" : "LETTER"} style={s.page}>
         {/* Sidebar */}
         <View style={s.sidebar}>
+          {data.mercado === "mx" && data.photoUrl ? <Image src={data.photoUrl} style={{ width: 60, height: 60, borderRadius: 4, marginBottom: 12 }} /> : null}
           <Text style={s.name}>{name}</Text>
           {subtitle ? <Text style={s.subS}>{subtitle}</Text> : null}
           {contacts.map((c, i) => <Text key={i} style={s.contactS}>{c}</Text>)}

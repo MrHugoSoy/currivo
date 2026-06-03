@@ -21,7 +21,7 @@ const s = StyleSheet.create({
   page:    { fontFamily: "DMSans", backgroundColor: C.fondo, paddingTop: 40, paddingBottom: 40, paddingLeft: 44, paddingRight: 44, fontSize: 10 },
   header:  { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 0 },
   headerText: { flex: 1 },
-  photo:   { width: 64, height: 64, borderRadius: 4, objectFit: "cover", marginLeft: 16, flexShrink: 0 },
+  photo:   { width: 64, height: 64, borderRadius: 4, marginLeft: 16 },
   name:    { fontSize: 26, fontWeight: 700, color: C.primario, letterSpacing: -0.5 },
   sub:     { fontSize: 12, color: C.acento, marginTop: 4, fontWeight: 700 },
   contact: { fontSize: 9, color: C.hint, marginTop: 5 },

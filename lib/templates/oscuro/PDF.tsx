@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet, Font } from "@react-pdf/renderer";
 import { parseCVText, extractHeader, CVItem } from "../parser";
 import type { CVData } from "../types";
 import path from "path";
@@ -48,9 +48,14 @@ export default function OscuroPDF({ data }: { data: CVData }) {
   return (
     <Document>
       <Page size={data.mercado === "mx" ? "A4" : "LETTER"} style={s.page}>
-        <Text style={s.name}>{name}</Text>
-        {subtitle ? <Text style={s.sub}>{subtitle}</Text> : null}
-        {contacts.length ? <Text style={s.contact}>{contacts.join(" · ")}</Text> : null}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 0 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={s.name}>{name}</Text>
+            {subtitle ? <Text style={s.sub}>{subtitle}</Text> : null}
+            {contacts.length ? <Text style={s.contact}>{contacts.join(" · ")}</Text> : null}
+          </View>
+          {data.mercado === "mx" && data.photoUrl ? <Image src={data.photoUrl} style={{ width: 64, height: 64, borderRadius: 4, marginLeft: 16 }} /> : null}
+        </View>
         <View style={s.divider} />
         {main.map((sec, i) => (
           <View key={i} style={{ marginBottom: 12 }}>
