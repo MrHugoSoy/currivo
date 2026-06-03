@@ -89,6 +89,10 @@ export default function PerfilPage() {
   const handleSave = async () => {
     if (!user) return;
     if (username && username.length < 3) { setSaveError("El nombre debe tener al menos 3 caracteres."); return; }
+    if (username.trim() && username.trim() !== (user.user_metadata?.username ?? "")) {
+      const { data: available } = await supabase.rpc("check_username_available", { uname: username.trim(), exclude_uid: user.id });
+      if (available === false) { setSaveError("Ese nombre de usuario ya está en uso. Elige otro."); return; }
+    }
     setSaving(true); setSaveError(null);
     try {
       let newAvatarUrl = avatarUrl;

@@ -33,6 +33,14 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
     setLoading(true);
     try {
       if (tab === "register") {
+        if (username.trim()) {
+          const { data: available } = await supabase.rpc("check_username_available", { uname: username.trim() });
+          if (available === false) {
+            setError("Ese nombre de usuario ya está en uso. Elige otro.");
+            setLoading(false);
+            return;
+          }
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
