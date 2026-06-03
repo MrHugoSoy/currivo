@@ -940,7 +940,7 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
     if (!slug) return;
     setPdfLoading(true); setPdfError(null);
     try {
-      const res = await fetch("/api/pdf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug, template: templateId }) });
+      const res = await fetch("/api/pdf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug, template: templateId, photoUrl: photoUrl ?? undefined }) });
       if (!res.ok) throw new Error((await res.json()).error || "Error");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
