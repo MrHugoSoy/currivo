@@ -89,7 +89,11 @@ export default function PerfilPage() {
   const handleSave = async () => {
     if (!user) return;
     if (username && username.length < 3) { setSaveError("El nombre debe tener al menos 3 caracteres."); return; }
+    const RESERVED = ["hugosoy", "resumika", "admin", "soporte", "support", "help", "root", "superadmin"];
     if (username.trim() && username.trim() !== (user.user_metadata?.username ?? "")) {
+      if (RESERVED.includes(username.trim().toLowerCase())) {
+        setSaveError("Ese nombre de usuario no está disponible. Elige otro."); return;
+      }
       const { data: available } = await supabase.rpc("check_username_available", { uname: username.trim(), exclude_uid: user.id });
       if (available === false) { setSaveError("Ese nombre de usuario ya está en uso. Elige otro."); return; }
     }

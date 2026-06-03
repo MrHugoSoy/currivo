@@ -20,6 +20,8 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
 
   const switchTab = (t: Tab) => { setTab(t); setError(null); setSuccess(false); };
 
+  const RESERVED = ["hugosoy", "resumika", "admin", "soporte", "support", "help", "root", "superadmin"];
+
   const handleUsernameInput = (v: string) =>
     setUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 20));
 
@@ -34,6 +36,11 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
     try {
       if (tab === "register") {
         if (username.trim()) {
+          if (RESERVED.includes(username.trim().toLowerCase())) {
+            setError("Ese nombre de usuario no está disponible. Elige otro.");
+            setLoading(false);
+            return;
+          }
           const { data: available } = await supabase.rpc("check_username_available", { uname: username.trim() });
           if (available === false) {
             setError("Ese nombre de usuario ya está en uso. Elige otro.");
