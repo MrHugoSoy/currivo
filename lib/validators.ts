@@ -54,6 +54,7 @@ export const generateSchema = z.object({
     language: z.string().max(50),
     level:    z.string().max(30),
   })).max(10).optional(),
+  photoUrl:        z.string().optional(),
   templateId:      z.string().max(30).optional(),
   sinExperiencia:  z.boolean().optional(),
   anosExperiencia:   z.string().max(10).optional(),
