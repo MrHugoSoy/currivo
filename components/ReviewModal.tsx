@@ -28,6 +28,7 @@ export default function ReviewModal({ userId, nombre, puesto, mercado, onClose }
         mercado,
         stars,
         text: text.trim(),
+        approved: false,
       });
       setDone(true);
       setTimeout(onClose, 2000);

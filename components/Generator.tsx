@@ -1007,7 +1007,7 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
         <div style={{ padding: "6px 16px", display: "flex", alignItems: "center", gap: 5 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--green)", flexShrink: 0 }} />
           <span style={{ fontSize: 10, color: "var(--green)" }}>
-            {saved ? "✓ Cambios guardados" : "● Tienes cambios guardados"}
+            {saved ? "✓ Cambios guardados" : "● Tienes cambios sin guardar"}
           </span>
         </div>
       )}

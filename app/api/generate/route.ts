@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { supabase } from "@/lib/supabase";
 import { createClient } from "@supabase/supabase-js";
 import { generateLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 import { generateSchema } from "@/lib/validators";
@@ -101,7 +100,7 @@ function buildPrompt(data: Record<string, unknown>): string {
   const certTexto = Array.isArray(certificaciones) && certificaciones.length > 0
     ? certificaciones
         .filter(c => c.nombre?.trim())
-        .map(c => `${c.nombre}${c.institucion ? ` (${c.institucion}` : ""}${c.anio ? `, ${c.anio})` : c.institucion ? ")" : ""}`)
+        .map(c => `${c.nombre}${(c.institucion || c.anio) ? ` (${[c.institucion, c.anio].filter(Boolean).join(", ")})` : ""}`)
         .join(", ")
     : typeof certificaciones === "string" ? certificaciones.trim() : "";
 
@@ -577,7 +576,7 @@ export async function POST(req: NextRequest) {
     };
 
     if (editSlug) {
-      await supabase.from("cvs").update({
+      await supabaseAdmin.from("cvs").update({
         nombre, puesto,
         ciudad: body.ciudad || null,
         email: body.email || null,
@@ -590,7 +589,7 @@ export async function POST(req: NextRequest) {
     }
 
     const slug = generateSlug(nombre);
-    await supabase.from("cvs").insert({
+    await supabaseAdmin.from("cvs").insert({
       slug, nombre, puesto,
       ciudad: body.ciudad || null,
       email: body.email || null,

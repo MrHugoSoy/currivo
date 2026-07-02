@@ -56,9 +56,9 @@ export default function Testimonials() {
   };
 
   useEffect(() => {
-    timerRef.current = setInterval(next, 5000);
+    timerRef.current = setInterval(() => setIndex(i => (i + 1) % total), 5000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, []);
+  }, [total]);
 
   const handleMouseDown = (e: React.MouseEvent) => { setDragging(true); dragStart.current = e.clientX; };
   const handleMouseUp = (e: React.MouseEvent) => {

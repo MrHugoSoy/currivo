@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 import { PDF_TEMPLATES } from "@/lib/templates/index";
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? "placeholder",
+  { auth: { persistSession: false } }
+);
 export const dynamic = "force-dynamic";
 import type { TemplateId, CVData } from "@/lib/templates/types";
 
@@ -13,7 +19,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "slug y template son requeridos" }, { status: 400 });
     }
 
-    const { data: row, error } = await supabase
+    const { data: row, error } = await supabaseAdmin
       .from("cvs")
       .select("nombre, puesto, ciudad, email, mercado, cv_text, form_data")
       .eq("slug", slug)
