@@ -431,6 +431,7 @@ STRUCTURE (in this exact order):
 
 7. ${isFr ? "LANGUES" : "LANGUAGES"}
    - ${langList || (isFr ? "Anglais (Courant)" : "English (Fluent)")}
+   - IMPORTANT: Copy the exact level label as provided — do NOT rename or reinterpret it (e.g. if given "Basic (B1)", write exactly "Basic (B1)", not "Intermediate (B1)")
    ${langList?.toLowerCase().includes("french")
      ? (isFr ? "- METTRE EN VALEUR le français en tête — avantage majeur au Québec, Ottawa et postes gouvernementaux fédéraux\n   - Format: Français — [niveau] | Anglais — [niveau]" : "- HIGHLIGHT French prominently — major competitive advantage in Quebec, Ottawa, and federal government positions\n   - Format: French — [level] | English — [level]")
      : (isFr ? "- Format: Langue — Niveau (ex. Espagnol — Langue maternelle | Anglais — Professionnel)" : "- Format: Language — Level (e.g. Spanish — Native | English — Professional)")}
