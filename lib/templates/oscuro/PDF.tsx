@@ -117,11 +117,11 @@ function DarkPDFItem({ item }: { item: CVItem }) {
     );
   }
   const content = item.content ?? "";
-  if (content.includes(" | ") || content.split(",").length > 2) {
-    const tags = content.split(/[|,]/).map((t) => t.trim()).filter(Boolean);
+  const cparts = content.split(/[|,]/).map((t) => t.trim()).filter(Boolean);
+  if ((content.includes(" | ") || content.split(",").length > 2) && cparts.every(p => p.length <= 35)) {
     return (
       <View style={s.tagRow}>
-        {tags.map((tag, i) => <Text key={i} style={s.tag}>{tag}</Text>)}
+        {cparts.map((tag, i) => <Text key={i} style={s.tag}>{tag}</Text>)}
       </View>
     );
   }

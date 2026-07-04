@@ -112,8 +112,8 @@ function MinPDFItem({ item, isSkill }: { item: CVItem; isSkill: boolean }) {
     );
   }
   const content = item.content ?? "";
-  if (isSkill || content.includes(" | ") || content.split(",").length > 3) {
-    const parts = content.split(/[|,]/).map((t) => t.trim()).filter(Boolean);
+  const parts = content.split(/[|,]/).map((t) => t.trim()).filter(Boolean);
+  if (isSkill || ((content.includes(" | ") || content.split(",").length > 3) && parts.every(p => p.length <= 35))) {
     return <Text style={{ ...s.para, color: C.muted }}>{parts.join("  ·  ")}</Text>;
   }
   return <Text style={s.para}>{content}</Text>;

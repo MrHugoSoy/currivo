@@ -156,11 +156,11 @@ function Item({ item }: { item: CVItem }) {
   }
 
   const content = item.content ?? "";
-  if (content.includes(" | ") || content.split(",").length > 2) {
-    const tags = content.split(/[|,]/).map(t => t.trim()).filter(Boolean);
+  const cparts = content.split(/[|,]/).map(t => t.trim()).filter(Boolean);
+  if ((content.includes(" | ") || content.split(",").length > 2) && cparts.every(p => p.length <= 35)) {
     return (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 4 }}>
-        {tags.map((tag, i) => (
+        {cparts.map((tag, i) => (
           <span key={i} style={{ fontSize: 10, padding: "3px 9px", background: C.greenBg, color: C.acento, borderRadius: 3, fontWeight: 500, border: "1px solid rgba(42,82,54,.15)" }}>
             {tag}
           </span>

@@ -119,11 +119,11 @@ function MinItem({ item, isSkillSection, skills }: { item: CVItem; isSkillSectio
   }
 
   const content = item.content ?? "";
-  if (isSkillSection || content.includes(" | ") || content.split(",").length > 3) {
-    const tags = content.split(/[|,]/).map((t) => t.trim()).filter(Boolean);
+  const cparts = content.split(/[|,]/).map((t) => t.trim()).filter(Boolean);
+  if (isSkillSection || ((content.includes(" | ") || content.split(",").length > 3) && cparts.every(p => p.length <= 35))) {
     return (
       <div style={{ fontSize: 11, color: C.muted, lineHeight: 2 }}>
-        {tags.join("  ·  ")}
+        {cparts.join("  ·  ")}
       </div>
     );
   }
