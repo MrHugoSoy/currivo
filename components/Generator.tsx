@@ -20,8 +20,8 @@ const TONES = ["Profesional", "Creativo", "Formal", "Moderno"];
 const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas", "Construcción", "Manufactura", "Logística", "Ventas", "Recursos Humanos", "Legal", "Gastronomía", "Turismo", "Medios"];
 const DISPONIBILIDAD_OPTIONS = ["Inmediata", "15 días", "1 mes", "2 meses", "A convenir"];
 const COMMON_LANGUAGES = ["Español","English","Français","Português","Deutsch","Italiano","中文 (Mandarín)","日本語","한국어","العربية","Русский","Nederlands","Polski","Türkçe","हिन्दी","Tagalog","Vietnamese"];
-const LEVELS_ES = ["Nativo","Fluido","Avanzado (C1)","Intermedio (B2)","Básico (B1)","Elemental (A2)"];
-const LEVELS_EN = ["Native","Fluent","Advanced (C1)","Intermediate (B2)","Basic (B1)","Elementary (A2)"];
+const LEVELS_ES = ["Nativo","Fluido","Avanzado (C1)","Intermedio Alto (B2)","Intermedio (B1)","Elemental (A2)"];
+const LEVELS_EN = ["Native","Fluent","Advanced (C1)","Upper Intermediate (B2)","Intermediate (B1)","Elementary (A2)"];
 const SOCIAL_TYPES = ["LinkedIn","GitHub","Portfolio","Behance","Twitter/X","Dribbble","Otro"];
 
 // Template definitions inline (replaces TemplateSelector import)
