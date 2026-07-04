@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import CVPreview from "./CVPreview";
 import { AuthModal } from "./AuthModal";
 import ReviewModal from "./ReviewModal";
@@ -8,6 +8,10 @@ import { PREVIEW_TEMPLATES } from "@/lib/templates/previews";
 import { supabase } from "@/lib/supabase";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
+
+const SAMPLE_MX = ["Diseñadora Gráfica","Contador Público","Ingeniero de Software","Enfermera Especialista","Arquitecta","Maestra de Primaria","Desarrollador Web","Chef Ejecutivo","Psicóloga Clínica","Abogada Corporativa","Médica General","Gerente de Marketing","Analista Financiero","Ingeniero Civil","Administradora de Empresas","Técnico en Mantenimiento","Coordinadora de RRHH","Fotógrafo Profesional"];
+const SAMPLE_US = ["Graphic Designer","Software Engineer","Marketing Manager","Data Analyst","Project Manager","UX Designer","Financial Analyst","Sales Representative","HR Specialist","Operations Manager","Full Stack Developer","Product Manager","Business Analyst","Registered Nurse","Civil Engineer"];
+const SAMPLE_CA = ["Software Developer","Project Manager","Registered Nurse","Financial Analyst","Marketing Coordinator","Civil Engineer","HR Manager","UX Designer","Data Scientist","Accountant","Bilingual Customer Service","Supply Chain Analyst","Environmental Engineer"];
 const TONES = ["Profesional", "Creativo", "Formal", "Moderno"];
 const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas", "Construcción", "Manufactura", "Logística", "Ventas", "Recursos Humanos", "Legal", "Gastronomía", "Turismo", "Medios"];
 const DISPONIBILIDAD_OPTIONS = ["Inmediata", "15 días", "1 mes", "2 meses", "A convenir"];
@@ -192,6 +196,12 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     } finally { setLoading(false); }
   };
 
+  const samplePuestos = useMemo(() => ({
+    mx: SAMPLE_MX[Math.floor(Math.random() * SAMPLE_MX.length)],
+    us: SAMPLE_US[Math.floor(Math.random() * SAMPLE_US.length)],
+    ca: SAMPLE_CA[Math.floor(Math.random() * SAMPLE_CA.length)],
+  }), []);
+
   const selectedMarket = MARKETS.find(m => m.id === form.mercado)!;
   const note = DIFF_NOTES[form.mercado];
   const isMx = form.mercado === "mx";
@@ -317,7 +327,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
               <FB step={1} total={TOTAL_STEPS} title={steps[0]} icon={BLOCK_META.personal.icon} iconBg={BLOCK_META.personal.color}>
                 <FR>
                   <F label={isMx ? "Nombre completo" : isUs ? "Full Name" : "Full Name / Nom complet"} placeholder="María García López" value={form.nombre} onChange={set("nombre")} />
-                  <F label={isMx ? "Puesto deseado" : isUs ? "Job Title" : "Job Title / Titre"} placeholder={isUs ? "Graphic Designer" : "Diseñadora Gráfica"} value={form.puesto} onChange={set("puesto")} />
+                  <F label={isMx ? "Puesto deseado" : isUs ? "Job Title" : "Job Title / Titre"} placeholder={samplePuestos[form.mercado]} value={form.puesto} onChange={set("puesto")} />
                 </FR>
                 <FR>
                   <F label={isMx ? "Ciudad" : isUs ? "City, State" : "City, Province"} placeholder={isMx ? "León, Gto." : isUs ? "Austin, TX" : "Toronto, ON"} value={form.ciudad} onChange={set("ciudad")} />
@@ -700,6 +710,10 @@ function ExperienceSelector({ experiencias, onChange, market }: { experiencias: 
   const isMx = market === "mx";
   const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   const update = (i: number, field: keyof ExperienciaEntry, val: string) => onChange(experiencias.map((e, j) => j === i ? { ...e, [field]: val } : e));
+  const sampleJob = useMemo(() => {
+    const list = market === "us" ? SAMPLE_US : market === "ca" ? SAMPLE_CA : SAMPLE_MX;
+    return list[Math.floor(Math.random() * list.length)];
+  }, [market]);
   return (
     <div>
       {experiencias.map((exp, i) => (
@@ -711,7 +725,7 @@ function ExperienceSelector({ experiencias, onChange, market }: { experiencias: 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
             <div>
               <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Puesto" : market === "us" ? "Job Title" : "Position"}</label>
-              <input type="text" value={exp.puesto} onChange={e => update(i, "puesto", e.target.value)} placeholder={isMx ? "Diseñadora Gráfica" : "Graphic Designer"} style={base} />
+              <input type="text" value={exp.puesto} onChange={e => update(i, "puesto", e.target.value)} placeholder={sampleJob} style={base} />
             </div>
             <div>
               <label style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,.35)", marginBottom: 5 }}>{isMx ? "Empresa" : "Company"}</label>
