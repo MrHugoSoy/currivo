@@ -78,7 +78,7 @@ export default function Dashboard() {
           </div>
 
           <a
-            href="/#generador"
+            href="/crear"
             style={{ fontSize: 13, background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: "10px 20px", textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}
           >
             + Generar nuevo CV
@@ -94,7 +94,7 @@ export default function Dashboard() {
           <div style={{ textAlign: "center", padding: "60px 24px", background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8 }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>📄</div>
             <p style={{ fontSize: 14, color: "var(--muted)", marginBottom: 20 }}>Genera tu primer CV con IA</p>
-            <a href="/#generador" style={{ fontSize: 13, background: "var(--green-mid)", color: "#fff", borderRadius: 6, padding: "10px 20px", textDecoration: "none", fontWeight: 500 }}>
+            <a href="/crear" style={{ fontSize: 13, background: "var(--green-mid)", color: "#fff", borderRadius: 6, padding: "10px 20px", textDecoration: "none", fontWeight: 500 }}>
               + Generar CV
             </a>
           </div>

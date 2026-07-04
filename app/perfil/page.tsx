@@ -175,7 +175,7 @@ export default function PerfilPage() {
             resumi<span style={{ color: "var(--green)" }}>ka</span>
           </a>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <a href="/#generador" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(45,90,61,.25)", borderRadius: 5, padding: "6px 14px", background: "var(--green-bg)" }}>✦ Nuevo CV</a>
+            <a href="/crear" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(45,90,61,.25)", borderRadius: 5, padding: "6px 14px", background: "var(--green-bg)" }}>✦ Nuevo CV</a>
             <button onClick={signOut} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 5, padding: "6px 14px", fontSize: 12, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>Cerrar sesión</button>
           </div>
         </header>
@@ -288,7 +288,7 @@ export default function PerfilPage() {
           <div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 20 }}>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px" }}>Mis CVs</h2>
-              <a href="/#generador" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none" }}>+ Generar nuevo</a>
+              <a href="/crear" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none" }}>+ Generar nuevo</a>
             </div>
             {cvsLoading ? (
               <div className="cv-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
@@ -396,7 +396,7 @@ function EmptyState() {
       <div style={{ fontSize: 36, marginBottom: 14 }}>📄</div>
       <p style={{ fontSize: 15, fontWeight: 500, color: "var(--ink)", marginBottom: 8 }}>Aún no tienes CVs</p>
       <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 22, lineHeight: 1.6 }}>Genera tu primer CV con IA en menos de 3 minutos. Es gratis.</p>
-      <a href="/#generador" style={{ display: "inline-block", background: "var(--green)", color: "#fff", textDecoration: "none", borderRadius: 6, padding: "10px 24px", fontSize: 13, fontWeight: 500 }}>✦ Generar mi CV</a>
+      <a href="/crear" style={{ display: "inline-block", background: "var(--green)", color: "#fff", textDecoration: "none", borderRadius: 6, padding: "10px 24px", fontSize: 13, fontWeight: 500 }}>✦ Generar mi CV</a>
     </div>
   );
 }
