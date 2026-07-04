@@ -55,11 +55,19 @@ export function parseCVText(text: string): CVSection[] {
   const sections: CVSection[] = [];
   let current: CVSection | null = null;
   let lastJob: CVItem | null = null;
+  let lastEdu: CVItem | null = null;
 
   function pushJob() {
     if (lastJob && current) {
       current.items.push({ ...lastJob, bullets: [...(lastJob.bullets ?? [])] });
       lastJob = null;
+    }
+  }
+
+  function pushEdu() {
+    if (lastEdu && current) {
+      current.items.push({ ...lastEdu, bullets: [...(lastEdu.bullets ?? [])] });
+      lastEdu = null;
     }
   }
 
@@ -74,12 +82,14 @@ export function parseCVText(text: string): CVSection[] {
 
     if (!line) {
       pushJob();
+      pushEdu();
       continue;
     }
 
     // Section header: all-caps letters, length >= 4 letters
     if (isAllCaps(line) && !isBullet(line)) {
       pushJob();
+      pushEdu();
       current = { title: line, items: [] };
       sections.push(current);
       continue;
@@ -98,6 +108,7 @@ export function parseCVText(text: string): CVSection[] {
         // Education section: parse as education entry regardless of content
         if (isEduSection()) {
           pushJob();
+          pushEdu();
           let date: string | undefined;
           let subtitle: string | undefined;
           for (const part of parts.slice(1)) {
@@ -107,12 +118,13 @@ export function parseCVText(text: string): CVSection[] {
               subtitle = part;
             }
           }
-          current.items.push({
+          lastEdu = {
             type: "education",
             title: parts[0],
             subtitle,
             date,
-          });
+            bullets: [],
+          };
           continue;
         }
 
@@ -157,6 +169,8 @@ export function parseCVText(text: string): CVSection[] {
       const content = cleanBullet(line);
       if (lastJob) {
         (lastJob.bullets ??= []).push(content);
+      } else if (lastEdu) {
+        (lastEdu.bullets ??= []).push(content);
       } else {
         current.items.push({ type: "bullet", content });
       }
@@ -164,10 +178,12 @@ export function parseCVText(text: string): CVSection[] {
     }
 
     pushJob();
+    pushEdu();
     current.items.push({ type: "paragraph", content: line });
   }
 
   pushJob();
+  pushEdu();
 
   const result = sections.filter((s) => s.title || s.items.length > 0);
 

@@ -100,6 +100,16 @@ function Item({ item }: { item: CVItem }) {
           {item.date && <div style={{ fontSize: 10, color: C.hint, flexShrink: 0 }}>{item.date}</div>}
         </div>
         {item.subtitle && <div style={{ fontSize: 11, color: C.hint, marginTop: 2 }}>{item.subtitle}</div>}
+        {item.bullets && item.bullets.length > 0 && (
+          <div style={{ marginTop: 4 }}>
+            {item.bullets.map((b, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, padding: "2px 0", alignItems: "flex-start" }}>
+                <span style={{ color: C.greenMid, fontSize: 9, marginTop: 2, flexShrink: 0 }}>▸</span>
+                <span style={{ fontSize: 11, color: C.texto, lineHeight: 1.5 }}>{b}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }

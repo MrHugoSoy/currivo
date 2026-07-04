@@ -90,6 +90,12 @@ function PDFItem({ item }: { item: CVItem }) {
           {item.date ? <Text style={{ fontSize: 8.5, color: C.hint }}>{item.date}</Text> : null}
         </View>
         {item.subtitle ? <Text style={s.jMeta}>{item.subtitle}</Text> : null}
+        {(item.bullets ?? []).map((b, i) => (
+          <View key={i} style={s.bRow}>
+            <Text style={s.bMark}>▸</Text>
+            <Text style={s.bTxt}>{b}</Text>
+          </View>
+        ))}
       </View>
     );
   }

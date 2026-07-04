@@ -79,6 +79,12 @@ function MinPDFItem({ item, isSkill }: { item: CVItem; isSkill: boolean }) {
           {item.date ? <Text style={s.jDate}>{item.date}</Text> : null}
         </View>
         {item.subtitle ? <Text style={s.jMeta}>{item.subtitle}</Text> : null}
+        {(item.bullets ?? []).map((b, i) => (
+          <View key={i} style={s.bRow}>
+            <Text style={s.bMark}>–</Text>
+            <Text style={s.bTxt}>{b}</Text>
+          </View>
+        ))}
       </View>
     );
   }

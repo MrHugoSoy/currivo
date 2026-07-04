@@ -76,6 +76,16 @@ function MinItem({ item, isSkillSection, skills }: { item: CVItem; isSkillSectio
           {item.date && <div style={{ fontSize: 10, color: C.hint }}>{item.date}</div>}
         </div>
         {item.subtitle && <div style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>{item.subtitle}</div>}
+        {item.bullets && item.bullets.length > 0 && (
+          <div style={{ marginTop: 4 }}>
+            {item.bullets.map((b, i) => (
+              <div key={i} style={{ fontSize: 11, color: C.texto, lineHeight: 1.8, paddingLeft: 14, position: "relative", marginBottom: 2 }}>
+                <span style={{ position: "absolute", left: 0, color: C.hint }}>–</span>
+                {b}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
