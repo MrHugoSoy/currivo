@@ -12,6 +12,10 @@ const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 const SAMPLE_MX = ["Diseñadora Gráfica","Contador Público","Ingeniero de Software","Enfermera Especialista","Arquitecta","Maestra de Primaria","Desarrollador Web","Chef Ejecutivo","Psicóloga Clínica","Abogada Corporativa","Médica General","Gerente de Marketing","Analista Financiero","Ingeniero Civil","Administradora de Empresas","Técnico en Mantenimiento","Coordinadora de RRHH","Fotógrafo Profesional"];
 const SAMPLE_US = ["Graphic Designer","Software Engineer","Marketing Manager","Data Analyst","Project Manager","UX Designer","Financial Analyst","Sales Representative","HR Specialist","Operations Manager","Full Stack Developer","Product Manager","Business Analyst","Registered Nurse","Civil Engineer"];
 const SAMPLE_CA = ["Software Developer","Project Manager","Registered Nurse","Financial Analyst","Marketing Coordinator","Civil Engineer","HR Manager","UX Designer","Data Scientist","Accountant","Bilingual Customer Service","Supply Chain Analyst","Environmental Engineer"];
+
+const SAMPLE_NAMES_MX = ["María García López","Carlos Hernández Ruiz","Ana Martínez Soto","Jorge Ramírez Torres","Sofía López Mendoza","Diego Flores Castillo","Valentina Cruz Jiménez","Luis Morales Vega","Fernanda Reyes Guzmán","Alejandro Vargas Núñez","Daniela Romero Peña","Iván Sánchez Ríos","Paola Ortiz Delgado","Roberto Navarro Luna","Camila Aguilar Ramos"];
+const SAMPLE_NAMES_US = ["James Wilson","Emily Johnson","Michael Brown","Sarah Davis","David Martinez","Jessica Taylor","Christopher Anderson","Amanda Thomas","Daniel Jackson","Ashley White","Joshua Harris","Megan Clark","Matthew Lewis","Brittany Robinson","Ryan Walker"];
+const SAMPLE_NAMES_CA = ["Liam Chen","Emma Tremblay","Noah Patel","Olivia Dubois","Ethan Kim","Sophia Nguyen","Lucas Okafor","Isabella Singh","Mason Lavoie","Ava Kowalski","Aiden Fernandez","Mia Johansson","Carter Williams","Zoe Lefebvre","Owen Sharma"];
 const TONES = ["Profesional", "Creativo", "Formal", "Moderno"];
 const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas", "Construcción", "Manufactura", "Logística", "Ventas", "Recursos Humanos", "Legal", "Gastronomía", "Turismo", "Medios"];
 const DISPONIBILIDAD_OPTIONS = ["Inmediata", "15 días", "1 mes", "2 meses", "A convenir"];
@@ -201,6 +205,11 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     us: SAMPLE_US[Math.floor(Math.random() * SAMPLE_US.length)],
     ca: SAMPLE_CA[Math.floor(Math.random() * SAMPLE_CA.length)],
   }), []);
+  const sampleNames = useMemo(() => ({
+    mx: SAMPLE_NAMES_MX[Math.floor(Math.random() * SAMPLE_NAMES_MX.length)],
+    us: SAMPLE_NAMES_US[Math.floor(Math.random() * SAMPLE_NAMES_US.length)],
+    ca: SAMPLE_NAMES_CA[Math.floor(Math.random() * SAMPLE_NAMES_CA.length)],
+  }), []);
 
   const selectedMarket = MARKETS.find(m => m.id === form.mercado)!;
   const note = DIFF_NOTES[form.mercado];
@@ -326,7 +335,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
               {/* 1. DATOS PERSONALES */}
               <FB step={1} total={TOTAL_STEPS} title={steps[0]} icon={BLOCK_META.personal.icon} iconBg={BLOCK_META.personal.color}>
                 <FR>
-                  <F label={isMx ? "Nombre completo" : isUs ? "Full Name" : "Full Name / Nom complet"} placeholder="María García López" value={form.nombre} onChange={set("nombre")} />
+                  <F label={isMx ? "Nombre completo" : isUs ? "Full Name" : "Full Name / Nom complet"} placeholder={sampleNames[form.mercado]} value={form.nombre} onChange={set("nombre")} />
                   <F label={isMx ? "Puesto deseado" : isUs ? "Job Title" : "Job Title / Titre"} placeholder={samplePuestos[form.mercado]} value={form.puesto} onChange={set("puesto")} />
                 </FR>
                 <FR>
