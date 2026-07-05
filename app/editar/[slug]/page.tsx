@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import TextEditor from "./TextEditor";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 type PageProps = { params: Promise<{ slug: string }> };
 

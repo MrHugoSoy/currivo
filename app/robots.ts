@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/perfil", "/api", "/dashboard"],
+      disallow: ["/perfil", "/dashboard", "/api", "/editar", "/pago"],
     },
     sitemap: "https://resumika.com/sitemap.xml",
   };
