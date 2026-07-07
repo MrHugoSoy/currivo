@@ -24,6 +24,7 @@ export interface CVCardData {
   mercado: "mx" | "us" | "ca";
   template: string;
   created_at: string;
+  user_id?: string;
 }
 
 interface CVCardProps {
