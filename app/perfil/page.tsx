@@ -280,7 +280,7 @@ export default function PerfilPage() {
               {profile?.is_pro ? (
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{PLAN_LABELS[profile.pro_plan ?? ""] ?? profile.pro_plan}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{PLAN_LABELS[profile.pro_plan ?? ""] ?? profile.pro_plan ?? "Pro"}</span>
                     <span style={{ fontSize: 10, fontWeight: 600, background: "var(--green-bg)", color: "var(--green)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 100, padding: "1px 8px" }}>Activo</span>
                   </div>
                   <div style={{ fontSize: 11, color: "var(--hint)", marginBottom: 16 }}>
@@ -288,7 +288,7 @@ export default function PerfilPage() {
                       ? `${profile.pro_plan === "gift" ? "Expira el" : "Renueva el"} ${new Date(profile.pro_expires_at).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`
                       : "Sin vencimiento"}
                   </div>
-                  {profile.pro_plan !== "lifetime_mxn" && (
+                  {profile.stripe_customer_id && profile.pro_plan !== "lifetime_mxn" && profile.pro_plan !== "gift" && (
                     <button onClick={handlePortal} disabled={portalLoading}
                       style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "9px 0", fontSize: 12, color: "var(--muted)", fontFamily: "inherit", cursor: portalLoading ? "default" : "pointer", opacity: portalLoading ? 0.6 : 1 }}>
                       {portalLoading ? "Cargando..." : "Gestionar suscripción →"}
