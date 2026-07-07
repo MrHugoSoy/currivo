@@ -7,10 +7,17 @@ import { CVCardSkeleton } from "@/components/Skeleton";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
+type GiftCode = { id: string; code: string; is_used: boolean; used_at: string | null; created_at: string };
+
 export default function Dashboard() {
   const [cvs, setCvs] = useState<CVCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [authed, setAuthed] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [giftCodes, setGiftCodes] = useState<GiftCode[]>([]);
+  const [giftLoading, setGiftLoading] = useState(false);
+  const [genCount, setGenCount] = useState(1);
+  const [copied, setCopied] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -24,6 +31,8 @@ export default function Dashboard() {
       }
 
       setAuthed(true);
+      setUserId(session.user.id);
+      loadGiftCodes(session.user.id);
 
       const { data, error } = await supabase
         .from("cvs")
@@ -35,6 +44,28 @@ export default function Dashboard() {
     }
     load();
   }, [router]);
+
+  async function loadGiftCodes(uid: string) {
+    const res = await fetch(`/api/gift/generate?userId=${uid}`);
+    if (res.ok) { const d = await res.json(); setGiftCodes(d.codes ?? []); }
+  }
+
+  async function handleGenerate() {
+    if (!userId) return;
+    setGiftLoading(true);
+    const res = await fetch("/api/gift/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, count: genCount }),
+    });
+    if (res.ok) { const d = await res.json(); setGiftCodes(prev => [...(d.codes ?? []), ...prev]); }
+    setGiftLoading(false);
+  }
+
+  function handleCopyCode(code: string) {
+    navigator.clipboard.writeText(code);
+    setCopied(code); setTimeout(() => setCopied(null), 2000);
+  }
 
   function handleDelete(id: string) {
     setCvs((prev) => prev.filter((cv) => cv.id !== id));
@@ -83,6 +114,56 @@ export default function Dashboard() {
           >
             + Generar nuevo CV
           </a>
+        </div>
+
+        {/* Gift codes */}
+        <div style={{ marginBottom: 40 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px", marginBottom: 16 }}>
+            Códigos de regalo
+          </h2>
+
+          {/* Generator */}
+          <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 20, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 13, color: "var(--muted)" }}>Generar</span>
+            <input type="number" min={1} max={50} value={genCount} onChange={e => setGenCount(Number(e.target.value))}
+              style={{ width: 60, background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 10px", fontSize: 13, color: "var(--ink)", fontFamily: "inherit", outline: "none" }} />
+            <span style={{ fontSize: 13, color: "var(--muted)" }}>código{genCount !== 1 ? "s" : ""}</span>
+            <button onClick={handleGenerate} disabled={giftLoading}
+              style={{ background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: "8px 18px", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: giftLoading ? "default" : "pointer", opacity: giftLoading ? 0.6 : 1 }}>
+              {giftLoading ? "Generando..." : "Generar"}
+            </button>
+          </div>
+
+          {/* Codes list */}
+          {giftCodes.length === 0 ? (
+            <p style={{ fontSize: 13, color: "var(--hint)" }}>No hay códigos generados todavía.</p>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 8 }}>
+              {giftCodes.map(gc => (
+                <div key={gc.id} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, opacity: gc.is_used ? 0.5 : 1 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 600, color: gc.is_used ? "var(--hint)" : "var(--ink)", letterSpacing: "1px" }}>{gc.code}</div>
+                    <div style={{ fontSize: 10, color: "var(--hint)", marginTop: 3 }}>
+                      {gc.is_used
+                        ? `Canjeado ${gc.used_at ? new Date(gc.used_at).toLocaleDateString("es-MX") : ""}`
+                        : `Creado ${new Date(gc.created_at).toLocaleDateString("es-MX")}`}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: gc.is_used ? "var(--warm)" : "var(--green-bg)", color: gc.is_used ? "var(--muted)" : "var(--green)", border: `1px solid ${gc.is_used ? "var(--border)" : "rgba(45,90,61,.2)"}` }}>
+                      {gc.is_used ? "Usado" : "Disponible"}
+                    </span>
+                    {!gc.is_used && (
+                      <button onClick={() => handleCopyCode(gc.code)}
+                        style={{ background: "none", border: "1px solid var(--border)", borderRadius: 5, padding: "4px 10px", fontSize: 11, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
+                        {copied === gc.code ? "✓" : "Copiar"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* CV list */}

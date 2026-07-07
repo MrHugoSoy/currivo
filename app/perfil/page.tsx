@@ -26,6 +26,7 @@ const PLAN_LABELS: Record<string, string> = {
   pro_usd_founder: "Pro Fundador",
   pro_usd: "Pro",
   lifetime_mxn: "Lifetime",
+  gift: "Código Regalo",
 };
 
 export default function PerfilPage() {
@@ -42,6 +43,9 @@ export default function PerfilPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [giftCode, setGiftCode] = useState("");
+  const [giftLoading, setGiftLoading] = useState(false);
+  const [giftMsg, setGiftMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -115,6 +119,25 @@ export default function PerfilPage() {
     } catch (err: unknown) {
       setSaveError(err instanceof Error ? err.message : "Error al guardar");
     } finally { setSaving(false); }
+  };
+
+  const handleRedeemGift = async () => {
+    if (!user || !giftCode.trim()) return;
+    setGiftLoading(true); setGiftMsg(null);
+    try {
+      const res = await fetch("/api/gift/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: giftCode.trim(), userId: user.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setGiftMsg({ ok: false, text: data.error ?? "Error al canjear." }); return; }
+      const exp = new Date(data.expires_at).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" });
+      setGiftMsg({ ok: true, text: `¡Código canjeado! Pro activo hasta el ${exp}.` });
+      setGiftCode("");
+      setProfile(p => p ? { ...p, is_pro: true, pro_plan: "gift", pro_expires_at: data.expires_at } : p);
+    } catch { setGiftMsg({ ok: false, text: "Error de conexión." }); }
+    finally { setGiftLoading(false); }
   };
 
   const signOut = async () => { await supabase.auth.signOut(); router.replace("/"); };
@@ -262,7 +285,7 @@ export default function PerfilPage() {
                   </div>
                   <div style={{ fontSize: 11, color: "var(--hint)", marginBottom: 16 }}>
                     {profile.pro_expires_at
-                      ? `Renueva el ${new Date(profile.pro_expires_at).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`
+                      ? `${profile.pro_plan === "gift" ? "Expira el" : "Renueva el"} ${new Date(profile.pro_expires_at).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`
                       : "Sin vencimiento"}
                   </div>
                   {profile.pro_plan !== "lifetime_mxn" && (
@@ -282,6 +305,30 @@ export default function PerfilPage() {
                 </>
               )}
             </div>
+          </div>
+
+            {/* Gift code */}
+            {!profile?.is_pro && (
+              <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 22px", marginTop: 12 }}>
+                <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--hint)", marginBottom: 14, fontWeight: 600 }}>Código de regalo</div>
+                <input
+                  type="text"
+                  placeholder="RSMK-XXXX-XXXX"
+                  value={giftCode}
+                  onChange={e => { setGiftCode(e.target.value.toUpperCase()); setGiftMsg(null); }}
+                  style={{ ...inputStyle, marginBottom: 8, letterSpacing: "1px", fontFamily: "monospace" }}
+                />
+                {giftMsg && (
+                  <p style={{ fontSize: 11, color: giftMsg.ok ? "var(--green)" : "#b91c1c", background: giftMsg.ok ? "var(--green-bg)" : "#fef2f2", border: `1px solid ${giftMsg.ok ? "rgba(45,90,61,.2)" : "#fecaca"}`, borderRadius: 5, padding: "7px 10px", marginBottom: 8 }}>
+                    {giftMsg.text}
+                  </p>
+                )}
+                <button onClick={handleRedeemGift} disabled={giftLoading || !giftCode.trim()}
+                  style={{ width: "100%", background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "10px 0", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: (giftLoading || !giftCode.trim()) ? "default" : "pointer", opacity: (giftLoading || !giftCode.trim()) ? 0.5 : 1 }}>
+                  {giftLoading ? "Canjeando..." : "Canjear código"}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* RIGHT — CVs */}

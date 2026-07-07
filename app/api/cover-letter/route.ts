@@ -149,11 +149,14 @@ export async function POST(req: NextRequest) {
 
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("is_pro")
+      .select("is_pro, pro_plan, pro_expires_at")
       .eq("user_id", userId)
       .single();
 
-    if (!profile?.is_pro) {
+    const isActivePro = profile?.is_pro &&
+      (profile.pro_plan !== "gift" || !profile.pro_expires_at || new Date(profile.pro_expires_at) > new Date());
+
+    if (!isActivePro) {
       return NextResponse.json({ error: "PRO_REQUIRED" }, { status: 403 });
     }
 
