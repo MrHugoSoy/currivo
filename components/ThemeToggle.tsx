@@ -1,23 +1,28 @@
 "use client";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
+  // Re-apply on every route change (React can strip data-theme from <html> on navigation)
   useEffect(() => {
     const stored = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const isDark = stored === "dark" || (!stored && prefersDark);
+    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
     setDark(isDark);
     setMounted(true);
-  }, []);
+  }, [pathname]);
 
   function toggle() {
     const next = !dark;
+    const theme = next ? "dark" : "light";
     setDark(next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-    document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
+    localStorage.setItem("theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
   }
 
   if (!mounted) return null;
@@ -42,7 +47,7 @@ export function ThemeToggle() {
         justifyContent: "center",
         cursor: "pointer",
         fontSize: 17,
-        transition: "box-shadow .15s, border-color .15s",
+        transition: "box-shadow .15s",
       }}
       onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 14px rgba(0,0,0,0.18)"; }}
       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.12)"; }}
