@@ -17,6 +17,22 @@
   --green-mid: #4a9462;
 }
 
+[data-theme="dark"] {
+  --cream: #121110;
+  --paper: #1c1a16;
+  --warm: #242119;
+  --border: #2e2b23;
+  --border2: #3c3930;
+  --ink: #f2ede5;
+  --body: #c0b9af;
+  --muted: #7a746c;
+  --hint: #504b45;
+  --green: #2d5a3d;
+  --green2: #3d7a54;
+  --green-bg: #192a1f;
+  --green-mid: #4a9462;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
