@@ -31,8 +31,9 @@ export default function Dashboard() {
       }
 
       setAuthed(true);
-      setUserId(session.user.id);
-      loadGiftCodes(session.user.id);
+      const uid = session!.user.id;
+      setUserId(uid);
+      loadGiftCodes(uid);
 
       const { data, error } = await supabase
         .from("cvs")

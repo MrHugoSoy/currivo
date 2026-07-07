@@ -305,7 +305,6 @@ export default function PerfilPage() {
                 </>
               )}
             </div>
-          </div>
 
             {/* Gift code */}
             {!profile?.is_pro && (
