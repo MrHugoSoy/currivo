@@ -15,6 +15,9 @@
   --green2: #3d7a54;
   --green-bg: #eef4f0;
   --green-mid: #4a9462;
+  --surface-dark: #1c1a16;
+  --nav-bg: rgba(248,245,239,0.92);
+  --nav-bg-scrolled: rgba(248,245,239,0.95);
 }
 
 [data-theme="dark"] {
@@ -31,6 +34,9 @@
   --green2: #3d7a54;
   --green-bg: #192a1f;
   --green-mid: #4a9462;
+  --surface-dark: #0d0c0a;
+  --nav-bg: rgba(18,17,16,0.92);
+  --nav-bg-scrolled: rgba(18,17,16,0.95);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }

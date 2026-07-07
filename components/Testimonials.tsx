@@ -78,7 +78,7 @@ export default function Testimonials() {
   const getVisible = () => Array.from({ length: VISIBLE }, (_, i) => reviews[(index + i) % total]);
 
   return (
-    <section style={{ background: "var(--ink)", padding: "80px 0 88px", overflow: "hidden" }}>
+    <section style={{ background: "var(--surface-dark)", padding: "80px 0 88px", overflow: "hidden" }}>
       <style>{`
         .testimonials-inner { max-width: 1320px; margin: 0 auto; padding: 0 64px; }
         .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; cursor: grab; user-select: none; }

@@ -2,7 +2,7 @@
 
 export default function CTASection() {
   return (
-    <section style={{ background: "var(--ink)", padding: "96px 48px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+    <section style={{ background: "var(--surface-dark)", padding: "96px 48px", textAlign: "center", position: "relative", overflow: "hidden" }}>
       {/* Ambient glow */}
       <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 600, height: 300, background: "radial-gradient(ellipse, rgba(45,90,61,.35) 0%, transparent 70%)", pointerEvents: "none" }} />
 

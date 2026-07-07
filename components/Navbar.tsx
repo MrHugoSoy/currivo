@@ -37,6 +37,9 @@ export default function Navbar() {
         .nav-links { display: flex; gap: 32px; margin: 0 auto; }
         .nav-ctas  { display: flex; gap: 10px; align-items: center; }
         .nav-hamburger { display: none; }
+        .nav-root { background: var(--nav-bg); }
+        .nav-root.nav-scrolled { background: var(--nav-bg-scrolled); }
+        .nav-mobile { background: var(--nav-bg-scrolled); }
         @media (max-width: 768px) {
           .nav-inner { padding: 0 20px !important; }
           .nav-links { display: none !important; }
@@ -45,7 +48,7 @@ export default function Navbar() {
         }
       `}</style>
 
-      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, height: 62, background: scrolled ? "rgba(248,245,239,0.95)" : "rgba(248,245,239,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)", transition: "background .2s" }}>
+      <nav className={`nav-root${scrolled ? " nav-scrolled" : ""}`} style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, height: 62, backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)", transition: "background .2s" }}>
         <div className="nav-inner" style={{ padding: "0 64px", height: "100%", display: "flex", alignItems: "center" }}>
 
           <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px", flexShrink: 0 }}>
@@ -106,7 +109,7 @@ export default function Navbar() {
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <div style={{ position: "fixed", top: 62, left: 0, right: 0, zIndex: 99, background: "rgba(248,245,239,0.98)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)", padding: "16px 20px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+        <div className="nav-mobile" style={{ position: "fixed", top: 62, left: 0, right: 0, zIndex: 99, backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)", padding: "16px 20px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
           {[
             { href: "/#como-funciona", label: "Cómo funciona" },
             { href: "/crear", label: "Plantillas" },
