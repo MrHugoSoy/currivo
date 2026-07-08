@@ -4,6 +4,8 @@ import { supabase } from "@/lib/supabase";
 import { AuthModal } from "./AuthModal";
 import type { User } from "@supabase/supabase-js";
 
+const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
+
 type ModalTab = "register" | "login";
 
 export default function Navbar() {
@@ -80,6 +82,9 @@ export default function Navbar() {
                   </span>
                 </a>
                 <a href="/perfil" style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 14px" }}>Mi perfil</a>
+                {ADMIN_EMAILS.includes(user.email ?? "") && (
+                  <a href="/dashboard" style={{ fontSize: 12, color: "var(--green)", textDecoration: "none", border: "1px solid rgba(45,90,61,.25)", borderRadius: 6, padding: "7px 14px", background: "var(--green-bg)" }}>Dashboard</a>
+                )}
                 <button onClick={handleSignOut} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 14px", fontSize: 12, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>Salir</button>
               </>
             ) : (
@@ -125,6 +130,9 @@ export default function Navbar() {
           {user ? (
             <>
               <a href="/perfil" onClick={() => setMobileOpen(false)} style={{ fontSize: 14, color: "var(--muted)", textDecoration: "none", padding: "8px 0" }}>Mi perfil</a>
+              {ADMIN_EMAILS.includes(user.email ?? "") && (
+                <a href="/dashboard" onClick={() => setMobileOpen(false)} style={{ fontSize: 14, color: "var(--green)", textDecoration: "none", padding: "8px 0", fontWeight: 500 }}>Dashboard ↗</a>
+              )}
               <button onClick={handleSignOut} style={{ marginTop: 4, background: "none", border: "1px solid var(--border)", borderRadius: 8, padding: "12px", fontSize: 14, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>Cerrar sesión</button>
             </>
           ) : (
