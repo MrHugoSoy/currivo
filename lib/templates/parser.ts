@@ -96,8 +96,9 @@ export function parseCVText(text: string): CVSection[] {
     }
 
     if (!current) {
-      current = { title: "", items: [] };
-      sections.push(current);
+      // Lines before the first section header are the CV header (name, title, contacts).
+      // extractHeader() handles them — skip here to avoid rendering them twice.
+      continue;
     }
 
     // Pipe-separated lines: job, education, or skills
