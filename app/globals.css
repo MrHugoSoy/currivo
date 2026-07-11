@@ -81,3 +81,8 @@ body {
   border-radius: 4px;
   display: block;
 }
+
+.article-card:hover {
+  border-color: rgba(42,82,54,.25) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}

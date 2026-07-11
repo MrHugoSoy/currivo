@@ -5,9 +5,8 @@ export function ArticleCard({ guia }: { guia: GuiaFrontmatter }) {
   return (
     <a
       href={`/guias/${guia.slug}`}
+      className="article-card"
       style={{ display: "block", background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "22px 24px", textDecoration: "none", transition: "border-color .15s, box-shadow .15s" }}
-      onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(42,82,54,.25)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 16px rgba(0,0,0,.06)"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none"; }}
     >
       {/* Badges */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
