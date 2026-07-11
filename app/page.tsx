@@ -6,6 +6,7 @@ import Testimonials from "@/components/Testimonials";
 import Pricing from "@/components/Pricing";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
+import { FeaturedGuias } from "@/components/guias/FeaturedGuias";
 
 export const metadata: Metadata = {
   title: "resumika — Generador de CV con Inteligencia Artificial",
@@ -81,6 +82,7 @@ export default function Home() {
         <Hero />
         <HowItWorks />
         <Testimonials />
+        <FeaturedGuias />
         <Pricing />
         <CTASection />
       </main>
