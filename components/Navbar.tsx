@@ -36,12 +36,22 @@ export default function Navbar() {
   return (
     <>
       <style>{`
-        .nav-links { display: flex; gap: 32px; margin: 0 auto; }
-        .nav-ctas  { display: flex; gap: 10px; align-items: center; }
+        .nav-links { display: flex; gap: 28px; margin: 0 auto; }
+        .nav-ctas  { display: flex; gap: 8px; align-items: center; }
         .nav-hamburger { display: none; }
         .nav-root { background: var(--nav-bg); }
         .nav-root.nav-scrolled { background: var(--nav-bg-scrolled); }
         .nav-mobile { background: var(--nav-bg-scrolled); }
+        .nav-link { font-size: 13px; color: var(--body); font-weight: 400; text-decoration: none; transition: color .15s; }
+        .nav-link:hover { color: var(--ink); }
+        .nav-btn-ghost { font-size: 12px; color: var(--body); text-decoration: none; border: 1px solid var(--border2); border-radius: 6px; padding: 7px 14px; background: transparent; font-family: inherit; cursor: pointer; transition: border-color .15s, color .15s; }
+        .nav-btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+        .nav-btn-cta { background: var(--green); color: #fff; border-radius: 6px; padding: 8px 18px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; text-decoration: none; border: none; transition: opacity .15s; }
+        .nav-btn-cta:hover { opacity: .88; }
+        .nav-btn-register { background: var(--ink); color: var(--cream); border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: opacity .15s; }
+        .nav-btn-register:hover { opacity: .82; }
+        .nav-btn-admin { font-size: 12px; color: var(--green); text-decoration: none; border: 1px solid rgba(45,90,61,.35); border-radius: 6px; padding: 7px 14px; background: var(--green-bg); font-weight: 500; transition: background .15s; }
+        .nav-btn-admin:hover { background: var(--green2); color: #fff; border-color: transparent; }
         @media (max-width: 768px) {
           .nav-inner { padding: 0 20px !important; }
           .nav-links { display: none !important; }
@@ -58,13 +68,11 @@ export default function Navbar() {
           </a>
 
           <div className="nav-links">
-            <a href="/#como-funciona" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Cómo funciona</a>
-            <a href="/crear" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Plantillas</a>
-            <a href="/#precios" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Precios</a>
-            <a href="/guias" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Guías</a>
-            {user && (
-              <a href="/carta" style={{ fontSize: 13, color: "var(--muted)", fontFamily: "inherit", fontWeight: 400, textDecoration: "none" }}>Carta de presentación</a>
-            )}
+            <a href="/#como-funciona" className="nav-link">Cómo funciona</a>
+            <a href="/crear" className="nav-link">Plantillas</a>
+            <a href="/#precios" className="nav-link">Precios</a>
+            <a href="/guias" className="nav-link">Guías</a>
+            {user && <a href="/carta" className="nav-link">Carta de presentación</a>}
           </div>
 
           <div className="nav-ctas">
@@ -78,25 +86,23 @@ export default function Navbar() {
                       {user.email?.[0].toUpperCase()}
                     </div>
                   )}
-                  <span style={{ fontSize: 12, color: "var(--body)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span style={{ fontSize: 12, color: "var(--body)", maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {user.user_metadata?.username ? `@${user.user_metadata.username}` : user.email}
                   </span>
                 </a>
-                <a href="/perfil" style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 14px" }}>Mi perfil</a>
+                <a href="/perfil" className="nav-btn-ghost">Mi perfil</a>
                 {ADMIN_EMAILS.includes(user.email ?? "") && (
-                  <a href="/dashboard" style={{ fontSize: 12, color: "var(--green)", textDecoration: "none", border: "1px solid rgba(45,90,61,.25)", borderRadius: 6, padding: "7px 14px", background: "var(--green-bg)" }}>Dashboard</a>
+                  <a href="/dashboard" className="nav-btn-admin">Dashboard</a>
                 )}
-                <button onClick={handleSignOut} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 14px", fontSize: 12, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>Salir</button>
+                <button onClick={handleSignOut} className="nav-btn-ghost">Salir</button>
               </>
             ) : (
               <>
-                <button onClick={() => setModal("login")} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "8px 16px", fontSize: 13, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>Iniciar sesión</button>
-                <button onClick={() => setModal("register")} style={{ background: "var(--ink)", color: "var(--cream)", border: "none", borderRadius: 6, padding: "8px 16px", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: "pointer" }}>Registrarse</button>
+                <button onClick={() => setModal("login")} className="nav-btn-ghost">Iniciar sesión</button>
+                <button onClick={() => setModal("register")} className="nav-btn-register">Registrarse</button>
               </>
             )}
-            <a href="/crear" style={{ background: "var(--green)", color: "#fff", borderRadius: 6, padding: "8px 18px", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: "pointer", textDecoration: "none" }}>
-              Crear mi CV →
-            </a>
+            <a href="/crear" className="nav-btn-cta">Crear mi CV →</a>
           </div>
 
           {/* Hamburger */}
