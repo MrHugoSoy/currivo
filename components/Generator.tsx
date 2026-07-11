@@ -123,7 +123,9 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const [authLoaded, setAuthLoaded] = useState(false);
   const [showAuth, setShowAuth] = useState<"register" | "login" | null>(null);
   const [showVacante, setShowVacante] = useState(false);
+  const [pendingAutoSubmit, setPendingAutoSubmit] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+  const handleGenerateRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -170,6 +172,31 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     } catch { /* ignore */ }
   }, []);
 
+  // Restore pending form after email confirmation redirect
+  useEffect(() => {
+    const raw = localStorage.getItem("resumika_pending_form");
+    if (!raw) return;
+    try {
+      const saved = JSON.parse(raw);
+      setForm(f => ({ ...f, ...saved }));
+      setPendingAutoSubmit(true);
+    } catch {
+      localStorage.removeItem("resumika_pending_form");
+    }
+  }, []);
+
+  // Keep ref current so the auto-submit effect always calls the latest version
+  useEffect(() => { handleGenerateRef.current = handleGenerate; });
+
+  // Auto-submit when user authenticates with a pending form
+  useEffect(() => {
+    if (!pendingAutoSubmit || !userId || !authLoaded || loading) return;
+    localStorage.removeItem("resumika_pending_form");
+    setPendingAutoSubmit(false);
+    setShowAuth(null);
+    handleGenerateRef.current();
+  }, [pendingAutoSubmit, userId, authLoaded, loading]);
+
   const set = (k: keyof CVFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm(f => ({ ...f, [k]: e.target.value }));
@@ -177,7 +204,12 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const selectMarket = (m: Market) => { setForm(f => ({ ...f, mercado: m })); setResult(null); setSlug(null); };
 
   const handleGenerate = async () => {
-    if (authLoaded && !userId) { setShowAuth("register"); return; }
+    if (authLoaded && !userId) {
+      localStorage.setItem("resumika_pending_form", JSON.stringify(form));
+      setPendingAutoSubmit(true);
+      setShowAuth("register");
+      return;
+    }
     if (!form.nombre || !form.puesto) { setError("Por favor completa nombre y puesto deseado."); return; }
     if (!form.sinExperiencia && form.experiencias.every(e => !e.descripcion.trim())) {
       setError("Describe al menos una experiencia, o marca que no tienes experiencia."); return;
