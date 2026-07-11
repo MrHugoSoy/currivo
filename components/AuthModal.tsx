@@ -51,7 +51,10 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { username: username.trim() || undefined } },
+          options: {
+            data: { username: username.trim() || undefined },
+            emailRedirectTo: "https://resumika.com",
+          },
         });
         if (error) throw error;
         fetch("/api/email/welcome", {
