@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { getAllGuias } from "@/lib/guias";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -15,7 +16,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/crear`,   lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
     { url: `${base}/precios`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/carta`,   lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/guias`,   lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
   ];
+
+  const guias = getAllGuias();
+  const guiaRoutes: MetadataRoute.Sitemap = guias.map((g) => ({
+    url: `${base}/guias/${g.slug}`,
+    lastModified: new Date(g.updatedAt ?? g.publishedAt),
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+  const catSeen = new Set<string>();
+  const categoryRoutes: MetadataRoute.Sitemap = guias
+    .filter((g) => { if (catSeen.has(g.category)) return false; catSeen.add(g.category); return true; })
+    .map((g) => ({
+      url: `${base}/guias/categoria/${g.category}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
 
   const { data: cvs } = await supabaseAdmin
     .from("cvs")
@@ -30,5 +49,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...staticRoutes, ...cvRoutes];
+  return [...staticRoutes, ...guiaRoutes, ...categoryRoutes, ...cvRoutes];
 }
