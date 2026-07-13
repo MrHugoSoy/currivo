@@ -1,10 +1,1 @@
-{
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.resumika.com" }],
-      "destination": "https://resumika.com/:path*",
-      "permanent": true
-    }
-  ]
-}
+{}
