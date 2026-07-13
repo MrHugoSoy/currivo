@@ -20,6 +20,7 @@ export interface Guia extends GuiaFrontmatter {
 }
 
 export const CATEGORIES: Record<string, string> = {
+  "guia-general":    "Guía General",
   "formato-cv":      "Formato de CV",
   "por-ciudad":      "Por Ciudad",
   "via-migratoria":  "Vía Migratoria",
