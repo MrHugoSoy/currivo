@@ -284,7 +284,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
         }
       `}</style>
 
-      <section id="generador" className="gen-section" style={{ background: "var(--ink)", padding: "88px 0" }}>
+      <section id="generador" className="gen-section" style={{ background: "var(--surface-dark)", padding: "88px 0" }}>
         <div className="gen-wrap" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 40px" }}>
 
           {/* Label */}
