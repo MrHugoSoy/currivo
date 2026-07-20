@@ -69,7 +69,7 @@ export default function Navbar() {
 
           <div className="nav-links">
             <a href="/#como-funciona" className="nav-link">Cómo funciona</a>
-            <a href="/crear" className="nav-link">Plantillas</a>
+            <a href="/plantillas" className="nav-link">Plantillas</a>
             <a href="/#precios" className="nav-link">Precios</a>
             <a href="/guias" className="nav-link">Guías</a>
             {user && <a href="/carta" className="nav-link">Carta de presentación</a>}
@@ -124,7 +124,7 @@ export default function Navbar() {
         <div className="nav-mobile" style={{ position: "fixed", top: 62, left: 0, right: 0, zIndex: 99, backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)", padding: "16px 20px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
           {[
             { href: "/#como-funciona", label: "Cómo funciona" },
-            { href: "/crear", label: "Plantillas" },
+            { href: "/plantillas", label: "Plantillas" },
             { href: "/#precios", label: "Precios" },
             { href: "/guias", label: "Guías" },
             ...(user ? [{ href: "/carta", label: "Carta de presentación" }] : []),
