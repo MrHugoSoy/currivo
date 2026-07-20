@@ -32,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Prevent flash of wrong theme */}
         <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('theme');if(t==='dark'||(t===null&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}` }} />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8458170443836025" crossOrigin="anonymous" />
       </head>
       <body>
         {children}
