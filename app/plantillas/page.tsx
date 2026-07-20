@@ -4,13 +4,15 @@ import ClasicoPreview from "@/lib/templates/clasico/Preview";
 import ModernoPreview from "@/lib/templates/moderno/Preview";
 import MinimalistaPreview from "@/lib/templates/minimalista/Preview";
 import OscuroPreview from "@/lib/templates/oscuro/Preview";
+import EjecutivoPreview from "@/lib/templates/ejecutivo/Preview";
+import CompactoPreview from "@/lib/templates/compacto/Preview";
 import type { CVData, TemplateId } from "@/lib/templates/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Plantillas de CV | resumika",
-  description: "Elige entre 4 plantillas de currículum profesional. Clásico, Moderno, Minimalista y Oscuro — todas optimizadas para ATS.",
+  description: "Elige entre 6 plantillas de currículum profesional. Clásico, Moderno, Ejecutivo, Compacto, Minimalista y Oscuro — todas optimizadas para ATS.",
   alternates: { canonical: "https://resumika.com/plantillas" },
 };
 
@@ -54,6 +56,8 @@ Inglés (Avanzado C1)`,
 const PREVIEW_MAP: Record<TemplateId, React.ComponentType<{ data: CVData }>> = {
   clasico:     ClasicoPreview,
   moderno:     ModernoPreview,
+  ejecutivo:   EjecutivoPreview,
+  compacto:    CompactoPreview,
   minimalista: MinimalistaPreview,
   oscuro:      OscuroPreview,
 };
@@ -85,7 +89,7 @@ export default function PlantillasPage() {
               Elige tu plantilla de CV
             </h1>
             <p style={{ fontSize: 15, color: "rgba(255,255,255,.5)", lineHeight: 1.7, maxWidth: 500 }}>
-              4 diseños optimizados para ATS, adaptados a México, Canadá y EE.UU. Cambia de plantilla en cualquier momento sin perder tu información.
+              6 diseños optimizados para ATS, adaptados a México, Canadá y EE.UU. Cambia de plantilla en cualquier momento sin perder tu información.
             </p>
           </div>
         </div>

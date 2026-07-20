@@ -82,6 +82,59 @@ const LAYOUT_ICONS: Record<TemplateId, React.ReactNode> = {
       <rect x="30" y="58" width="10" height="4" rx="1" fill="#243a2a" />
     </svg>
   ),
+  ejecutivo: (
+    <svg width="56" height="70" viewBox="0 0 56 70" fill="none">
+      <rect width="56" height="70" rx="3" fill="#ffffff" />
+      {/* Navy header band */}
+      <rect width="56" height="20" rx="3" fill="#1e3a5f" />
+      <rect x="0" y="17" width="56" height="3" rx="0" fill="#1e3a5f" />
+      {/* Blue accent stripe */}
+      <rect x="0" y="20" width="56" height="2" fill="#2b6cb0" />
+      {/* Name in header */}
+      <rect x="6" y="7" width="22" height="4" rx="1" fill="white" opacity=".85" />
+      <rect x="6" y="13" width="13" height="2" rx="1" fill="#93c5fd" opacity=".8" />
+      {/* Body content */}
+      <rect x="6" y="27" width="2.5" height="10" rx="1" fill="#2b6cb0" />
+      <rect x="11" y="28" width="16" height="1.5" rx=".5" fill="#1e3a5f" />
+      <rect x="11" y="32" width="30" height="1" rx=".5" fill="#e2e8f0" />
+      <rect x="11" y="35" width="30" height="1" rx=".5" fill="#e2e8f0" />
+      <rect x="6" y="43" width="2.5" height="10" rx="1" fill="#2b6cb0" />
+      <rect x="11" y="44" width="16" height="1.5" rx=".5" fill="#1e3a5f" />
+      <rect x="11" y="48" width="30" height="1" rx=".5" fill="#e2e8f0" />
+      <rect x="11" y="51" width="20" height="1" rx=".5" fill="#e2e8f0" />
+      {/* Skill tags */}
+      <rect x="6" y="59" width="12" height="5" rx="2" fill="#ebf4ff" />
+      <rect x="20" y="59" width="12" height="5" rx="2" fill="#ebf4ff" />
+      <rect x="34" y="59" width="12" height="5" rx="2" fill="#ebf4ff" />
+    </svg>
+  ),
+  compacto: (
+    <svg width="56" height="70" viewBox="0 0 56 70" fill="none">
+      <rect width="56" height="70" rx="3" fill="#ffffff" />
+      {/* Green accent bar */}
+      <rect width="56" height="2.5" rx="1" fill="#16a34a" />
+      {/* Bold name */}
+      <rect x="6" y="8" width="26" height="5" rx="1" fill="#111827" opacity=".85" />
+      <rect x="6" y="15" width="16" height="2" rx="1" fill="#6b7280" opacity=".6" />
+      {/* Dark divider */}
+      <rect x="6" y="21" width="44" height="1.5" rx=".5" fill="#111827" opacity=".8" />
+      {/* Section 1: green underline header */}
+      <rect x="6" y="27" width="14" height="1.5" rx=".5" fill="#111827" opacity=".7" />
+      <rect x="6" y="29" width="14" height="1.5" rx=".5" fill="#16a34a" />
+      <rect x="6" y="33" width="30" height="1" rx=".5" fill="#e5e7eb" />
+      <rect x="6" y="36" width="30" height="1" rx=".5" fill="#e5e7eb" />
+      <rect x="6" y="39" width="20" height="1" rx=".5" fill="#e5e7eb" />
+      {/* Section 2 */}
+      <rect x="6" y="46" width="14" height="1.5" rx=".5" fill="#111827" opacity=".7" />
+      <rect x="6" y="48" width="14" height="1.5" rx=".5" fill="#16a34a" />
+      <rect x="6" y="52" width="30" height="1" rx=".5" fill="#e5e7eb" />
+      <rect x="6" y="55" width="22" height="1" rx=".5" fill="#e5e7eb" />
+      {/* Pill tags */}
+      <rect x="6" y="61" width="13" height="5" rx="2.5" fill="#f0fdf4" />
+      <rect x="21" y="61" width="13" height="5" rx="2.5" fill="#f0fdf4" />
+      <rect x="36" y="61" width="13" height="5" rx="2.5" fill="#f0fdf4" />
+    </svg>
+  ),
 };
 
 export default function TemplateSelector({ selected, onSelect, userIsPro = false }: Props) {
