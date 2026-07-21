@@ -2,7 +2,7 @@ import { getFeaturedGuias } from "@/lib/guias";
 import { ArticleCard } from "./ArticleCard";
 
 export async function FeaturedGuias() {
-  const guias = getFeaturedGuias(3);
+  const guias = getFeaturedGuias(6);
   if (guias.length === 0) return null;
 
   return (
