@@ -29,7 +29,7 @@ export default function ClasicoPreview({ data }: { data: CVData }) {
       {/* ── HEADER ── */}
       <div style={{ marginBottom: 18, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 36, fontWeight: 600, color: C.primario, letterSpacing: "-1px", lineHeight: 1.1 }}>
+          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 36, fontWeight: 600, color: C.primario, letterSpacing: "-1px", lineHeight: 1.1, hyphens: "none", overflowWrap: "break-word", wordBreak: "break-word" }}>
             {name}
           </div>
           {subtitle && (
@@ -44,7 +44,7 @@ export default function ClasicoPreview({ data }: { data: CVData }) {
 
         {/* Photo — only for Mexico */}
         {isMx && data.photoUrl && (
-          <div style={{ flexShrink: 0 }}>
+          <div style={{ flexShrink: 0, width: 80, height: 80 }}>
             <img
               src={data.photoUrl}
               alt={name}
@@ -52,6 +52,7 @@ export default function ClasicoPreview({ data }: { data: CVData }) {
                 width: 80, height: 80,
                 borderRadius: 6,
                 objectFit: "cover",
+                objectPosition: "center",
                 border: `2px solid ${C.border}`,
                 display: "block",
               }}
