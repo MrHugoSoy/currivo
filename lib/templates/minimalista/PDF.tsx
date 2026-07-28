@@ -42,7 +42,7 @@ export default function MinimalistaPDF({ data }: { data: CVData }) {
   const name = hdr.name || data.nombre;
   const subtitle = hdr.subtitle || data.puesto;
   const contacts = hdr.contacts.length ? hdr.contacts : [data.ciudad, data.email].filter(Boolean) as string[];
-  const main = sections.filter((sec) => sec.title !== "");
+  const main = sections.filter((sec) => sec.title !== "" && sec.title.toLowerCase() !== name.toLowerCase());
 
   return (
     <Document>

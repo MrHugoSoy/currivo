@@ -49,7 +49,7 @@ export default function ModernoPDF({ data }: { data: CVData }) {
   const contacts = hdr.contacts.length ? hdr.contacts : [data.ciudad, data.email].filter(Boolean) as string[];
   const skills = extractSkills(sections);
   const langs = extractLanguages(sections);
-  const main = sections.filter((sec) => sec.title !== "" && !/skill|habilidad|idioma|language|langue/i.test(sec.title));
+  const main = sections.filter((sec) => sec.title !== "" && sec.title.toLowerCase() !== name.toLowerCase() && !/skill|habilidad|idioma|language|langue/i.test(sec.title));
 
   return (
     <Document>

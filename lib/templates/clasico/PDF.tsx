@@ -45,7 +45,7 @@ export default function ClasicoPDF({ data }: { data: CVData }) {
   const name = hdr.name || data.nombre;
   const subtitle = hdr.subtitle || data.puesto;
   const contacts = [...hdr.contacts, ...(hdr.contacts.length ? [] : [data.ciudad, data.email].filter(Boolean) as string[])];
-  const main = sections.filter((sec) => sec.title !== "");
+  const main = sections.filter((sec) => sec.title !== "" && sec.title.toLowerCase() !== name.toLowerCase());
   const isMx = data.mercado === "mx";
   const showPhoto = isMx && !!data.photoUrl;
 

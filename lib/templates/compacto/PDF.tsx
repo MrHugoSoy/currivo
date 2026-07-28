@@ -53,7 +53,7 @@ export default function CompactoPDF({ data }: { data: CVData }) {
   const contacts = hdr.contacts.length
     ? hdr.contacts
     : [data.ciudad, data.email].filter(Boolean) as string[];
-  const main     = sections.filter(sec => sec.title !== "");
+  const main     = sections.filter(sec => sec.title !== "" && sec.title.toLowerCase() !== name.toLowerCase());
   const isMx     = data.mercado === "mx";
 
   return (
