@@ -10,6 +10,12 @@ type CV = {
   puesto: string; ciudad: string | null; mercado: string; created_at: string;
 };
 
+type CoverLetter = {
+  id: string; nombre: string; puesto: string;
+  empresa: string | null; mercado: string; created_at: string;
+  cover_letter_text: string;
+};
+
 type Profile = {
   is_pro: boolean;
   pro_plan: string | null;
@@ -36,6 +42,9 @@ export default function PerfilPage() {
   const [user, setUser] = useState<User | null>(null);
   const [cvs, setCvs] = useState<CV[]>([]);
   const [cvsLoading, setCvsLoading] = useState(true);
+  const [letters, setLetters] = useState<CoverLetter[]>([]);
+  const [lettersLoading, setLettersLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"cvs" | "cartas">("cvs");
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -64,6 +73,18 @@ export default function PerfilPage() {
     setCvsLoading(false);
   }
 
+  async function loadLetters(userId: string) {
+    setLettersLoading(true);
+    const { data } = await supabase
+      .from("cover_letters")
+      .select("id, nombre, puesto, empresa, mercado, created_at, cover_letter_text")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setLetters((data ?? []) as CoverLetter[]);
+    setLettersLoading(false);
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user ?? null;
@@ -72,6 +93,7 @@ export default function PerfilPage() {
       setUsername(u.user_metadata?.username ?? "");
       setAvatarUrl(u.user_metadata?.avatar_url ?? null);
       loadCVs(u.id, u.email ?? "");
+      loadLetters(u.id);
       supabase.from("profiles")
         .select("is_pro, pro_plan, pro_expires_at, stripe_customer_id")
         .eq("user_id", u.id)
@@ -330,22 +352,51 @@ export default function PerfilPage() {
             )}
           </div>
 
-          {/* RIGHT — CVs */}
+          {/* RIGHT — Tabs */}
           <div>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 20 }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px" }}>Mis CVs</h2>
-              <a href="/crear" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none" }}>+ Generar nuevo</a>
+            {/* Tab bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 20, borderBottom: "1px solid var(--border)" }}>
+              {(["cvs", "cartas"] as const).map(tab => (
+                <button key={tab} onClick={() => setActiveTab(tab)} style={{ background: "none", border: "none", borderBottom: `2px solid ${activeTab === tab ? "var(--green)" : "transparent"}`, padding: "0 4px 12px", marginRight: 24, fontSize: 14, fontWeight: activeTab === tab ? 600 : 400, color: activeTab === tab ? "var(--ink)" : "var(--muted)", cursor: "pointer", fontFamily: "inherit", transition: "color .15s" }}>
+                  {tab === "cvs" ? `Mis CVs${cvs.length ? ` (${cvs.length})` : ""}` : `Mis Cartas${letters.length ? ` (${letters.length})` : ""}`}
+                </button>
+              ))}
+              <div style={{ marginLeft: "auto" }}>
+                {activeTab === "cvs"
+                  ? <a href="/crear" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none" }}>+ Generar nuevo</a>
+                  : <a href="/carta" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none" }}>+ Nueva carta</a>
+                }
+              </div>
             </div>
-            {cvsLoading ? (
-              <div className="cv-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
-                {[1,2,3,4].map(i => <CVCardPerfilSkeleton key={i} />)}
-              </div>
-            ) : cvs.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <div className="cv-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
-                {cvs.map(cv => <CVCard key={cv.id} cv={cv} onDelete={handleDeleteCV} />)}
-              </div>
+
+            {/* CVs tab */}
+            {activeTab === "cvs" && (
+              cvsLoading ? (
+                <div className="cv-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
+                  {[1,2,3,4].map(i => <CVCardPerfilSkeleton key={i} />)}
+                </div>
+              ) : cvs.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <div className="cv-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
+                  {cvs.map(cv => <CVCard key={cv.id} cv={cv} onDelete={handleDeleteCV} />)}
+                </div>
+              )
+            )}
+
+            {/* Cartas tab */}
+            {activeTab === "cartas" && (
+              lettersLoading ? (
+                <div className="cv-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
+                  {[1,2,3].map(i => <CVCardPerfilSkeleton key={i} />)}
+                </div>
+              ) : letters.length === 0 ? (
+                <EmptyLettersState />
+              ) : (
+                <div className="cv-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
+                  {letters.map(l => <LetterCard key={l.id} letter={l} />)}
+                </div>
+              )
             )}
           </div>
         </div>
@@ -443,6 +494,81 @@ function EmptyState() {
       <p style={{ fontSize: 15, fontWeight: 500, color: "var(--ink)", marginBottom: 8 }}>Aún no tienes CVs</p>
       <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 22, lineHeight: 1.6 }}>Genera tu primer CV con IA en menos de 3 minutos. Es gratis.</p>
       <a href="/crear" style={{ display: "inline-block", background: "var(--green)", color: "#fff", textDecoration: "none", borderRadius: 6, padding: "10px 24px", fontSize: 13, fontWeight: 500 }}>✦ Generar mi CV</a>
+    </div>
+  );
+}
+
+function EmptyLettersState() {
+  return (
+    <div style={{ textAlign: "center", padding: "60px 32px", border: "1px dashed var(--border2)", borderRadius: 10 }}>
+      <div style={{ fontSize: 36, marginBottom: 14 }}>✉️</div>
+      <p style={{ fontSize: 15, fontWeight: 500, color: "var(--ink)", marginBottom: 8 }}>Aún no tienes cartas</p>
+      <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 22, lineHeight: 1.6 }}>Genera una carta de presentación personalizada con IA.</p>
+      <a href="/carta" style={{ display: "inline-block", background: "var(--green)", color: "#fff", textDecoration: "none", borderRadius: 6, padding: "10px 24px", fontSize: 13, fontWeight: 500 }}>✦ Generar carta</a>
+    </div>
+  );
+}
+
+function LetterCard({ letter }: { letter: CoverLetter }) {
+  const [expanded, setExpanded] = useState(false);
+  const [copied,   setCopied]   = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const date = new Date(letter.created_at).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" });
+
+  async function handleDownloadPDF() {
+    setPdfLoading(true);
+    try {
+      const res = await fetch("/api/cover-letter/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: letter.cover_letter_text, nombre: letter.nombre, puesto: letter.puesto, empresa: letter.empresa, mercado: letter.mercado }),
+      });
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `carta-${letter.nombre.toLowerCase().replace(/\s+/g, "-")}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { alert("Error al generar el PDF. Intenta de nuevo."); }
+    finally { setPdfLoading(false); }
+  }
+
+  return (
+    <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 3px rgba(0,0,0,.04)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <span style={{ fontSize: 11, background: "var(--green-bg)", color: "var(--green)", borderRadius: 4, padding: "3px 8px", fontWeight: 500, border: "1px solid rgba(45,90,61,.15)" }}>
+          {FLAG[letter.mercado] ?? "🌎"} {MARKET[letter.mercado] ?? letter.mercado}
+        </span>
+        <span style={{ fontSize: 10, color: "var(--hint)" }}>{date}</span>
+      </div>
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.3px", lineHeight: 1.2, marginBottom: 4 }}>{letter.nombre}</div>
+      <div style={{ fontSize: 12, color: "var(--body)", marginBottom: letter.empresa ? 2 : 14 }}>{letter.puesto}</div>
+      {letter.empresa && <div style={{ fontSize: 11, color: "var(--hint)", marginBottom: 14 }}>🏢 {letter.empresa}</div>}
+
+      {expanded && (
+        <div style={{ fontSize: 11, color: "var(--body)", lineHeight: 1.7, background: "var(--warm)", borderRadius: 6, padding: "12px 14px", marginBottom: 12, maxHeight: 200, overflowY: "auto", whiteSpace: "pre-wrap", border: "1px solid var(--border)" }}>
+          {letter.cover_letter_text}
+        </div>
+      )}
+
+      <div style={{ height: 1, background: "var(--border)", marginBottom: 12 }} />
+      <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+        <button onClick={() => setExpanded(e => !e)}
+          style={{ flex: 1, textAlign: "center", fontSize: 12, fontWeight: 500, color: "var(--green)", background: "var(--green-bg)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 6, padding: "7px 0", cursor: "pointer", fontFamily: "inherit", minWidth: 60 }}>
+          {expanded ? "Ocultar" : "Ver →"}
+        </button>
+        <button onClick={() => { navigator.clipboard.writeText(letter.cover_letter_text); setCopied(true); setTimeout(() => setCopied(false), 2200); }}
+          style={{ flex: 1, fontSize: 12, color: copied ? "var(--green)" : "var(--muted)", background: copied ? "var(--green-bg)" : "none", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 0", cursor: "pointer", fontFamily: "inherit", transition: "all .15s", minWidth: 60 }}>
+          {copied ? "✓ Copiado" : "Copiar"}
+        </button>
+        <button onClick={handleDownloadPDF} disabled={pdfLoading}
+          style={{ flex: 1, fontSize: 12, color: "#fff", background: "var(--green)", border: "none", borderRadius: 6, padding: "7px 0", cursor: pdfLoading ? "not-allowed" : "pointer", fontFamily: "inherit", fontWeight: 500, opacity: pdfLoading ? 0.7 : 1, minWidth: 60 }}>
+          {pdfLoading ? "..." : "↓ PDF"}
+        </button>
+      </div>
     </div>
   );
 }

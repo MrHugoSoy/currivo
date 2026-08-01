@@ -38,10 +38,11 @@ export default function CartaPage() {
   const [vacante, setVacante] = useState("");
   const [showVacante, setShowVacante] = useState(false);
 
-  const [loading, setLoading] = useState(false);
-  const [result,  setResult]  = useState<string | null>(null);
-  const [error,   setError]   = useState<string | null>(null);
-  const [copied,  setCopied]  = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [result,     setResult]     = useState<string | null>(null);
+  const [error,      setError]      = useState<string | null>(null);
+  const [copied,     setCopied]     = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -105,6 +106,28 @@ export default function CartaPage() {
   }
 
   const isMx = mercado === "mx";
+
+  async function handleDownloadPDF() {
+    if (!result) return;
+    setPdfLoading(true);
+    try {
+      const res = await fetch("/api/cover-letter/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: result, nombre, puesto, empresa, mercado }),
+      });
+      if (!res.ok) throw new Error("Error generando PDF");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `carta-${nombre.toLowerCase().replace(/\s+/g, "-")}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError(isMx ? "Error al generar el PDF. Intenta de nuevo." : "Error generating PDF. Please try again.");
+    } finally { setPdfLoading(false); }
+  }
 
   const fieldBase: React.CSSProperties = {
     width: "100%", background: "rgba(255,255,255,.05)",
@@ -300,15 +323,25 @@ export default function CartaPage() {
               <div className="carta-result" style={{ position: "sticky", top: 82, maxHeight: "calc(100vh - 100px)", display: "flex", flexDirection: "column" }}>
                 {result ? (
                   <div style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(74,144,96,.25)", borderRadius: 10, padding: 28, flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, flexWrap: "wrap", gap: 8 }}>
                       <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,.28)", fontWeight: 500 }}>
                         {isMx ? "Carta generada" : "Generated cover letter"}
                       </div>
-                      <button
-                        onClick={() => { navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 2200); }}
-                        style={{ fontSize: 11, color: copied ? "#7dd4a0" : "rgba(255,255,255,.45)", background: "none", border: "1px solid", borderColor: copied ? "rgba(74,144,96,.4)" : "rgba(255,255,255,.12)", borderRadius: 5, padding: "4px 12px", cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}>
-                        {copied ? (isMx ? "✓ Copiado" : "✓ Copied") : (isMx ? "Copiar texto" : "Copy text")}
-                      </button>
+                      <div style={{ display: "flex", gap: 7 }}>
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 2200); }}
+                          style={{ fontSize: 11, color: copied ? "#7dd4a0" : "rgba(255,255,255,.45)", background: "none", border: "1px solid", borderColor: copied ? "rgba(74,144,96,.4)" : "rgba(255,255,255,.12)", borderRadius: 5, padding: "4px 12px", cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}>
+                          {copied ? (isMx ? "✓ Copiado" : "✓ Copied") : (isMx ? "Copiar" : "Copy")}
+                        </button>
+                        <button
+                          onClick={handleDownloadPDF}
+                          disabled={pdfLoading}
+                          style={{ fontSize: 11, color: "#fff", background: "var(--green-mid)", border: "none", borderRadius: 5, padding: "4px 14px", cursor: pdfLoading ? "not-allowed" : "pointer", fontFamily: "inherit", fontWeight: 500, opacity: pdfLoading ? 0.7 : 1, display: "flex", alignItems: "center", gap: 5 }}>
+                          {pdfLoading ? (
+                            <><span style={{ width: 10, height: 10, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,.3)", borderTopColor: "#fff", animation: "spin .65s linear infinite", display: "inline-block" }} />{isMx ? "Generando..." : "Generating..."}</>
+                          ) : (isMx ? "↓ Descargar PDF" : "↓ Download PDF")}
+                        </button>
+                      </div>
                     </div>
                     <pre style={{ fontFamily: "inherit", fontSize: 13, color: "rgba(248,245,239,.85)", lineHeight: 1.85, whiteSpace: "pre-wrap", wordBreak: "break-word", margin: 0, flex: 1 }}>
                       {result}
