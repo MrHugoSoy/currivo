@@ -155,7 +155,7 @@ export default function CartaPage() {
       <>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         <Navbar />
-        <div style={{ minHeight: "100vh", background: "var(--ink)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ minHeight: "100vh", background: "var(--surface-dark)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid rgba(255,255,255,.1)", borderTopColor: "#7dd4a0", animation: "spin .65s linear infinite" }} />
         </div>
       </>
@@ -168,7 +168,7 @@ export default function CartaPage() {
       <>
         <Navbar />
         <main style={{ paddingTop: 62 }}>
-          <section style={{ background: "var(--ink)", minHeight: "calc(100vh - 62px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+          <section style={{ background: "var(--surface-dark)", minHeight: "calc(100vh - 62px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
             <div style={{ maxWidth: 480, textAlign: "center" }}>
               <div style={{ fontSize: 52, marginBottom: 20 }}>✉️</div>
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 600, color: "#f8f5ef", letterSpacing: "-1px", marginBottom: 12 }}>
@@ -212,7 +212,7 @@ export default function CartaPage() {
       `}</style>
       <Navbar />
       <main style={{ paddingTop: 62 }}>
-        <section className="carta-sec" style={{ background: "var(--ink)", padding: "88px 0", minHeight: "calc(100vh - 62px)" }}>
+        <section className="carta-sec" style={{ background: "var(--surface-dark)", padding: "88px 0", minHeight: "calc(100vh - 62px)" }}>
           <div className="carta-wrap" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 40px" }}>
 
             {/* Label row */}
