@@ -49,18 +49,31 @@ export default function CartaPage() {
       const user = data.session?.user;
       if (!user) { router.replace("/"); return; }
       setUserId(user.id);
+      const email = user.email ?? "";
 
-      const [{ data: profile }, { data: cvsData }] = await Promise.all([
+      const [{ data: profile }, { data: byId }, { data: byEmail }] = await Promise.all([
         supabase.from("profiles").select("is_pro").eq("user_id", user.id).single(),
         supabase.from("cvs")
           .select("slug, nombre, puesto, form_data")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(20),
+        supabase.from("cvs")
+          .select("slug, nombre, puesto, form_data")
+          .eq("email", email)
+          .order("created_at", { ascending: false })
+          .limit(20),
       ]);
 
       setIsPro(profile?.is_pro ?? false);
-      if (cvsData) setCvs(cvsData as CVRecord[]);
+
+      const seen = new Set<string>();
+      const merged = [...(byId ?? []), ...(byEmail ?? [])].filter(cv => {
+        if (seen.has(cv.slug)) return false;
+        seen.add(cv.slug);
+        return true;
+      });
+      setCvs(merged as CVRecord[]);
     });
   }, [router]);
 
