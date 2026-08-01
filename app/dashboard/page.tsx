@@ -43,6 +43,18 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
   );
 }
 
+function groupByMonth(codes: GiftCode[]) {
+  const map: Record<string, { generated: number; used: number }> = {};
+  for (const c of codes) {
+    const d = new Date(c.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (!map[key]) map[key] = { generated: 0, used: 0 };
+    map[key].generated++;
+    if (c.is_used) map[key].used++;
+  }
+  return Object.entries(map).sort((a, b) => b[0].localeCompare(a[0]));
+}
+
 function MiniBar({ data, labels }: { data: Record<string, number>; labels: Record<string, string> }) {
   const total = Object.values(data).reduce((a, b) => a + b, 0);
   if (total === 0) return <p style={{ fontSize: 12, color: "var(--hint)" }}>Sin datos</p>;
@@ -215,7 +227,7 @@ export default function Dashboard() {
               <StatCard label="Usuarios únicos" value={stats.uniqueUsers} />
               <StatCard label="Usuarios Pro" value={stats.proUsers} sub="planes activos" />
               <StatCard label="Usuarios Gift" value={stats.giftUsers} sub="código de regalo" />
-              <StatCard label="Códigos regalo" value={`${stats.giftUsed} / ${stats.giftTotal}`} sub="usados / total" />
+              <StatCard label="Códigos regalo" value={`${giftCodes.filter(c => c.is_used).length} / ${giftCodes.length}`} sub="usados / total" />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 40 }}>
@@ -284,6 +296,44 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* Gift codes by month */}
+        {giftCodes.length > 0 && (() => {
+          const byMonth = groupByMonth(giftCodes);
+          return (
+            <div style={{ marginBottom: 40 }}>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px", marginBottom: 16 }}>
+                Códigos por mes
+              </h2>
+              <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 100px", padding: "10px 20px", borderBottom: "1px solid var(--border)", background: "var(--warm)" }}>
+                  {["Mes", "Generados", "Usados", "Disponibles"].map(h => (
+                    <div key={h} style={{ fontSize: 10, color: "var(--hint)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.6px" }}>{h}</div>
+                  ))}
+                </div>
+                {byMonth.map(([key, val]) => {
+                  const [year, month] = key.split("-");
+                  const label = new Date(Number(year), Number(month) - 1, 1).toLocaleDateString("es-MX", { month: "long", year: "numeric" });
+                  const disponibles = val.generated - val.used;
+                  return (
+                    <div key={key} style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 100px", padding: "12px 20px", borderBottom: "1px solid var(--border)" }}>
+                      <div style={{ fontSize: 13, color: "var(--ink)", fontWeight: 500, textTransform: "capitalize" }}>{label}</div>
+                      <div style={{ fontSize: 13, color: "var(--ink)", fontWeight: 600 }}>{val.generated}</div>
+                      <div style={{ fontSize: 13, color: val.used > 0 ? "var(--green)" : "var(--hint)", fontWeight: val.used > 0 ? 600 : 400 }}>{val.used}</div>
+                      <div style={{ fontSize: 13, color: disponibles > 0 ? "var(--body)" : "var(--hint)" }}>{disponibles}</div>
+                    </div>
+                  );
+                })}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 100px", padding: "12px 20px", background: "var(--warm)" }}>
+                  <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 600 }}>Total</div>
+                  <div style={{ fontSize: 12, color: "var(--ink)", fontWeight: 700 }}>{giftCodes.length}</div>
+                  <div style={{ fontSize: 12, color: "var(--green)", fontWeight: 700 }}>{giftCodes.filter(c => c.is_used).length}</div>
+                  <div style={{ fontSize: 12, color: "var(--body)", fontWeight: 700 }}>{giftCodes.filter(c => !c.is_used).length}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* CV list */}
         <div>
