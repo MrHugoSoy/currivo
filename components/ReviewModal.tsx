@@ -21,7 +21,7 @@ export default function ReviewModal({ userId, nombre, puesto, mercado, onClose }
     if (!stars || !text.trim()) return;
     setLoading(true);
     try {
-      await supabase.from("reviews").insert({
+      const { error } = await supabase.from("reviews").insert({
         user_id: userId,
         nombre,
         puesto,
@@ -30,12 +30,15 @@ export default function ReviewModal({ userId, nombre, puesto, mercado, onClose }
         text: text.trim(),
         approved: false,
       });
+      if (error) console.error("Review insert error:", error.message);
+    } catch (err) {
+      console.error("Review submit error:", err);
+    } finally {
+      // Mark as reviewed regardless so modal never blocks the user again
+      try { localStorage.setItem("resumika_reviewed", "true"); } catch {}
+      setLoading(false);
       setDone(true);
       setTimeout(onClose, 2000);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
