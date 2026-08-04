@@ -89,6 +89,66 @@ function buildPrompt(data: Record<string, unknown>): string {
     ? "SIN EXPERIENCIA LABORAL — no inventar trabajos anteriores."
     : formatExperiencias(experiencias);
 
+  const hasNoExp = sinExperiencia === true || experiencias.length === 0;
+
+  const noExpBlock_es = hasNoExp ? `
+═══ REGLAS ESPECIALES — PERFIL SIN EXPERIENCIA LABORAL FORMAL ═══
+
+ESTRUCTURA OBLIGATORIA para este candidato (en este orden):
+  1. DATOS PERSONALES / ENCABEZADO
+  2. OBJETIVO PROFESIONAL — quién es, hacia dónde se dirige, qué puede aportar
+  3. HABILIDADES Y COMPETENCIAS — habilidades técnicas y blandas para ${puesto}
+  4. FORMACIÓN ACADÉMICA — solo datos proporcionados, sin inventar
+  5. FORMACIÓN COMPLEMENTARIA / CERTIFICACIONES — ÚNICAMENTE las que el usuario mencionó
+  6. EXPERIENCIA PREVIA NO RELACIONADA — trabajos de servicio, part-time (solo si existen)
+  7. PROYECTOS PERSONALES — SOLO si el usuario los mencionó explícitamente
+
+PROHIBICIONES ABSOLUTAS:
+- NUNCA inventar proyectos a partir de cursos o certificaciones
+  INCORRECTO: tiene curso de Photoshop → inventar "Proyecto: Diseñé campaña para empresa X"
+  CORRECTO: listar "Photoshop" en HABILIDADES y el curso en FORMACIÓN COMPLEMENTARIA
+- NUNCA escribir contenido genérico o placeholder en secciones vacías
+  INCORRECTO: "Abierto a oportunidades de voluntariado" / "En búsqueda de proyectos colaborativos"
+  CORRECTO: si no hay voluntariado, OMITIR la sección completamente
+- NUNCA inventar empresas, fechas, logros, referencias ni ningún dato
+- Si una sección no tiene información real, OMITIRLA por completo
+
+CÓMO VENDER HONESTAMENTE ESTE PERFIL:
+- El OBJETIVO PROFESIONAL es el espacio para comunicar motivación, actitud y cultura fit
+- Destacar habilidades transferibles reales con confianza y sin exagerar
+- Resaltar logros académicos o proyectos personales SOLO si el usuario los mencionó
+- Un CV honesto de 4 secciones es infinitamente mejor que uno inflado con datos falsos
+` : "";
+
+  const noExpBlock_en = hasNoExp ? `
+═══ SPECIAL RULES — CANDIDATE WITH NO FORMAL WORK EXPERIENCE ═══
+
+MANDATORY STRUCTURE for this candidate (in this exact order):
+  1. HEADER (name, target position, contact info)
+  2. PROFESSIONAL SUMMARY — who they are, career direction, what value they bring
+  3. SKILLS & COMPETENCIES — technical and soft skills relevant to ${puesto}
+  4. EDUCATION — only provided data, nothing invented
+  5. TRAINING & CERTIFICATIONS — ONLY what the user explicitly mentioned
+  6. PRIOR NON-RELATED EXPERIENCE — service jobs, part-time work (only if it exists)
+  7. PERSONAL PROJECTS — ONLY if the user explicitly mentioned them
+
+ABSOLUTE PROHIBITIONS:
+- NEVER invent projects derived from courses or certifications
+  WRONG: user has a Photoshop course → invent "Project: Designed campaign for Company X"
+  RIGHT: list "Photoshop" in SKILLS and the course under TRAINING & CERTIFICATIONS
+- NEVER write generic or placeholder content for empty sections
+  WRONG: "Open to volunteer opportunities" / "Seeking collaborative projects"
+  RIGHT: if no volunteer info was provided, OMIT that section entirely
+- NEVER invent companies, dates, achievements, references, or any data
+- If a section has no real information, OMIT IT COMPLETELY
+
+HOW TO HONESTLY SELL THIS CANDIDATE:
+- The PROFESSIONAL SUMMARY is where motivation, attitude, and culture fit live
+- List real transferable skills confidently, without inflation
+- Highlight academic achievements or personal projects ONLY if the user mentioned them
+- An honest 4-section CV always beats a padded one with fabricated data
+` : "";
+
   const skillsNote = habilidades
     ? `El usuario especificó estas habilidades, inclúyelas todas: ${habilidades}. Puedes complementar con otras relevantes para ${industria}.`
     : `Genera habilidades relevantes para ${industria}.`;
@@ -203,6 +263,7 @@ REGLA MÁS IMPORTANTE — NO INVENTAR NADA:
 ${vacanteRule_es}
 
 ${certRule_es}
+${noExpBlock_es}
 
 ESTRUCTURA DEL DOCUMENTO — CRÍTICO:
 - El CV debe empezar DIRECTAMENTE con el nombre del candidato
@@ -279,13 +340,14 @@ CRITICAL — NEVER FABRICATE INFORMATION:
 - If no experience provided and sinExperiencia is true, focus on education and skills only
 ${vacanteRule_en}
 ${certRule_en}
+${noExpBlock_en}
 
 ═══ US RESUME RULES — FOLLOW STRICTLY ═══
 
 WHAT NEVER TO INCLUDE (US anti-discrimination laws):
 - NO photo, NO age, NO date of birth
-- NO marital status, NO nationality, NO religion
-- NO immigration status
+- NO marital status, NO nationality, NO religion, NO ethnicity
+- Work authorization status MAY be included if the user provided it (e.g., "US Citizen", "Green Card Holder", "H-1B Visa Holder", "OPT/CPT")
 - NO "References available upon request"
 - NO generic objective statements ("seeking a dynamic company...")
 
@@ -376,6 +438,7 @@ CRITICAL — NEVER FABRICATE INFORMATION:
 - A short honest resume always beats a fabricated one
 ${vacanteRule_en}
 ${certRule_en}
+${noExpBlock_en}
 
 ═══ CANADIAN RESUME RULES — FOLLOW STRICTLY ═══
 
@@ -383,6 +446,11 @@ WHAT NEVER TO INCLUDE (Canadian Human Rights laws):
 - NO photo, NO age, NO date of birth
 - NO marital status, NO nationality, NO religion
 - NO Social Insurance Number (SIN)
+
+WORK AUTHORIZATION (recommended for newcomers):
+- Include a brief work authorization line in the header when the user's background suggests they are a newcomer to Canada
+- Accepted formats: "Status: Permanent Resident" | "Status: Open Work Permit" | "Status: Canadian Citizen" | "Status: PGWP Holder"
+- Include ONLY if authorization status information was provided anywhere in the form; DO NOT invent or assume their status
 - NO full address (City, Province only)
 - NO "References available upon request"
 
