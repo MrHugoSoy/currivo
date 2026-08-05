@@ -124,6 +124,9 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const [showAuth, setShowAuth] = useState<"register" | "login" | null>(null);
   const [showVacante, setShowVacante] = useState(false);
   const [pendingAutoSubmit, setPendingAutoSubmit] = useState(false);
+  const [draftBanner, setDraftBanner] = useState(false);
+  const [draftData, setDraftData] = useState<(CVFormData & { _savedAt?: string }) | null>(null);
+  const [draftSavedAt, setDraftSavedAt] = useState<Date | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const handleGenerateRef = useRef<() => void>(() => {});
 
@@ -151,6 +154,29 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Detect existing draft once auth loads (only for logged-in users, not in edit mode)
+  useEffect(() => {
+    if (!authLoaded || !userId || editSlug) return;
+    const key = `resumika_draft_${userId}`;
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as CVFormData & { _savedAt?: string };
+      if (parsed._savedAt) { setDraftData(parsed); setDraftBanner(true); }
+    } catch {}
+  }, [authLoaded, userId, editSlug]);
+
+  // Auto-save draft on form changes (debounced 2s, only for logged-in users)
+  useEffect(() => {
+    if (!userId || !authLoaded || result || editSlug) return;
+    const timeout = setTimeout(() => {
+      try {
+        localStorage.setItem(`resumika_draft_${userId}`, JSON.stringify({ ...form, _savedAt: new Date().toISOString() }));
+      } catch {}
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [form, userId, authLoaded, result, editSlug]);
 
   useEffect(() => {
     const raw = localStorage.getItem("currivo_edit_draft");
@@ -203,6 +229,34 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
 
   const selectMarket = (m: Market) => { setForm(f => ({ ...f, mercado: m })); setResult(null); setSlug(null); };
 
+  const handleSaveDraft = () => {
+    if (!userId) return;
+    try {
+      localStorage.setItem(`resumika_draft_${userId}`, JSON.stringify({ ...form, _savedAt: new Date().toISOString() }));
+      setDraftSavedAt(new Date());
+      setTimeout(() => setDraftSavedAt(null), 3000);
+    } catch {}
+  };
+
+  const loadDraft = () => {
+    if (!draftData) return;
+    const { _savedAt, ...formData } = draftData;
+    void _savedAt;
+    if (!Array.isArray(formData.experiencias) || !formData.experiencias.length) formData.experiencias = DEFAULT_FORM.experiencias;
+    if (!Array.isArray(formData.educacion) || !formData.educacion.length) formData.educacion = DEFAULT_FORM.educacion;
+    if (!Array.isArray(formData.redesSociales)) formData.redesSociales = [];
+    if (!Array.isArray(formData.habilidades)) formData.habilidades = [];
+    if (!Array.isArray(formData.certificaciones)) formData.certificaciones = [];
+    setForm(f => ({ ...f, ...formData }));
+    setDraftBanner(false);
+  };
+
+  const discardDraft = () => {
+    if (userId) { try { localStorage.removeItem(`resumika_draft_${userId}`); } catch {} }
+    setDraftBanner(false);
+    setDraftData(null);
+  };
+
   const handleGenerate = async () => {
     if (authLoaded && !userId) {
       localStorage.setItem("resumika_pending_form", JSON.stringify(form));
@@ -226,6 +280,8 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
         throw new Error(data.error || "Error generando CV");
       }
       setResult(data.cv); setInitialCvText(null); setSlug(data.slug ?? null);
+      if (userId) { try { localStorage.removeItem(`resumika_draft_${userId}`); } catch {} }
+      setDraftBanner(false);
       setTimeout(() => previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Error inesperado");
@@ -293,6 +349,25 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
             <span style={{ flex: 1, height: 1, background: "rgba(255,255,255,.07)", display: "block" }} />
             {editSlug && <span style={{ fontSize: 10, color: "rgba(255,255,255,.3)", letterSpacing: 0 }}>Editando · tus datos están precargados</span>}
           </div>
+
+          {/* ── DRAFT BANNER ── */}
+          {draftBanner && draftData?._savedAt && !result && (
+            <div style={{ background: "rgba(74,144,96,.1)", border: "1px solid rgba(74,144,96,.28)", borderRadius: 10, padding: "14px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ fontSize: 20, flexShrink: 0 }}>📋</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: "#7dd4a0" }}>Tienes un borrador guardado</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginTop: 2 }}>
+                  {new Date(draftData._savedAt).toLocaleDateString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                </div>
+              </div>
+              <button onClick={loadDraft} style={{ fontSize: 11, color: "#7dd4a0", background: "rgba(42,82,54,.2)", border: "1px solid rgba(74,144,96,.35)", borderRadius: 6, padding: "7px 16px", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
+                Continuar →
+              </button>
+              <button onClick={discardDraft} style={{ fontSize: 11, color: "rgba(255,255,255,.28)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
+                Descartar
+              </button>
+            </div>
+          )}
 
           {/* ── MARKET SELECTOR — mejorado ── */}
           <div style={{ marginBottom: 16 }}>
@@ -559,6 +634,12 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                     : vacanteActiva ? <>🎯 Generar CV optimizado para la vacante</>
                     : <>✦ Generar CV para {selectedMarket.flag} {selectedMarket.label}</>}
                 </button>
+                {userId && !editSlug && (
+                  <button onClick={handleSaveDraft}
+                    style={{ width: "100%", background: "none", color: draftSavedAt ? "#7dd4a0" : "rgba(255,255,255,.32)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 8, padding: "10px", fontSize: 12, fontFamily: "inherit", cursor: "pointer", marginTop: 8, transition: "color .2s, border-color .2s", borderColor: draftSavedAt ? "rgba(74,144,96,.35)" : "rgba(255,255,255,.1)" }}>
+                    {draftSavedAt ? "✓ Borrador guardado" : "Guardar borrador"}
+                  </button>
+                )}
                 {!isAdmin && <p style={{ textAlign: "center", fontSize: 9, color: "rgba(255,255,255,.18)", marginTop: 8, letterSpacing: "0.5px" }}>El primero es gratis · Sin tarjeta · Sin registro</p>}
               </FB>
             </div>
