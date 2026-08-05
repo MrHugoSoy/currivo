@@ -24,12 +24,12 @@ export default function Hero() {
           </div>
 
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(40px, 5vw, 68px)", fontWeight: 600, lineHeight: 1.06, letterSpacing: "-1.5px", color: "var(--ink)", marginBottom: 22 }}>
-            El CV que abre<br />puertas — creado<br />
-            <em style={{ fontStyle: "italic", color: "var(--green)" }}>en 3 minutos</em>
+            Tu CV no debería<br />verse igual en México<br />
+            <em style={{ fontStyle: "italic", color: "var(--green)" }}>que en Canadá</em>
           </h1>
 
           <p style={{ fontSize: 16, lineHeight: 1.72, color: "var(--body)", maxWidth: 430, marginBottom: 36 }}>
-            Completa tus datos, elige el tono y nuestra IA genera un currículum profesional adaptado a tu industria, listo para enviar.
+            Cada país tiene sus reglas. resumika genera el formato correcto para México (con foto y datos personales), USA (ATS, 1 página, sin foto) o Canadá (voluntariado, bilingüismo) — automáticamente.
           </p>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
