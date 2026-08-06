@@ -1,40 +1,72 @@
 "use client";
 import { SectionLabel } from "./HowItWorks";
 
-const plans = [
-  {
-    label: "Gratis",
-    amount: "$0",
-    period: "siempre gratis",
-    feats: [["✓","1 CV generado"],["✓","2 plantillas básicas"],["✓","Descarga PDF"],["—","Edición ilimitada"],["—","Plantillas premium"],["—","Carta de presentación"]],
-    cta: "Comenzar gratis",
-    featured: false,
-    href: "/crear",
-  },
-  {
-    label: "Pro",
-    badge: "Más popular",
-    amount: "$49",
-    originalAmount: "$99",
-    founderBadge: "🚀 Precio de lanzamiento",
-    period: "MXN por mes",
-    feats: [["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","PDF + Word"],["✓","CV adaptado por vacante"]],
-    cta: "Suscribirme →",
-    featured: true,
-    href: "/pago?plan=pro_mxn_founder",
-  },
-  {
-    label: "Lifetime",
-    amount: "$399",
-    period: "pago único · para siempre",
-    feats: [["✓","Todo lo de Pro"],["✓","Acceso de por vida"],["✓","Futuras plantillas"],["✓","LinkedIn Optimizer"],["✓","Soporte prioritario"],["✓","Sin renovaciones"]],
-    cta: "Comprar ahora",
-    featured: false,
-    href: "/pago?plan=lifetime_mxn",
-  },
-];
+type Currency = "MXN" | "USD" | "CAD";
 
-export default function Pricing() {
+const PRICES: Record<Currency, {
+  pro: { amount: string; original: string; period: string; badge: string; founder: string };
+  lifetime: { amount: string; period: string };
+  free: { period: string; cta: string };
+  proCta: string;
+  lifetimeCta: string;
+}> = {
+  MXN: {
+    pro:      { amount: "$49",   original: "$99",   period: "MXN por mes",    badge: "Más popular",  founder: "🚀 Precio de lanzamiento" },
+    lifetime: { amount: "$399",  period: "pago único · para siempre" },
+    free:     { period: "siempre gratis", cta: "Comenzar gratis" },
+    proCta: "Suscribirme →", lifetimeCta: "Comprar ahora",
+  },
+  USD: {
+    pro:      { amount: "$2.99", original: "$5.99", period: "USD / month",    badge: "Most popular", founder: "🚀 Launch price" },
+    lifetime: { amount: "$22",   period: "one-time · forever" },
+    free:     { period: "always free", cta: "Start free" },
+    proCta: "Subscribe →", lifetimeCta: "Buy now",
+  },
+  CAD: {
+    pro:      { amount: "$3.99", original: "$7.99", period: "CAD / month",    badge: "Most popular", founder: "🚀 Launch price" },
+    lifetime: { amount: "$29",   period: "one-time · forever" },
+    free:     { period: "always free", cta: "Start free" },
+    proCta: "Subscribe →", lifetimeCta: "Buy now",
+  },
+};
+
+export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
+  const p = PRICES[currency];
+
+  const plans = [
+    {
+      label: "Gratis",
+      amount: "$0",
+      period: p.free.period,
+      feats: [["✓","1 CV generado"],["✓","2 plantillas básicas"],["✓","Descarga PDF"],["—","Edición ilimitada"],["—","Plantillas premium"],["—","Carta de presentación"]],
+      cta: p.free.cta,
+      featured: false,
+      href: "/crear",
+    },
+    {
+      label: "Pro",
+      badge: p.pro.badge,
+      amount: p.pro.amount,
+      originalAmount: p.pro.original,
+      founderBadge: p.pro.founder,
+      period: p.pro.period,
+      feats: [["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","PDF + Word"],["✓","CV adaptado por vacante"]],
+      cta: p.proCta,
+      featured: true,
+      href: "/pago?plan=pro_mxn_founder",
+    },
+    {
+      label: "Lifetime",
+      amount: p.lifetime.amount,
+      period: p.lifetime.period,
+      feats: [["✓","Todo lo de Pro"],["✓","Acceso de por vida"],["✓","Futuras plantillas"],["✓","LinkedIn Optimizer"],["✓","Soporte prioritario"],["✓","Sin renovaciones"]],
+      cta: p.lifetimeCta,
+      featured: false,
+      href: "/pago?plan=lifetime_mxn",
+    },
+  ];
+
+
   return (
     <section id="precios" style={{ padding: "96px 0", background: "var(--cream)" }}>
       <style>{`
@@ -62,14 +94,21 @@ export default function Pricing() {
           </p>
         </div>
         <div className="pricing-cards">
-          {plans.map(p => <PlanCard key={p.label} plan={p} />)}
+          {plans.map(plan => <PlanCard key={plan.label} plan={plan} />)}
         </div>
+        {currency !== "MXN" && (
+          <p style={{ fontSize: 11, color: "var(--hint)", textAlign: "center", marginTop: 20 }}>
+            * Prices shown are approximate. Checkout is processed in MXN (Mexican Peso).
+          </p>
+        )}
       </div>
     </section>
   );
 }
 
-function PlanCard({ plan: p }: { plan: typeof plans[0] }) {
+type Plan = { label: string; amount: string; period: string; feats: string[][]; cta: string; featured: boolean; href: string; badge?: string; originalAmount?: string; founderBadge?: string; };
+
+function PlanCard({ plan: p }: { plan: Plan }) {
   return (
     <div
       style={{ background: p.featured ? "var(--green)" : "var(--paper)", borderRadius: 12, padding: p.featured ? "36px 30px 32px" : "32px 30px", border: p.featured ? "none" : "1px solid var(--border)", boxShadow: p.featured ? "0 20px 60px rgba(45,90,61,.28)" : "none", transform: p.featured ? "translateY(-8px)" : "none", transition: "transform .2s, box-shadow .2s", position: "relative" }}

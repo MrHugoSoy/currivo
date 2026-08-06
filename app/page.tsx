@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
@@ -73,7 +74,11 @@ const jsonLd = {
   ],
 };
 
-export default function Home() {
+export default async function Home() {
+  const hdrs = await headers();
+  const country = hdrs.get("x-vercel-ip-country") ?? "MX";
+  const currency = country === "US" ? "USD" : country === "CA" ? "CAD" : "MXN";
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -83,7 +88,7 @@ export default function Home() {
         <HowItWorks />
         <Testimonials />
         <FeaturedGuias />
-        <Pricing />
+        <Pricing currency={currency} />
         <CTASection />
       </main>
       <Footer />
