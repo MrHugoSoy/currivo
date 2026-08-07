@@ -1,3 +1,5 @@
+import Logo from "./Logo";
+
 export default function Footer() {
   return (
     <footer style={{ borderTop: "1px solid var(--border)", background: "var(--paper)" }}>
@@ -10,8 +12,8 @@ export default function Footer() {
         }
       `}</style>
       <div className="footer-inner">
-        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none" }}>
-          resumi<span style={{ color: "var(--green)" }}>ka</span>
+        <a href="/" style={{ color: "var(--ink)", textDecoration: "none", display: "flex", alignItems: "center" }}>
+          <Logo height={20} />
         </a>
         <div style={{ display: "flex", gap: 28, flexWrap: "wrap", justifyContent: "center" }}>
           <a href="/guias"      className="footer-link">Guías</a>

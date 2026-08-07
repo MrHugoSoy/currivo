@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { AuthModal } from "./AuthModal";
+import Logo from "./Logo";
 import type { User } from "@supabase/supabase-js";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
@@ -63,8 +64,8 @@ export default function Navbar() {
       <nav className={`nav-root${scrolled ? " nav-scrolled" : ""}`} style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, height: 62, backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)", transition: "background .2s" }}>
         <div className="nav-inner" style={{ padding: "0 64px", height: "100%", display: "flex", alignItems: "center" }}>
 
-          <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px", flexShrink: 0 }}>
-            resumi<span style={{ color: "var(--green)" }}>ka</span>
+          <a href="/" style={{ color: "var(--ink)", textDecoration: "none", flexShrink: 0, display: "flex", alignItems: "center" }}>
+            <Logo height={26} />
           </a>
 
           <div className="nav-links">
