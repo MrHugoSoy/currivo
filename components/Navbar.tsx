@@ -65,7 +65,7 @@ export default function Navbar() {
         <div className="nav-inner" style={{ padding: "0 64px", height: "100%", display: "flex", alignItems: "center" }}>
 
           <a href="/" style={{ color: "var(--ink)", textDecoration: "none", flexShrink: 0, display: "flex", alignItems: "center" }}>
-            <Logo height={26} />
+            <Logo height={30} />
           </a>
 
           <div className="nav-links">
