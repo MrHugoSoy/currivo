@@ -1046,6 +1046,15 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
     setIsEditing(false);
   }, [text]);
 
+  useEffect(() => {
+    if (!userId || localStorage.getItem("resumika_reviewed")) return;
+    const t = setTimeout(() => {
+      setShowReview(true);
+      localStorage.setItem("resumika_reviewed", "true");
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [userId]);
+
   const Preview = PREVIEW_TEMPLATES[templateId] ?? PREVIEW_TEMPLATES.clasico;
   const cvData: CVData = { nombre, puesto, ciudad, email, mercado: market, cv_text: editedText, photoUrl };
   const hasEdits = editedText !== text;
@@ -1082,10 +1091,6 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url; a.download = `${slug}.pdf`; a.click();
       URL.revokeObjectURL(url);
-      if (!localStorage.getItem("resumika_reviewed") && userId) {
-        setShowReview(true);
-        localStorage.setItem("resumika_reviewed", "true");
-      }
     } catch (e: unknown) { setPdfError(e instanceof Error ? e.message : "Error"); } finally { setPdfLoading(false); }
   };
 
