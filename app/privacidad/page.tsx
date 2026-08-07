@@ -34,7 +34,7 @@ export default function PrivacidadPage() {
 
           <Section title="1. Responsable del tratamiento">
             <P>resumika.com ("nosotros", "el Responsable") trata sus datos personales de acuerdo con la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento.</P>
-            <P>Para cualquier asunto relacionado con el tratamiento de sus datos, puede contactarnos en: <strong>privacidad@resumika.com</strong></P>
+            <P>Para cualquier asunto relacionado con el tratamiento de sus datos, puede contactarnos en: <strong>info@resumika.com</strong></P>
           </Section>
 
           <Section title="2. Datos personales que recopilamos">
@@ -72,7 +72,7 @@ export default function PrivacidadPage() {
 
           <Section title="5. Derechos ARCO">
             <P>Conforme a la LFPDPPP, usted tiene derecho a <strong>Acceder, Rectificar, Cancelar u Oponerse</strong> al tratamiento de sus datos personales (derechos ARCO).</P>
-            <P>Para ejercerlos, envíe una solicitud a <strong>privacidad@resumika.com</strong> con:</P>
+            <P>Para ejercerlos, envíe una solicitud a <strong>info@resumika.com</strong> con:</P>
             <ul style={ulStyle}>
               <li>Nombre completo y correo electrónico registrado.</li>
               <li>Descripción clara del derecho que desea ejercer.</li>
@@ -82,7 +82,7 @@ export default function PrivacidadPage() {
           </Section>
 
           <Section title="6. Retención de datos">
-            <P>Conservamos sus datos durante el tiempo que mantenga una cuenta activa o sea necesario para prestar el Servicio. Puede solicitar la eliminación de su cuenta y datos en cualquier momento a través de <strong>privacidad@resumika.com</strong>.</P>
+            <P>Conservamos sus datos durante el tiempo que mantenga una cuenta activa o sea necesario para prestar el Servicio. Puede solicitar la eliminación de su cuenta y datos en cualquier momento a través de <strong>info@resumika.com</strong>.</P>
             <P>Los CVs públicos compartidos mediante un enlace pueden tener un período de retención adicional de hasta 90 días tras la solicitud de eliminación, por razones de caché y copias de seguridad.</P>
           </Section>
 
@@ -106,7 +106,7 @@ export default function PrivacidadPage() {
           </Section>
 
           <Section title="10. Contacto y autoridad">
-            <P>Para cualquier consulta sobre privacidad: <strong>privacidad@resumika.com</strong></P>
+            <P>Para cualquier consulta sobre privacidad: <strong>info@resumika.com</strong></P>
             <P>Si considera que su derecho a la protección de datos ha sido vulnerado, puede presentar una queja ante el <strong>Instituto Nacional de Transparencia, Acceso a la Información y Protección de Datos Personales (INAI)</strong> en <a href="https://www.inai.org.mx" target="_blank" rel="noreferrer" style={{ color: "var(--green)" }}>www.inai.org.mx</a>.</P>
           </Section>
 

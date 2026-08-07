@@ -49,7 +49,7 @@ export default function TerminosPage() {
 
           <Section title="3. Uso del servicio y cuentas">
             <P>El primer CV generado es gratuito. Para acceder a generaciones adicionales, funciones premium y almacenamiento persistente de CVs, es necesario crear una cuenta y, en su caso, contratar un plan de pago.</P>
-            <P>Usted es responsable de mantener la confidencialidad de las credenciales de su cuenta y de todas las actividades realizadas desde la misma. Notifíquenos inmediatamente si detecta acceso no autorizado a su cuenta escribiendo a <strong>privacidad@resumika.com</strong>.</P>
+            <P>Usted es responsable de mantener la confidencialidad de las credenciales de su cuenta y de todas las actividades realizadas desde la misma. Notifíquenos inmediatamente si detecta acceso no autorizado a su cuenta escribiendo a <strong>info@resumika.com</strong>.</P>
           </Section>
 
           <Section title="4. Contenido generado por IA">
@@ -88,7 +88,7 @@ export default function TerminosPage() {
           </Section>
 
           <Section title="10. Contacto">
-            <P>Si tiene preguntas sobre estos Términos, puede contactarnos en: <strong>hola@resumika.com</strong></P>
+            <P>Si tiene preguntas sobre estos Términos, puede contactarnos en: <strong>info@resumika.com</strong></P>
           </Section>
 
         </div>

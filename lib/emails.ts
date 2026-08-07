@@ -1,6 +1,6 @@
 import { resend } from "./resend";
 
-const FROM = "resumika <hola@resumika.com>";
+const FROM = "resumika <info@resumika.com>";
 const BASE_URL = "https://resumika.com";
 
 function baseLayout(content: string): string {

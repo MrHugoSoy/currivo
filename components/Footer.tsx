@@ -17,7 +17,7 @@ export default function Footer() {
           <a href="/guias"      className="footer-link">Guías</a>
           <a href="/terminos"   className="footer-link">Términos</a>
           <a href="/privacidad" className="footer-link">Privacidad</a>
-          <a href="mailto:hola@resumika.com" className="footer-link">Contacto</a>
+          <a href="mailto:info@resumika.com" className="footer-link">Contacto</a>
         </div>
         <span style={{ fontSize: 11, color: "var(--hint)" }}>© 2026 resumika · México</span>
       </div>
