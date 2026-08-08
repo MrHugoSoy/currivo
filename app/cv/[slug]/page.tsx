@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { CVPageActions } from "./CVPageActions";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/index";
 import type { TemplateId, CVData } from "@/lib/templates/types";
+import Logo from "@/components/Logo";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -84,8 +85,8 @@ export default async function CVPage({ params }: PageProps) {
 
       {/* Nav */}
       <header className="no-print" style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 64px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
-        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", letterSpacing: "-0.5px", textDecoration: "none" }}>
-          resumi<span style={{ color: "var(--green)" }}>ka</span>
+        <a href="/" style={{ color: "var(--ink)", textDecoration: "none", display: "flex", alignItems: "center" }}>
+          <Logo height={24} />
         </a>
         <a href="/" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(45,90,61,.25)", borderRadius: 5, padding: "6px 14px", background: "var(--green-bg)" }}>
           ✦ Crear mi CV

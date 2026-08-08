@@ -3,6 +3,7 @@ import { useState, useRef, useTransition } from "react";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/previews";
 import type { TemplateId, CVData } from "@/lib/templates/types";
 import { saveCVText } from "../actions";
+import Logo from "@/components/Logo";
 
 interface Props {
   slug: string;
@@ -72,8 +73,8 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
         }}>
           {/* Breadcrumb */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, overflow: "hidden" }}>
-            <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px", flexShrink: 0 }}>
-              resumi<span style={{ color: "var(--green)" }}>ka</span>
+            <a href="/" style={{ color: "var(--ink)", textDecoration: "none", flexShrink: 0, display: "flex", alignItems: "center" }}>
+              <Logo height={22} />
             </a>
             <span style={{ color: "var(--border2)", fontSize: 16, flexShrink: 0 }}>/</span>
             <a href={`/cv/${slug}`} style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none", flexShrink: 0 }}>

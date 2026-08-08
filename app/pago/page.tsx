@@ -2,6 +2,7 @@
 import { useState, Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Logo from "@/components/Logo";
 
 const PLANS = {
   pro_mxn_founder: {
@@ -137,8 +138,8 @@ function CheckoutContent() {
 
       {/* Top bar */}
       <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", height: 56, display: "flex", alignItems: "center", padding: "0 32px", justifyContent: "space-between", flexShrink: 0 }}>
-        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px" }}>
-          resumi<span style={{ color: "var(--green)" }}>ka</span>
+        <a href="/" style={{ color: "var(--ink)", textDecoration: "none", display: "flex", alignItems: "center" }}>
+          <Logo height={24} />
         </a>
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--muted)" }}>
           <span style={{ color: "var(--green)", fontSize: 14 }}>🔒</span>

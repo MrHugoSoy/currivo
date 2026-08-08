@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { CVCardPerfilSkeleton } from "@/components/Skeleton";
+import Logo from "@/components/Logo";
 import type { User } from "@supabase/supabase-js";
 
 type CV = {
@@ -216,8 +217,8 @@ export default function PerfilPage() {
 
         {/* Header */}
         <header className="perfil-header" style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 64px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
-          <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 21, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", textDecoration: "none", letterSpacing: "-0.3px" }}>
-            resumi<span style={{ color: "var(--green)" }}>ka</span>
+          <a href="/" style={{ color: "var(--ink)", textDecoration: "none", display: "flex", alignItems: "center" }}>
+            <Logo height={24} />
           </a>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <a href="/crear" style={{ fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none", border: "1px solid rgba(45,90,61,.25)", borderRadius: 5, padding: "6px 14px", background: "var(--green-bg)" }}>✦ Nuevo CV</a>
