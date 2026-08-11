@@ -21,7 +21,7 @@ export default async function GuiasPage({ searchParams }: Props) {
   return (
     <>
       <Navbar />
-      <main style={{ minHeight: "100vh", background: "var(--cream)", paddingTop: 62 }}>
+      <main style={{ minHeight: "100vh", background: "var(--cream)", paddingTop: 68 }}>
         <style>{`
           .guias-inner { max-width: 1320px; margin: 0 auto; padding: 0 64px; }
           .guias-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }

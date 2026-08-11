@@ -70,7 +70,7 @@ export default function PlantillasPage() {
   return (
     <>
       <Navbar />
-      <main style={{ minHeight: "100vh", background: "var(--cream)", paddingTop: 62 }}>
+      <main style={{ minHeight: "100vh", background: "var(--cream)", paddingTop: 68 }}>
         <style>{`
           .pl-inner  { max-width: 1200px; margin: 0 auto; padding: 0 64px; }
           .pl-grid   { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; }

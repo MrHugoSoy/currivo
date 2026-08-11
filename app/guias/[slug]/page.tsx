@@ -135,7 +135,7 @@ export default async function GuiaPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
-      <main style={{ minHeight: "100vh", background: "var(--cream)", paddingTop: 62 }}>
+      <main style={{ minHeight: "100vh", background: "var(--cream)", paddingTop: 68 }}>
         <style>{`
           .guia-layout { max-width: 1100px; margin: 0 auto; padding: 0 64px; display: grid; grid-template-columns: 1fr 260px; gap: 48px; align-items: start; }
           .guia-sidebar { position: sticky; top: 86px; }

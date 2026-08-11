@@ -24,7 +24,7 @@ export default async function PreciosPage() {
   return (
     <>
       <Navbar />
-      <main style={{ paddingTop: 62 }}>
+      <main style={{ paddingTop: 68 }}>
         <Pricing currency={currency} />
       </main>
       <Footer />

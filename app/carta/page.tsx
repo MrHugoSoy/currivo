@@ -167,7 +167,7 @@ export default function CartaPage() {
     return (
       <>
         <Navbar />
-        <main style={{ paddingTop: 62 }}>
+        <main style={{ paddingTop: 68 }}>
           <section style={{ background: "var(--surface-dark)", minHeight: "calc(100vh - 62px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
             <div style={{ maxWidth: 480, textAlign: "center" }}>
               <div style={{ fontSize: 52, marginBottom: 20 }}>✉️</div>
@@ -211,7 +211,7 @@ export default function CartaPage() {
         }
       `}</style>
       <Navbar />
-      <main style={{ paddingTop: 62 }}>
+      <main style={{ paddingTop: 68 }}>
         <section className="carta-sec" style={{ background: "var(--surface-dark)", padding: "88px 0", minHeight: "calc(100vh - 62px)" }}>
           <div className="carta-wrap" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 40px" }}>
 

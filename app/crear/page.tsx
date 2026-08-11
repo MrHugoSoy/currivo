@@ -68,7 +68,7 @@ export default async function CrearPage({ searchParams }: Props) {
   return (
     <>
       <Navbar />
-      <main style={{ paddingTop: 62 }}>
+      <main style={{ paddingTop: 68 }}>
         <Generator initialData={initialData} editSlug={edit} />
       </main>
       <Footer />
