@@ -6,6 +6,7 @@ import ReviewModal from "./ReviewModal";
 import type { TemplateId, CVData } from "@/lib/templates/types";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/previews";
 import { supabase } from "@/lib/supabase";
+import { saveCVText } from "@/app/editar/actions";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
@@ -1064,7 +1065,7 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
     if (!userId) { alert("Necesitas una cuenta para guardar cambios."); return; }
     setSaving(true);
     try {
-      await supabase.from("cvs").update({ cv_text: editedText }).eq("slug", slug);
+      await saveCVText(slug, editedText);
       setSaved(true);
       setIsEditing(false);
       setTimeout(() => setSaved(false), 2500);
