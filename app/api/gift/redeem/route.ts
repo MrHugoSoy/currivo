@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   const { data: gift, error: fetchErr } = await supabaseAdmin
     .from("gift_codes")
-    .select("id, is_used")
+    .select("id, is_used, months")
     .eq("code", normalised)
     .single();
 
@@ -29,8 +29,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Ya tienes un plan activo." }, { status: 409 });
   }
 
+  const months = gift.months ?? 1;
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 30);
+  expiresAt.setMonth(expiresAt.getMonth() + months);
 
   const [{ error: markErr }, { error: profileErr }] = await Promise.all([
     supabaseAdmin.from("gift_codes").update({ is_used: true, used_by: userId, used_at: new Date().toISOString() }).eq("id", gift.id),

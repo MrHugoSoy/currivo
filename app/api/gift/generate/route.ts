@@ -16,16 +16,17 @@ function randomCode(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId, count = 1 } = await req.json();
+  const { userId, count = 1, months = 1 } = await req.json();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: profile } = await supabaseAdmin
     .from("profiles").select("is_admin").eq("user_id", userId).single();
   if (!profile?.is_admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+  const validMonths = [1, 3, 6].includes(Number(months)) ? Number(months) : 1;
   const n = Math.min(Math.max(1, Number(count)), 50);
-  const codes = Array.from({ length: n }, () => ({ code: randomCode() }));
-  const { data, error } = await supabaseAdmin.from("gift_codes").insert(codes).select("id, code, created_at");
+  const codes = Array.from({ length: n }, () => ({ code: randomCode(), months: validMonths }));
+  const { data, error } = await supabaseAdmin.from("gift_codes").insert(codes).select("id, code, months, created_at");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ codes: data });
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabaseAdmin
     .from("gift_codes")
-    .select("id, code, is_used, used_at, created_at")
+    .select("id, code, months, is_used, used_at, created_at")
     .order("created_at", { ascending: false })
     .limit(200);
 

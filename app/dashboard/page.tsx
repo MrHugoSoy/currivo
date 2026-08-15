@@ -7,7 +7,7 @@ import { CVCardSkeleton } from "@/components/Skeleton";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
-type GiftCode = { id: string; code: string; is_used: boolean; used_at: string | null; created_at: string };
+type GiftCode = { id: string; code: string; months?: number; is_used: boolean; used_at: string | null; created_at: string };
 
 type Stats = {
   totalCvs: number;
@@ -83,6 +83,7 @@ export default function Dashboard() {
   const [giftCodes, setGiftCodes] = useState<GiftCode[]>([]);
   const [giftLoading, setGiftLoading] = useState(false);
   const [genCount, setGenCount] = useState(1);
+  const [genMonths, setGenMonths] = useState(1);
   const [copied, setCopied] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const router = useRouter();
@@ -169,7 +170,7 @@ export default function Dashboard() {
     const res = await fetch("/api/gift/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, count: genCount }),
+      body: JSON.stringify({ userId, count: genCount, months: genMonths }),
     });
     if (res.ok) {
       const d = await res.json();
@@ -259,7 +260,13 @@ export default function Dashboard() {
             <span style={{ fontSize: 13, color: "var(--muted)" }}>Generar</span>
             <input type="number" min={1} max={50} value={genCount} onChange={e => setGenCount(Number(e.target.value))}
               style={{ width: 60, background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 6, padding: "7px 10px", fontSize: 13, color: "var(--ink)", fontFamily: "inherit", outline: "none" }} />
-            <span style={{ fontSize: 13, color: "var(--muted)" }}>código{genCount !== 1 ? "s" : ""}</span>
+            <span style={{ fontSize: 13, color: "var(--muted)" }}>código{genCount !== 1 ? "s" : ""} de</span>
+            {([1, 3, 6] as const).map(m => (
+              <button key={m} onClick={() => setGenMonths(m)}
+                style={{ background: genMonths === m ? "var(--green-mid)" : "var(--paper)", color: genMonths === m ? "#fff" : "var(--muted)", border: `1px solid ${genMonths === m ? "var(--green-mid)" : "var(--border)"}`, borderRadius: 6, padding: "7px 12px", fontSize: 13, fontFamily: "inherit", cursor: "pointer", fontWeight: genMonths === m ? 600 : 400, transition: "all .15s" }}>
+                {m === 1 ? "1 mes" : `${m} meses`}
+              </button>
+            ))}
             <button onClick={handleGenerate} disabled={giftLoading}
               style={{ background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: "8px 18px", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: giftLoading ? "default" : "pointer", opacity: giftLoading ? 0.6 : 1 }}>
               {giftLoading ? "Generando..." : "Generar"}
@@ -274,10 +281,16 @@ export default function Dashboard() {
                 <div key={gc.id} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, opacity: gc.is_used ? 0.5 : 1 }}>
                   <div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 600, color: gc.is_used ? "var(--hint)" : "var(--ink)", letterSpacing: "1px" }}>{gc.code}</div>
-                    <div style={{ fontSize: 10, color: "var(--hint)", marginTop: 3 }}>
-                      {gc.is_used
+                    <div style={{ fontSize: 10, color: "var(--hint)", marginTop: 3, display: "flex", alignItems: "center", gap: 6 }}>
+                      <span>{gc.is_used
                         ? `Canjeado ${gc.used_at ? new Date(gc.used_at).toLocaleDateString("es-MX") : ""}`
                         : `Creado ${new Date(gc.created_at).toLocaleDateString("es-MX")}`}
+                      </span>
+                      {gc.months && gc.months > 1 && (
+                        <span style={{ fontWeight: 600, color: "var(--green)", background: "var(--green-bg)", borderRadius: 4, padding: "1px 5px" }}>
+                          {gc.months}m
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
