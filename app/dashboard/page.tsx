@@ -276,36 +276,47 @@ export default function Dashboard() {
           {giftCodes.length === 0 ? (
             <p style={{ fontSize: 13, color: "var(--hint)" }}>No hay códigos generados todavía.</p>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 8 }}>
-              {giftCodes.map(gc => (
-                <div key={gc.id} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, opacity: gc.is_used ? 0.5 : 1 }}>
-                  <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 600, color: gc.is_used ? "var(--hint)" : "var(--ink)", letterSpacing: "1px" }}>{gc.code}</div>
-                    <div style={{ fontSize: 10, color: "var(--hint)", marginTop: 3, display: "flex", alignItems: "center", gap: 6 }}>
-                      <span>{gc.is_used
-                        ? `Canjeado ${gc.used_at ? new Date(gc.used_at).toLocaleDateString("es-MX") : ""}`
-                        : `Creado ${new Date(gc.created_at).toLocaleDateString("es-MX")}`}
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              {([6, 3, 1] as const).map(m => {
+                const group = giftCodes.filter(gc => (gc.months ?? 1) === m);
+                if (group.length === 0) return null;
+                const available = group.filter(gc => !gc.is_used).length;
+                return (
+                  <div key={m}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--muted)" }}>
+                        {m === 1 ? "1 mes" : `${m} meses`}
                       </span>
-                      {gc.months && gc.months > 1 && (
-                        <span style={{ fontWeight: 600, color: "var(--green)", background: "var(--green-bg)", borderRadius: 4, padding: "1px 5px" }}>
-                          {gc.months}m
-                        </span>
-                      )}
+                      <span style={{ fontSize: 11, color: "var(--hint)" }}>{available} disponibles · {group.length} total</span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 8 }}>
+                      {group.map(gc => (
+                        <div key={gc.id} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, opacity: gc.is_used ? 0.5 : 1 }}>
+                          <div>
+                            <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 600, color: gc.is_used ? "var(--hint)" : "var(--ink)", letterSpacing: "1px" }}>{gc.code}</div>
+                            <div style={{ fontSize: 10, color: "var(--hint)", marginTop: 3 }}>
+                              {gc.is_used
+                                ? `Canjeado ${gc.used_at ? new Date(gc.used_at).toLocaleDateString("es-MX") : ""}`
+                                : `Creado ${new Date(gc.created_at).toLocaleDateString("es-MX")}`}
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: gc.is_used ? "var(--warm)" : "var(--green-bg)", color: gc.is_used ? "var(--muted)" : "var(--green)", border: `1px solid ${gc.is_used ? "var(--border)" : "rgba(45,90,61,.2)"}` }}>
+                              {gc.is_used ? "Usado" : "Disponible"}
+                            </span>
+                            {!gc.is_used && (
+                              <button onClick={() => handleCopyCode(gc.code)}
+                                style={{ background: "none", border: "1px solid var(--border)", borderRadius: 5, padding: "4px 10px", fontSize: 11, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
+                                {copied === gc.code ? "✓" : "Copiar"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: gc.is_used ? "var(--warm)" : "var(--green-bg)", color: gc.is_used ? "var(--muted)" : "var(--green)", border: `1px solid ${gc.is_used ? "var(--border)" : "rgba(45,90,61,.2)"}` }}>
-                      {gc.is_used ? "Usado" : "Disponible"}
-                    </span>
-                    {!gc.is_used && (
-                      <button onClick={() => handleCopyCode(gc.code)}
-                        style={{ background: "none", border: "1px solid var(--border)", borderRadius: 5, padding: "4px 10px", fontSize: 11, color: "var(--muted)", fontFamily: "inherit", cursor: "pointer" }}>
-                        {copied === gc.code ? "✓" : "Copiar"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
