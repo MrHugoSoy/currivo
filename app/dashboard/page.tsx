@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { CVCard, type CVCardData } from "./CVCard";
 import { CVCardSkeleton } from "@/components/Skeleton";
+import Logo from "@/components/Logo";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
@@ -203,8 +204,8 @@ export default function Dashboard() {
 
       {/* Nav */}
       <header style={{ background: "var(--paper)", borderBottom: "1px solid var(--border)", padding: "0 64px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
-        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px", textDecoration: "none" }}>
-          resumika
+        <a href="/" style={{ color: "var(--ink)", textDecoration: "none", display: "flex", alignItems: "center" }}>
+          <Logo height={24} />
         </a>
         <span style={{ fontSize: 11, color: "var(--hint)" }}>Dashboard</span>
       </header>
