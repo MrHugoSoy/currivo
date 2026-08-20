@@ -29,12 +29,12 @@ export default function Hero() {
           </h1>
 
           <p style={{ fontSize: 16, lineHeight: 1.72, color: "var(--body)", maxWidth: 430, marginBottom: 36 }}>
-            Cada país tiene sus reglas. resumika genera el formato correcto para México (con foto y datos personales), USA (ATS, 1 página, sin foto) o Canadá (voluntariado, bilingüismo) — automáticamente.
+            Cada país tiene sus propias prácticas de contratación. resumika adapta el formato a México, USA o Canadá con IA — y además ajusta tu CV a cada vacante para que destaques.
           </p>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <a href="/crear" style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "13px 26px", fontSize: 14, fontWeight: 500, fontFamily: "inherit", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-              ✦ Generar mi CV gratis
+              ✦ Crear mi CV con IA →
             </a>
             <a href="/#precios" style={{ background: "none", color: "var(--body)", border: "1px solid var(--border)", borderRadius: 6, padding: "13px 26px", fontSize: 14, fontFamily: "inherit", cursor: "pointer", textDecoration: "none" }}>
               Ver planes

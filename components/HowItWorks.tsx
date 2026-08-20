@@ -10,7 +10,7 @@ const steps = [
   {
     n: "02",
     title: "La IA redacta",
-    desc: "Nuestro modelo analiza tu perfil y genera descripciones profesionales adaptadas a tu industria y mercado.",
+    desc: "Nuestro modelo analiza tu perfil — y la vacante, si la agregas — y genera descripciones profesionales adaptadas a tu industria, mercado y al puesto específico.",
     detail: "Resultado inmediato",
   },
   {
@@ -45,10 +45,10 @@ export default function HowItWorks() {
         <div className="hiw-header">
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(34px, 3.8vw, 52px)", fontWeight: 600, color: "var(--ink)", letterSpacing: "-1.2px", lineHeight: 1.08 }}>
             De tus datos a<br />
-            <em style={{ color: "var(--green)", fontStyle: "italic" }}>tu primera entrevista</em>
+            <em style={{ color: "var(--green)", fontStyle: "italic" }}>un CV listo para aplicar</em>
           </h2>
           <p style={{ fontSize: 15, color: "var(--body)", lineHeight: 1.75, paddingBottom: 4 }}>
-            Sin plantillas vacías. Sin horas frente a la pantalla. Completa el formulario y deja que la inteligencia artificial haga el trabajo pesado por ti.
+            Sin plantillas vacías. Sin horas frente a la pantalla. Completa el formulario y deja que la inteligencia artificial haga el trabajo pesado por ti — diseñado para ayudarte a conseguir más entrevistas.
           </p>
         </div>
 

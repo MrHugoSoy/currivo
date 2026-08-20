@@ -3,8 +3,11 @@ import { headers } from "next/headers";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
+import WhoItsFor from "@/components/WhoItsFor";
 import Testimonials from "@/components/Testimonials";
 import Pricing from "@/components/Pricing";
+import FAQ from "@/components/FAQ";
+import { FAQ_JSONLD } from "@/lib/faqData";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import { FeaturedGuias } from "@/components/guias/FeaturedGuias";
@@ -82,13 +85,16 @@ export default async function Home() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }} />
       <Navbar />
       <main>
         <Hero />
         <HowItWorks />
+        <WhoItsFor />
         <Testimonials />
         <FeaturedGuias />
         <Pricing currency={currency} />
+        <FAQ />
         <CTASection />
       </main>
       <Footer />

@@ -50,7 +50,7 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
       originalAmount: p.pro.original,
       founderBadge: p.pro.founder,
       period: p.pro.period,
-      feats: [["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","PDF + Word"],["✓","CV adaptado por vacante"]],
+      feats: [["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","Descarga en PDF"],["✓","CV adaptado por vacante"],["⏳","Exportar a Word (próximamente)"]],
       cta: p.proCta,
       featured: true,
       href: "/pago?plan=pro_mxn_founder",
@@ -59,7 +59,7 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
       label: "Lifetime",
       amount: p.lifetime.amount,
       period: p.lifetime.period,
-      feats: [["✓","Todo lo de Pro"],["✓","Acceso de por vida"],["✓","Futuras plantillas"],["✓","LinkedIn Optimizer"],["✓","Soporte prioritario"],["✓","Sin renovaciones"]],
+      feats: [["✓","Todo lo de Pro"],["✓","Acceso de por vida"],["✓","Futuras plantillas"],["✓","Soporte prioritario"],["✓","Sin renovaciones"],["⏳","LinkedIn Optimizer (próximamente)"]],
       cta: p.lifetimeCta,
       featured: false,
       href: "/pago?plan=lifetime_mxn",
@@ -149,8 +149,8 @@ function PlanCard({ plan: p }: { plan: Plan }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {p.feats.map(([icon, text]) => (
           <div key={text} style={{ fontSize: 12, color: p.featured ? "rgba(255,255,255,.8)" : "var(--body)", padding: "5px 0", display: "flex", gap: 10, alignItems: "center" }}>
-            <span style={{ color: icon === "✓" ? (p.featured ? "#a3e4bc" : "var(--green-mid)") : "var(--border2)", fontSize: 11, flexShrink: 0 }}>{icon}</span>
-            <span style={{ opacity: icon === "—" ? 0.45 : 1 }}>{text}</span>
+            <span style={{ color: icon === "✓" ? (p.featured ? "#a3e4bc" : "var(--green-mid)") : icon === "⏳" ? (p.featured ? "#f0cf8a" : "#d4a050") : "var(--border2)", fontSize: 11, flexShrink: 0 }}>{icon}</span>
+            <span style={{ opacity: icon === "—" ? 0.45 : icon === "⏳" ? 0.75 : 1, fontStyle: icon === "⏳" ? "italic" : "normal" }}>{text}</span>
           </div>
         ))}
       </div>

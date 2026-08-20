@@ -305,6 +305,8 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
   const isMx = form.mercado === "mx";
   const isUs = form.mercado === "us";
   const vacanteActiva = (form.vacante ?? "").length > 50;
+  const selectedTonos = form.tono ? form.tono.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const selectedIndustrias = form.industria ? form.industria.split(",").map(s => s.trim()).filter(Boolean) : [];
 
   const fieldBase: React.CSSProperties = {
     width: "100%", background: "rgba(255,255,255,.05)",
@@ -331,6 +333,10 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
         @media (max-width: 960px) {
           .gen-grid { grid-template-columns: 1fr !important; }
           .gen-preview-col { display: none !important; }
+          .gen-preview-col.gen-preview-col-active {
+            display: block !important; position: static !important;
+            max-height: none !important; margin-top: 20px;
+          }
           .gen-market { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 600px) {
@@ -548,19 +554,39 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
               <FB step={8} total={TOTAL_STEPS} title={steps[7]} icon={BLOCK_META.ia.icon} iconBg={BLOCK_META.ia.color}>
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ fontSize: 11, color: "rgba(255,255,255,.38)", display: "block", marginBottom: 8 }}>{isMx ? "Tono" : "Tone"}</label>
-                  <PillGroup options={[...TONES, isMx ? "Otro" : "Other"]} selected={TONES.includes(form.tono) ? form.tono : (isMx ? "Otro" : "Other")} onSelect={v => setForm(f => ({ ...f, tono: (v === "Otro" || v === "Other") ? "" : v }))} />
-                  {!TONES.includes(form.tono) && (
-                    <input type="text" autoFocus placeholder={isMx ? "Ej. Emprendedor..." : "e.g. Entrepreneurial..."} value={form.tono} onChange={e => setForm(f => ({ ...f, tono: e.target.value }))}
-                      style={{ marginTop: 8, ...fieldBase, border: "1px solid rgba(74,144,96,.35)" }} />
-                  )}
+                  <PillGroup
+                    options={TONES}
+                    selected={selectedTonos}
+                    onToggle={v => setForm(f => {
+                      const cur = f.tono ? f.tono.split(",").map(s => s.trim()).filter(Boolean) : [];
+                      const next = cur.includes(v) ? cur.filter(x => x !== v) : [...cur, v];
+                      return { ...f, tono: next.join(", ") };
+                    })}
+                    onAddCustom={v => setForm(f => {
+                      const cur = f.tono ? f.tono.split(",").map(s => s.trim()).filter(Boolean) : [];
+                      return cur.includes(v) ? f : { ...f, tono: [...cur, v].join(", ") };
+                    })}
+                    addLabel={isMx ? "+ Otro" : "+ Other"}
+                    customPlaceholder={isMx ? "Ej. Emprendedor..." : "e.g. Entrepreneurial..."}
+                  />
                 </div>
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 11, color: "rgba(255,255,255,.38)", display: "block", marginBottom: 8 }}>{isMx ? "Industria" : "Industry"}</label>
-                  <PillGroup options={[...INDUSTRIES, isMx ? "Otra" : "Other"]} selected={INDUSTRIES.includes(form.industria) ? form.industria : (isMx ? "Otra" : "Other")} onSelect={v => setForm(f => ({ ...f, industria: (v === "Otra" || v === "Other") ? "" : v }))} />
-                  {!INDUSTRIES.includes(form.industria) && (
-                    <input type="text" autoFocus placeholder={isMx ? "Ej. Agricultura..." : "e.g. Agriculture..."} value={form.industria} onChange={e => setForm(f => ({ ...f, industria: e.target.value }))}
-                      style={{ marginTop: 8, ...fieldBase, border: "1px solid rgba(74,144,96,.35)" }} />
-                  )}
+                  <PillGroup
+                    options={INDUSTRIES}
+                    selected={selectedIndustrias}
+                    onToggle={v => setForm(f => {
+                      const cur = f.industria ? f.industria.split(",").map(s => s.trim()).filter(Boolean) : [];
+                      const next = cur.includes(v) ? cur.filter(x => x !== v) : [...cur, v];
+                      return { ...f, industria: next.join(", ") };
+                    })}
+                    onAddCustom={v => setForm(f => {
+                      const cur = f.industria ? f.industria.split(",").map(s => s.trim()).filter(Boolean) : [];
+                      return cur.includes(v) ? f : { ...f, industria: [...cur, v].join(", ") };
+                    })}
+                    addLabel={isMx ? "+ Otra" : "+ Other"}
+                    customPlaceholder={isMx ? "Ej. Agricultura..." : "e.g. Agriculture..."}
+                  />
                 </div>
 
                 {/* ── TEMPLATE SELECTOR MEJORADO ── */}
@@ -642,11 +668,15 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                   </button>
                 )}
                 {!isAdmin && <p style={{ textAlign: "center", fontSize: 9, color: "rgba(255,255,255,.18)", marginTop: 8, letterSpacing: "0.5px" }}>El primero es gratis · Sin tarjeta · Sin registro</p>}
+                <p style={{ textAlign: "center", fontSize: 9, color: "rgba(255,255,255,.18)", marginTop: 6, letterSpacing: "0.5px" }}>
+                  🔒 No vendemos tus datos ·{" "}
+                  <a href="/privacidad" style={{ color: "rgba(255,255,255,.32)" }}>Política de privacidad</a>
+                </p>
               </FB>
             </div>
 
             {/* ── PREVIEW COL — STICKY ── */}
-            <div className="gen-preview-col" ref={previewRef} style={{ position: "sticky", top: 72, maxHeight: "calc(100vh - 90px)", overflowY: "auto" }}>
+            <div className={`gen-preview-col${(loading || result) ? " gen-preview-col-active" : ""}`} ref={previewRef} style={{ position: "sticky", top: 72, maxHeight: "calc(100vh - 90px)", overflowY: "auto" }}>
               {result ? (
                 <>
                   <GeneratedResult text={result} market={form.mercado} slug={slug} templateId={form.templateId} nombre={form.nombre} puesto={form.puesto} ciudad={form.ciudad} email={form.email} photoUrl={form.photoUrl} userId={userId} />
@@ -755,15 +785,52 @@ function F({ label, placeholder, value, onChange, textarea }: {
     </div>
   );
 }
-function PillGroup({ options, selected, onSelect }: { options: string[]; selected: string; onSelect: (v: string) => void }) {
+function PillGroup({ options, selected, onToggle, onAddCustom, addLabel, customPlaceholder }: {
+  options: string[]; selected: string[]; onToggle: (v: string) => void;
+  onAddCustom: (v: string) => void; addLabel: string; customPlaceholder: string;
+}) {
+  const [customOpen, setCustomOpen] = useState(false);
+  const [customValue, setCustomValue] = useState("");
+  const customTags = selected.filter(s => !options.includes(s));
+
+  const commitCustom = () => {
+    const v = customValue.trim();
+    if (v) onAddCustom(v);
+    setCustomValue("");
+    setCustomOpen(false);
+  };
+
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-      {options.map(o => (
-        <button key={o} onClick={() => onSelect(o)}
-          style={{ border: "1px solid", borderColor: selected === o ? "rgba(74,144,96,.5)" : "rgba(255,255,255,.08)", borderRadius: 100, padding: "4px 12px", fontSize: 10, fontFamily: "inherit", color: selected === o ? "#7dd4a0" : "rgba(255,255,255,.32)", background: selected === o ? "rgba(42,82,54,.15)" : "none", cursor: "pointer" }}>
-          {o}
+    <div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+        {options.map(o => {
+          const active = selected.includes(o);
+          return (
+            <button key={o} type="button" onClick={() => onToggle(o)}
+              style={{ border: "1px solid", borderColor: active ? "rgba(74,144,96,.5)" : "rgba(255,255,255,.08)", borderRadius: 100, padding: "4px 12px", fontSize: 10, fontFamily: "inherit", color: active ? "#7dd4a0" : "rgba(255,255,255,.32)", background: active ? "rgba(42,82,54,.15)" : "none", cursor: "pointer" }}>
+              {o}
+            </button>
+          );
+        })}
+        {customTags.map(o => (
+          <button key={o} type="button" onClick={() => onToggle(o)}
+            style={{ border: "1px solid rgba(74,144,96,.5)", borderRadius: 100, padding: "4px 12px", fontSize: 10, fontFamily: "inherit", color: "#7dd4a0", background: "rgba(42,82,54,.15)", cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}>
+            {o} <span style={{ fontSize: 9, opacity: .6 }}>✕</span>
+          </button>
+        ))}
+        <button type="button" onClick={() => setCustomOpen(v => !v)}
+          style={{ border: "1px dashed rgba(255,255,255,.2)", borderRadius: 100, padding: "4px 12px", fontSize: 10, fontFamily: "inherit", color: "rgba(255,255,255,.4)", background: "none", cursor: "pointer" }}>
+          {addLabel}
         </button>
-      ))}
+      </div>
+      {customOpen && (
+        <input type="text" autoFocus value={customValue}
+          onChange={e => setCustomValue(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); commitCustom(); } }}
+          onBlur={commitCustom}
+          placeholder={customPlaceholder}
+          style={{ marginTop: 8, width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(74,144,96,.35)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" }} />
+      )}
     </div>
   );
 }

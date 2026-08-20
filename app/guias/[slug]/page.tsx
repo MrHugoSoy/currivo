@@ -203,6 +203,11 @@ export default async function GuiaPage({ params }: Props) {
                 components={mdxComponents}
               />
 
+              {/* Disclaimer */}
+              <p style={{ marginTop: 40, fontSize: 11.5, color: "var(--hint)", lineHeight: 1.7, borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                Última revisión: {formatDate(guia.updatedAt ?? guia.publishedAt)}. Esta guía tiene fines informativos y no constituye asesoría legal o migratoria. Los requisitos de inmigración y empleo cambian con frecuencia — verifica siempre la información vigente en fuentes oficiales (IRCC / Government of Canada, USCIS, gob.mx según corresponda) antes de tomar decisiones.
+              </p>
+
               {/* Bottom CTA */}
               <div style={{ marginTop: 48, background: "var(--surface-dark)", borderRadius: 12, padding: "32px 28px", textAlign: "center" }}>
                 <p style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,.35)", marginBottom: 10 }}>Siguiente paso</p>
