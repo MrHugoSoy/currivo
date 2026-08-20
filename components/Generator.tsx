@@ -647,7 +647,9 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                 {limitReached && (
                   <div style={{ background: "rgba(74,144,96,.1)", border: "1px solid rgba(74,144,96,.3)", borderRadius: 8, padding: "14px 16px", marginBottom: 10 }}>
                     <p style={{ fontSize: 13, color: "rgba(248,245,239,.9)", marginBottom: 10, lineHeight: 1.5 }}>
-                      Ya usaste tu CV gratis. Actualiza a Pro para generar CVs ilimitados.
+                      {vacanteActiva
+                        ? "Ya usaste tu CV gratis. Con Pro puedes adaptar tu CV a esta vacante — y a cada vacante a la que apliques, sin límite."
+                        : "Ya usaste tu CV gratis. Con Pro generas CVs ilimitados y los adaptas con IA a cada vacante a la que apliques."}
                     </p>
                     <a href="/#precios" style={{ display: "inline-block", background: "var(--green-mid)", color: "#fff", borderRadius: 6, padding: "8px 18px", fontSize: 12, fontWeight: 500, textDecoration: "none" }}>
                       Ver planes →

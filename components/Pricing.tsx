@@ -50,7 +50,7 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
       originalAmount: p.pro.original,
       founderBadge: p.pro.founder,
       period: p.pro.period,
-      feats: [["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","Descarga en PDF"],["✓","CV adaptado por vacante"],["⏳","Exportar a Word (próximamente)"]],
+      feats: [["✓","CV adaptado a cada vacante"],["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","Descarga en PDF"],["⏳","Exportar a Word (próximamente)"]],
       cta: p.proCta,
       featured: true,
       href: "/pago?plan=pro_mxn_founder",
@@ -90,7 +90,7 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
             <em style={{ color: "var(--green)", fontStyle: "italic" }}>tu carrera</em>
           </h2>
           <p style={{ fontSize: 15, color: "var(--body)", lineHeight: 1.75, paddingBottom: 4 }}>
-            Empieza gratis y escala cuando lo necesites. Sin contratos ni sorpresas — cancela cuando quieras.
+            ¿Encontraste una vacante? Con Pro pegas la descripción y adaptas tu CV con IA a cada una, sin límite. Empieza gratis y escala cuando lo necesites — sin contratos, cancela cuando quieras.
           </p>
         </div>
         <div className="pricing-cards">
