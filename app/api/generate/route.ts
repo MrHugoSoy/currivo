@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { generateLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 import { generateSchema } from "@/lib/validators";
+import { checkActivePro } from "@/lib/proServer";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -599,14 +600,7 @@ export async function POST(req: NextRequest) {
 
     // ── Límite de 1 CV gratis para usuarios no Pro ──
     if (body.userId && !body.editSlug) {
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("is_pro, pro_plan, pro_expires_at")
-        .eq("user_id", body.userId)
-        .single();
-
-      const isActivePro = profile?.is_pro &&
-        (profile.pro_plan !== "gift" || !profile.pro_expires_at || new Date(profile.pro_expires_at) > new Date());
+      const { isActivePro } = await checkActivePro(supabaseAdmin, body.userId);
 
       if (!isActivePro) {
         const { count } = await supabaseAdmin

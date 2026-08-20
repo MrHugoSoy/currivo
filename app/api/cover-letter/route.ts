@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { supabase } from "@/lib/supabase";
 import { createClient } from "@supabase/supabase-js";
 import { coverLetterLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
+import { checkActivePro } from "@/lib/proServer";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -147,14 +148,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "PRO_REQUIRED" }, { status: 403 });
     }
 
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("is_pro, pro_plan, pro_expires_at")
-      .eq("user_id", userId)
-      .single();
-
-    const isActivePro = profile?.is_pro &&
-      (profile.pro_plan !== "gift" || !profile.pro_expires_at || new Date(profile.pro_expires_at) > new Date());
+    const { isActivePro } = await checkActivePro(supabaseAdmin, userId);
 
     if (!isActivePro) {
       return NextResponse.json({ error: "PRO_REQUIRED" }, { status: 403 });
