@@ -20,7 +20,7 @@ export default function Hero() {
         <div className="animate-fade-up">
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--green-bg)", color: "var(--green)", border: "1px solid rgba(45,90,61,0.2)", borderRadius: 100, padding: "5px 14px 5px 8px", fontSize: 12, fontWeight: 500, marginBottom: 32 }}>
             <span className="animate-glow" style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--green-mid)", display: "inline-block" }} />
-            Generador de CV con Inteligencia Artificial
+            Tu copiloto para conseguir trabajo en México, EE.UU. y Canadá
           </div>
 
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(40px, 5vw, 68px)", fontWeight: 600, lineHeight: 1.06, letterSpacing: "-1.5px", color: "var(--ink)", marginBottom: 22 }}>
