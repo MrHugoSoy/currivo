@@ -92,10 +92,10 @@ export default async function Home() {
         <HowItWorks />
         <WhoItsFor />
         <Testimonials />
-        <FeaturedGuias />
         <Pricing currency={currency} />
         <FAQ />
         <CTASection />
+        <FeaturedGuias />
       </main>
       <Footer />
     </>
