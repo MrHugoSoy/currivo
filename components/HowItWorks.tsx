@@ -23,7 +23,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="como-funciona" style={{ padding: "96px 0", background: "var(--paper)" }}>
+    <section id="como-funciona" style={{ padding: "96px 0", background: "var(--surface-dark)" }}>
       <style>{`
         .hiw-inner { max-width: 1320px; margin: 0 auto; padding: 0 64px; }
         .hiw-header { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: end; margin-bottom: 64px; }
@@ -40,14 +40,17 @@ export default function HowItWorks() {
         }
       `}</style>
       <div className="hiw-inner">
-        <SectionLabel>Cómo funciona</SectionLabel>
+        <p style={{ fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,.3)", fontWeight: 500, marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
+          Cómo funciona
+          <span style={{ flex: 1, height: 1, background: "rgba(255,255,255,.1)", display: "block" }} />
+        </p>
 
         <div className="hiw-header">
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(34px, 3.8vw, 52px)", fontWeight: 600, color: "var(--ink)", letterSpacing: "-1.2px", lineHeight: 1.08 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(34px, 3.8vw, 52px)", fontWeight: 600, color: "#f8f5ef", letterSpacing: "-1.2px", lineHeight: 1.08 }}>
             De tus datos a<br />
-            <em style={{ color: "var(--green)", fontStyle: "italic" }}>un CV listo para aplicar</em>
+            <em style={{ color: "var(--green-mid)", fontStyle: "italic" }}>un CV listo para aplicar</em>
           </h2>
-          <p style={{ fontSize: 15, color: "var(--body)", lineHeight: 1.75, paddingBottom: 4 }}>
+          <p style={{ fontSize: 15, color: "rgba(255,255,255,.55)", lineHeight: 1.75, paddingBottom: 4 }}>
             Sin plantillas vacías. Sin horas frente a la pantalla. Completa el formulario y deja que la inteligencia artificial haga el trabajo pesado por ti — diseñado para ayudarte a conseguir más entrevistas.
           </p>
         </div>
@@ -57,22 +60,22 @@ export default function HowItWorks() {
             const card = (
               <div
                 key={s.n}
-                style={{ background: "var(--cream)", borderRadius: 10, padding: "32px 28px", border: "1px solid var(--border2)", boxShadow: "0 2px 10px rgba(20,30,60,.05)", position: "relative", overflow: "hidden", transition: "transform .2s, box-shadow .2s" }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(20,30,60,.1)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 10px rgba(20,30,60,.05)"; }}
+                style={{ background: "rgba(255,255,255,.05)", borderRadius: 10, padding: "32px 28px", border: "1px solid rgba(255,255,255,.09)", position: "relative", overflow: "hidden", transition: "transform .2s, box-shadow .2s" }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,.3)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
               >
-                <span style={{ position: "absolute", top: -6, right: 12, fontFamily: "'Cormorant Garamond', serif", fontSize: 88, fontWeight: 600, color: "rgba(26,32,53,.05)", lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>
+                <span style={{ position: "absolute", top: -6, right: 12, fontFamily: "'Cormorant Garamond', serif", fontSize: 88, fontWeight: 600, color: "rgba(255,255,255,.04)", lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>
                   {s.n}
                 </span>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--green-bg)", border: "1px solid rgba(45,90,61,.15)", borderRadius: 100, padding: "3px 10px", marginBottom: 22 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(59,130,246,.15)", border: "1px solid rgba(59,130,246,.3)", borderRadius: 100, padding: "3px 10px", marginBottom: 22 }}>
                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--green-mid)", display: "inline-block" }} />
-                  <span style={{ fontSize: 10, color: "var(--green)", fontWeight: 600, letterSpacing: "0.5px" }}>PASO {s.n}</span>
+                  <span style={{ fontSize: 10, color: "var(--green-mid)", fontWeight: 600, letterSpacing: "0.5px" }}>PASO {s.n}</span>
                 </div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, letterSpacing: "-0.3px", color: "var(--ink)", marginBottom: 10, lineHeight: 1.2 }}>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, letterSpacing: "-0.3px", color: "#f8f5ef", marginBottom: 10, lineHeight: 1.2 }}>
                   {s.title}
                 </h3>
-                <p style={{ fontSize: 13, color: "var(--body)", lineHeight: 1.7 }}>{s.desc}</p>
-                <div style={{ marginTop: 22, paddingTop: 16, borderTop: "1px solid var(--border)", fontSize: 11, color: "var(--green)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.2px" }}>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,.55)", lineHeight: 1.7 }}>{s.desc}</p>
+                <div style={{ marginTop: 22, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,.12)", fontSize: 11, color: "var(--green-mid)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6, letterSpacing: "0.2px" }}>
                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--green-mid)", display: "inline-block" }} />
                   {s.detail}
                 </div>
@@ -84,9 +87,9 @@ export default function HowItWorks() {
                 card,
                 <div key={`conn-${i}`} className="hiw-arrow">
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 24, height: 1, background: "var(--border2)" }} />
-                    <span style={{ fontSize: 13, color: "var(--hint)", lineHeight: 1 }}>→</span>
-                    <div style={{ width: 24, height: 1, background: "var(--border2)" }} />
+                    <div style={{ width: 24, height: 1, background: "rgba(255,255,255,.15)" }} />
+                    <span style={{ fontSize: 13, color: "rgba(255,255,255,.3)", lineHeight: 1 }}>→</span>
+                    <div style={{ width: 24, height: 1, background: "rgba(255,255,255,.15)" }} />
                   </div>
                 </div>,
               ];

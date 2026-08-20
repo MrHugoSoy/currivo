@@ -16,9 +16,10 @@ export default function Footer() {
           <Logo height={20} />
         </a>
         <div style={{ display: "flex", gap: 28, flexWrap: "wrap", justifyContent: "center" }}>
-          <a href="/nosotros"   className="footer-link">Nosotros</a>
-          <a href="/guias"      className="footer-link">Guías</a>
-          <a href="/#faq"       className="footer-link">Preguntas frecuentes</a>
+          <a href="/nosotros"    className="footer-link">Nosotros</a>
+          <a href="/guias"       className="footer-link">Guías</a>
+          <a href="/comparacion" className="footer-link">Comparación</a>
+          <a href="/#faq"        className="footer-link">Preguntas frecuentes</a>
           <a href="/terminos"   className="footer-link">Términos</a>
           <a href="/privacidad" className="footer-link">Privacidad</a>
           <a href="mailto:info@resumika.com" className="footer-link">Contacto</a>

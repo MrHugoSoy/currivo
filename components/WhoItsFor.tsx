@@ -1,5 +1,4 @@
 "use client";
-import { SectionLabel } from "./HowItWorks";
 
 const PROFILES = [
   { icon: "👨‍💼", title: "Ya tienes experiencia", desc: "Y quieres cambiar de trabajo o dar el siguiente paso en tu carrera." },
@@ -12,7 +11,7 @@ const PROFILES = [
 
 export default function WhoItsFor() {
   return (
-    <section style={{ padding: "88px 0", background: "var(--paper)" }}>
+    <section style={{ padding: "88px 0", background: "var(--surface-dark)" }}>
       <style>{`
         .wif-inner { max-width: 1320px; margin: 0 auto; padding: 0 64px; }
         .wif-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -25,17 +24,20 @@ export default function WhoItsFor() {
         }
       `}</style>
       <div className="wif-inner">
-        <SectionLabel>¿Para quién es?</SectionLabel>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(30px, 3.5vw, 46px)", fontWeight: 600, color: "var(--ink)", letterSpacing: "-1px", lineHeight: 1.1, marginBottom: 40, maxWidth: 620 }}>
-          resumika es para ti <em style={{ color: "var(--green)", fontStyle: "italic" }}>si...</em>
+        <p style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.3)", fontWeight: 500, marginBottom: 40, display: "flex", alignItems: "center", gap: 12 }}>
+          ¿Para quién es?
+          <span style={{ flex: 1, height: 1, background: "rgba(255,255,255,.1)", display: "block" }} />
+        </p>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(30px, 3.5vw, 46px)", fontWeight: 600, color: "#f8f5ef", letterSpacing: "-1px", lineHeight: 1.1, marginBottom: 40, maxWidth: 620 }}>
+          resumika es para ti <em style={{ color: "var(--green-mid)", fontStyle: "italic" }}>si...</em>
         </h2>
         <div className="wif-grid">
           {PROFILES.map(p => (
-            <div key={p.title} style={{ background: "var(--cream)", border: "1px solid var(--border2)", boxShadow: "0 2px 10px rgba(20,30,60,.05)", borderRadius: 10, padding: "24px 22px", display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <div key={p.title} style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.09)", borderRadius: 10, padding: "24px 22px", display: "flex", gap: 14, alignItems: "flex-start" }}>
               <span style={{ fontSize: 24, lineHeight: 1, flexShrink: 0 }}>{p.icon}</span>
               <div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 5 }}>{p.title}</p>
-                <p style={{ fontSize: 12.5, color: "var(--body)", lineHeight: 1.6 }}>{p.desc}</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#f8f5ef", marginBottom: 5 }}>{p.title}</p>
+                <p style={{ fontSize: 12.5, color: "rgba(255,255,255,.55)", lineHeight: 1.6 }}>{p.desc}</p>
               </div>
             </div>
           ))}

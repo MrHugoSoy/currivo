@@ -90,7 +90,6 @@ export default async function Home() {
       <main>
         <Hero />
         <HowItWorks />
-        <div style={{ height: 5, background: "linear-gradient(90deg, var(--green-mid), var(--green))" }} />
         <WhoItsFor />
         <Testimonials />
         <FeaturedGuias />
