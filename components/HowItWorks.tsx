@@ -57,11 +57,11 @@ export default function HowItWorks() {
             const card = (
               <div
                 key={s.n}
-                style={{ background: "var(--cream)", borderRadius: 10, padding: "32px 28px", border: "1px solid var(--border)", position: "relative", overflow: "hidden", transition: "transform .2s, box-shadow .2s" }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 10px 36px rgba(0,0,0,.07)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                style={{ background: "var(--cream)", borderRadius: 10, padding: "32px 28px", border: "1px solid var(--border2)", boxShadow: "0 2px 10px rgba(20,30,60,.05)", position: "relative", overflow: "hidden", transition: "transform .2s, box-shadow .2s" }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(20,30,60,.1)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 10px rgba(20,30,60,.05)"; }}
               >
-                <span style={{ position: "absolute", top: -6, right: 12, fontFamily: "'Cormorant Garamond', serif", fontSize: 88, fontWeight: 600, color: "rgba(28,26,22,.04)", lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>
+                <span style={{ position: "absolute", top: -6, right: 12, fontFamily: "'Cormorant Garamond', serif", fontSize: 88, fontWeight: 600, color: "rgba(26,32,53,.05)", lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>
                   {s.n}
                 </span>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--green-bg)", border: "1px solid rgba(45,90,61,.15)", borderRadius: 100, padding: "3px 10px", marginBottom: 22 }}>

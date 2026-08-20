@@ -31,7 +31,7 @@ export default function WhoItsFor() {
         </h2>
         <div className="wif-grid">
           {PROFILES.map(p => (
-            <div key={p.title} style={{ background: "var(--cream)", border: "1px solid var(--border)", borderRadius: 10, padding: "24px 22px", display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <div key={p.title} style={{ background: "var(--cream)", border: "1px solid var(--border2)", boxShadow: "0 2px 10px rgba(20,30,60,.05)", borderRadius: 10, padding: "24px 22px", display: "flex", gap: 14, alignItems: "flex-start" }}>
               <span style={{ fontSize: 24, lineHeight: 1, flexShrink: 0 }}>{p.icon}</span>
               <div>
                 <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 5 }}>{p.title}</p>
