@@ -11,7 +11,6 @@ export default function FAQ() {
       <style>{`
         .faq-inner { max-width: 1320px; margin: 0 auto; padding: 0 64px; }
         .faq-header { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: end; margin-bottom: 48px; }
-        .faq-list { max-width: 820px; }
         @media (max-width: 900px) {
           .faq-inner { padding: 0 24px; }
           .faq-header { grid-template-columns: 1fr; gap: 16px; margin-bottom: 32px; }
@@ -30,7 +29,7 @@ export default function FAQ() {
             Lo que más nos preguntan antes de crear su primer CV con resumika.
           </p>
         </div>
-        <div className="faq-list" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {FAQS.map((f, i) => {
             const isOpen = open === i;
             return (
@@ -53,7 +52,7 @@ export default function FAQ() {
                   <span style={{ width: 22, height: 22, flexShrink: 0, borderRadius: "50%", background: isOpen ? "var(--green)" : "var(--warm)", color: isOpen ? "#fff" : "var(--hint)", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", transform: isOpen ? "rotate(45deg)" : "none", transition: "transform .15s, background .15s, color .15s" }}>+</span>
                 </button>
                 {isOpen && (
-                  <p style={{ fontSize: 13, color: "var(--body)", lineHeight: 1.7, padding: "0 22px 20px" }}>{f.a}</p>
+                  <p style={{ fontSize: 13, color: "var(--body)", lineHeight: 1.7, padding: "0 22px 20px", maxWidth: 720 }}>{f.a}</p>
                 )}
               </div>
             );
