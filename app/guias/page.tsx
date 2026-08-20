@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getAllGuias, CATEGORIES } from "@/lib/guias";
+import { getAllGuias, CATEGORIES, COUNTRY_LABELS, COUNTRY_FLAGS } from "@/lib/guias";
 import { ArticleCard } from "@/components/guias/ArticleCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,13 +10,16 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://resumika.com/guias" },
 };
 
-type Props = { searchParams: Promise<{ categoria?: string }> };
+type Props = { searchParams: Promise<{ categoria?: string; pais?: string }> };
 
 export default async function GuiasPage({ searchParams }: Props) {
-  const { categoria } = await searchParams;
+  const { categoria, pais } = await searchParams;
   const all = getAllGuias();
-  const guias = categoria ? all.filter((g) => g.category === categoria) : all;
+  const guias = all
+    .filter((g) => !categoria || g.category === categoria)
+    .filter((g) => !pais || g.country === pais);
   const totalCategories = [...new Set(all.map((g) => g.category))];
+  const totalCountries = [...new Set(all.map((g) => g.country))];
 
   return (
     <>
@@ -49,21 +52,46 @@ export default async function GuiasPage({ searchParams }: Props) {
 
         <div className="guias-inner" style={{ padding: "40px 64px 80px" }}>
 
+          {/* Country filters */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+            <a
+              href={categoria ? `/guias?categoria=${categoria}` : "/guias"}
+              style={{ fontSize: 12, fontWeight: !pais ? 600 : 400, padding: "6px 14px", borderRadius: 100, textDecoration: "none", background: !pais ? "var(--ink)" : "var(--paper)", color: !pais ? "#fff" : "var(--body)", border: `1px solid ${!pais ? "var(--ink)" : "var(--border)"}`, transition: "all .15s" }}
+            >
+              Todos los países ({all.length})
+            </a>
+            {totalCountries.map((c) => {
+              const count = all.filter((g) => g.country === c).length;
+              const active = pais === c;
+              const href = categoria ? `/guias?pais=${c}&categoria=${categoria}` : `/guias?pais=${c}`;
+              return (
+                <a
+                  key={c}
+                  href={href}
+                  style={{ fontSize: 12, fontWeight: active ? 600 : 400, padding: "6px 14px", borderRadius: 100, textDecoration: "none", background: active ? "var(--ink)" : "var(--paper)", color: active ? "#fff" : "var(--body)", border: `1px solid ${active ? "var(--ink)" : "var(--border)"}`, transition: "all .15s" }}
+                >
+                  {COUNTRY_FLAGS[c] ?? ""} {COUNTRY_LABELS[c] ?? c} ({count})
+                </a>
+              );
+            })}
+          </div>
+
           {/* Category filters */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 32 }}>
             <a
-              href="/guias"
+              href={pais ? `/guias?pais=${pais}` : "/guias"}
               style={{ fontSize: 12, fontWeight: !categoria ? 600 : 400, padding: "6px 14px", borderRadius: 100, textDecoration: "none", background: !categoria ? "var(--green)" : "var(--paper)", color: !categoria ? "#fff" : "var(--body)", border: `1px solid ${!categoria ? "var(--green)" : "var(--border)"}`, transition: "all .15s" }}
             >
-              Todas ({all.length})
+              Todas las categorías ({all.length})
             </a>
             {totalCategories.map((cat) => {
               const count = all.filter((g) => g.category === cat).length;
               const active = categoria === cat;
+              const href = pais ? `/guias?categoria=${cat}&pais=${pais}` : `/guias?categoria=${cat}`;
               return (
                 <a
                   key={cat}
-                  href={`/guias?categoria=${cat}`}
+                  href={href}
                   style={{ fontSize: 12, fontWeight: active ? 600 : 400, padding: "6px 14px", borderRadius: 100, textDecoration: "none", background: active ? "var(--green)" : "var(--paper)", color: active ? "#fff" : "var(--body)", border: `1px solid ${active ? "var(--green)" : "var(--border)"}`, transition: "all .15s" }}
                 >
                   {CATEGORIES[cat] ?? cat} ({count})
