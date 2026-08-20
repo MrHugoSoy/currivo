@@ -9,6 +9,7 @@ import Logo from "@/components/Logo";
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
 type GiftCode = { id: string; code: string; months?: number; is_used: boolean; used_at: string | null; created_at: string };
+type Review = { id: string; user_id: string; nombre: string; puesto: string; mercado: string; stars: number; text: string; approved: boolean; created_at: string };
 
 type Stats = {
   totalCvs: number;
@@ -87,6 +88,9 @@ export default function Dashboard() {
   const [genMonths, setGenMonths] = useState(1);
   const [copied, setCopied] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewActionId, setReviewActionId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -103,6 +107,7 @@ export default function Dashboard() {
       const uid = session!.user.id;
       setUserId(uid);
       loadGiftCodes(uid);
+      loadReviews(uid);
 
       const { data: cvsData, error } = await supabase
         .from("cvs")
@@ -163,6 +168,29 @@ export default function Dashboard() {
   async function loadGiftCodes(uid: string) {
     const res = await fetch(`/api/gift/generate?userId=${uid}`);
     if (res.ok) { const d = await res.json(); setGiftCodes(d.codes ?? []); }
+  }
+
+  async function loadReviews(uid: string) {
+    setReviewsLoading(true);
+    const res = await fetch(`/api/admin/reviews?userId=${uid}`);
+    if (res.ok) { const d = await res.json(); setReviews(d.reviews ?? []); }
+    setReviewsLoading(false);
+  }
+
+  async function handleReviewAction(id: string, action: "approve" | "reject") {
+    if (!userId) return;
+    setReviewActionId(id);
+    const res = await fetch("/api/admin/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, id, action }),
+    });
+    if (res.ok) {
+      setReviews(prev => action === "approve"
+        ? prev.map(r => r.id === id ? { ...r, approved: true } : r)
+        : prev.filter(r => r.id !== id));
+    }
+    setReviewActionId(null);
   }
 
   async function handleGenerate() {
@@ -250,6 +278,86 @@ export default function Dashboard() {
             ))}
           </div>
         )}
+
+        {/* Reviews moderation */}
+        <div style={{ marginBottom: 40 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px", marginBottom: 16 }}>
+            Reseñas
+          </h2>
+
+          {reviewsLoading ? (
+            <p style={{ fontSize: 13, color: "var(--hint)" }}>Cargando reseñas...</p>
+          ) : reviews.length === 0 ? (
+            <p style={{ fontSize: 13, color: "var(--hint)" }}>No hay reseñas todavía.</p>
+          ) : (
+            <>
+              {(() => {
+                const pending = reviews.filter(r => !r.approved);
+                const approved = reviews.filter(r => r.approved);
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--muted)", marginBottom: 10 }}>
+                        Pendientes ({pending.length})
+                      </div>
+                      {pending.length === 0 ? (
+                        <p style={{ fontSize: 13, color: "var(--hint)" }}>No hay reseñas pendientes de aprobar.</p>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          {pending.map(r => (
+                            <div key={r.id} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 16px" }}>
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{r.nombre}</span>
+                                  <span style={{ fontSize: 12, color: "var(--muted)" }}>{r.puesto} · {MARKET_LABELS[r.mercado] ?? r.mercado}</span>
+                                  <span style={{ fontSize: 12, color: "#d4a050" }}>{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</span>
+                                </div>
+                                <span style={{ fontSize: 10, color: "var(--hint)" }}>{new Date(r.created_at).toLocaleDateString("es-MX")}</span>
+                              </div>
+                              <p style={{ fontSize: 13, color: "var(--body)", lineHeight: 1.6, marginBottom: 10 }}>{r.text}</p>
+                              <div style={{ display: "flex", gap: 8 }}>
+                                <button onClick={() => handleReviewAction(r.id, "approve")} disabled={reviewActionId === r.id}
+                                  style={{ background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 500, fontFamily: "inherit", cursor: reviewActionId === r.id ? "default" : "pointer", opacity: reviewActionId === r.id ? 0.6 : 1 }}>
+                                  Aprobar
+                                </button>
+                                <button onClick={() => handleReviewAction(r.id, "reject")} disabled={reviewActionId === r.id}
+                                  style={{ background: "none", border: "1px solid #fecaca", color: "#dc2626", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontFamily: "inherit", cursor: reviewActionId === r.id ? "default" : "pointer", opacity: reviewActionId === r.id ? 0.6 : 1 }}>
+                                  Rechazar
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {approved.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--muted)", marginBottom: 10 }}>
+                          Publicadas ({approved.length})
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          {approved.map(r => (
+                            <div key={r.id} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, opacity: 0.75 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", flexShrink: 0 }}>{r.nombre}</span>
+                                <span style={{ fontSize: 11, color: "var(--hint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.text}</span>
+                              </div>
+                              <button onClick={() => handleReviewAction(r.id, "reject")} disabled={reviewActionId === r.id}
+                                style={{ background: "none", border: "1px solid var(--border)", color: "var(--muted)", borderRadius: 5, padding: "4px 10px", fontSize: 11, fontFamily: "inherit", cursor: reviewActionId === r.id ? "default" : "pointer", flexShrink: 0, opacity: reviewActionId === r.id ? 0.6 : 1 }}>
+                                Quitar
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+        </div>
 
         {/* Gift codes */}
         <div style={{ marginBottom: 40 }}>
