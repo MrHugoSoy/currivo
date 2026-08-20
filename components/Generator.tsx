@@ -7,6 +7,7 @@ import type { TemplateId, CVData } from "@/lib/templates/types";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/previews";
 import { supabase } from "@/lib/supabase";
 import { saveCVText } from "@/app/editar/actions";
+import { isEffectivelyPro } from "@/lib/pro";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
@@ -138,8 +139,8 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
       setUserId(user?.id);
       setAuthLoaded(true);
       if (user?.id) {
-        const { data: profile } = await supabase.from("profiles").select("is_pro").eq("user_id", user.id).single();
-        setIsPro(profile?.is_pro ?? false);
+        const { data: profile } = await supabase.from("profiles").select("is_pro, pro_plan, pro_expires_at").eq("user_id", user.id).single();
+        setIsPro(isEffectivelyPro(profile));
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_e, session) => {
@@ -147,8 +148,8 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
       setUserId(session?.user?.id);
       setAuthLoaded(true);
       if (session?.user?.id) {
-        const { data: profile } = await supabase.from("profiles").select("is_pro").eq("user_id", session.user.id).single();
-        setIsPro(profile?.is_pro ?? false);
+        const { data: profile } = await supabase.from("profiles").select("is_pro, pro_plan, pro_expires_at").eq("user_id", session.user.id).single();
+        setIsPro(isEffectivelyPro(profile));
       } else {
         setIsPro(false);
       }

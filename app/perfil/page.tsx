@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { isEffectivelyPro } from "@/lib/pro";
 import { CVCardPerfilSkeleton } from "@/components/Skeleton";
 import Logo from "@/components/Logo";
 import type { User } from "@supabase/supabase-js";
@@ -188,6 +189,9 @@ export default function PerfilPage() {
 
   if (!user) return null;
 
+  const isExpiredGift = !!profile?.is_pro && profile.pro_plan === "gift" && !!profile.pro_expires_at && new Date(profile.pro_expires_at) <= new Date();
+  const effectivelyPro = isEffectivelyPro(profile);
+
   const displayAvatar = avatarPreview ?? avatarUrl;
   const initial = user.email?.[0].toUpperCase() ?? "?";
   const memberSince = new Date(user.created_at).toLocaleDateString("es-MX", { year: "numeric", month: "long" });
@@ -235,7 +239,7 @@ export default function PerfilPage() {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: 16, fontWeight: 500, color: "#f8f5ef" }}>{user.user_metadata?.username ? `@${user.user_metadata.username}` : user.email}</span>
-                {profile?.is_pro && (
+                {effectivelyPro && (
                   <span style={{ fontSize: 10, fontWeight: 600, background: "var(--green-bg)", color: "var(--green)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 100, padding: "2px 9px", letterSpacing: "0.3px" }}>✦ Pro</span>
                 )}
               </div>
@@ -300,18 +304,18 @@ export default function PerfilPage() {
             {/* Plan section */}
             <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 22px", marginTop: 12 }}>
               <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--hint)", marginBottom: 14, fontWeight: 600 }}>Mi plan</div>
-              {profile?.is_pro ? (
+              {effectivelyPro ? (
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{PLAN_LABELS[profile.pro_plan ?? ""] ?? profile.pro_plan ?? "Pro"}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{PLAN_LABELS[profile!.pro_plan ?? ""] ?? profile!.pro_plan ?? "Pro"}</span>
                     <span style={{ fontSize: 10, fontWeight: 600, background: "var(--green-bg)", color: "var(--green)", border: "1px solid rgba(45,90,61,.2)", borderRadius: 100, padding: "1px 8px" }}>Activo</span>
                   </div>
                   <div style={{ fontSize: 11, color: "var(--hint)", marginBottom: 16 }}>
-                    {profile.pro_expires_at
-                      ? `${profile.pro_plan === "gift" ? "Expira el" : "Renueva el"} ${new Date(profile.pro_expires_at).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`
+                    {profile!.pro_expires_at
+                      ? `${profile!.pro_plan === "gift" ? "Expira el" : "Renueva el"} ${new Date(profile!.pro_expires_at).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`
                       : "Sin vencimiento"}
                   </div>
-                  {profile.stripe_customer_id && profile.pro_plan !== "lifetime_mxn" && profile.pro_plan !== "gift" && (
+                  {profile!.stripe_customer_id && profile!.pro_plan !== "lifetime_mxn" && profile!.pro_plan !== "gift" && (
                     <button onClick={handlePortal} disabled={portalLoading}
                       style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 6, padding: "9px 0", fontSize: 12, color: "var(--muted)", fontFamily: "inherit", cursor: portalLoading ? "default" : "pointer", opacity: portalLoading ? 0.6 : 1 }}>
                       {portalLoading ? "Cargando..." : "Gestionar suscripción →"}
@@ -320,7 +324,14 @@ export default function PerfilPage() {
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 14 }}>Plan gratuito</div>
+                  {isExpiredGift ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10 }}>
+                      <span style={{ fontSize: 13, color: "var(--muted)" }}>Código de regalo expirado</span>
+                      <span style={{ fontSize: 10, fontWeight: 600, background: "#fef2f2", color: "#b91c1c", border: "1px solid #fecaca", borderRadius: 100, padding: "1px 8px" }}>Vencido</span>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 14 }}>Plan gratuito</div>
+                  )}
                   <a href="/pago?plan=pro_mxn_founder"
                     style={{ display: "block", textAlign: "center", background: "var(--green)", color: "#fff", borderRadius: 6, padding: "9px 0", fontSize: 12, fontWeight: 500, textDecoration: "none" }}>
                     Actualizar a Pro →
@@ -330,7 +341,7 @@ export default function PerfilPage() {
             </div>
 
             {/* Gift code */}
-            {!profile?.is_pro && (
+            {!effectivelyPro && (
               <div style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "20px 22px", marginTop: 12 }}>
                 <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--hint)", marginBottom: 14, fontWeight: 600 }}>Código de regalo</div>
                 <input

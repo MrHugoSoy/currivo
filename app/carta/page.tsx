@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { isEffectivelyPro } from "@/lib/pro";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -52,7 +53,7 @@ export default function CartaPage() {
       const email = user.email ?? "";
 
       const [{ data: profile }, { data: byId }, { data: byEmail }] = await Promise.all([
-        supabase.from("profiles").select("is_pro").eq("user_id", user.id).single(),
+        supabase.from("profiles").select("is_pro, pro_plan, pro_expires_at").eq("user_id", user.id).single(),
         supabase.from("cvs")
           .select("slug, nombre, puesto, form_data")
           .eq("user_id", user.id)
@@ -65,7 +66,7 @@ export default function CartaPage() {
           .limit(20),
       ]);
 
-      setIsPro(profile?.is_pro ?? false);
+      setIsPro(isEffectivelyPro(profile));
 
       const seen = new Set<string>();
       const merged = [...(byId ?? []), ...(byEmail ?? [])].filter(cv => {
