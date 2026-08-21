@@ -82,12 +82,20 @@ export default function TerminosPage() {
             <P>En la máxima medida permitida por la ley, resumika.com no será responsable de daños indirectos, incidentales, especiales, consecuentes o punitivos, incluida la pérdida de datos, oportunidades de empleo u otros perjuicios derivados del uso o la imposibilidad de uso del Servicio.</P>
           </Section>
 
-          <Section title="9. Modificaciones a los términos">
+          <Section title="9. Resultados y expectativas">
+            <P>resumika.com no garantiza que el uso del Servicio resulte en entrevistas, ofertas de empleo, contratación, aprobación por sistemas de seguimiento de candidatos (ATS), visas, permisos de trabajo o cualquier otro resultado laboral o migratorio específico. Los resultados dependen de múltiples factores ajenos al Servicio, incluyendo el criterio del reclutador, la vacante, el mercado laboral y los requisitos de cada empleador o autoridad migratoria.</P>
+          </Section>
+
+          <Section title="10. Información sobre empleo e inmigración">
+            <P>La información proporcionada por resumika.com sobre empleo, inmigración, visas y permisos de trabajo —incluyendo guías, artículos y contenido generado— tiene fines exclusivamente informativos y no constituye asesoría legal, migratoria ni profesional. Las leyes y requisitos migratorios cambian con frecuencia. Consulte siempre las fuentes oficiales correspondientes (por ejemplo, IRCC en Canadá, USCIS en Estados Unidos, o gob.mx en México) o a un profesional autorizado antes de tomar decisiones migratorias o laborales.</P>
+          </Section>
+
+          <Section title="11. Modificaciones a los términos">
             <P>Podemos actualizar estos Términos en cualquier momento. Cuando lo hagamos, revisaremos la fecha de "Última actualización" al inicio de este documento y, si los cambios son materiales, le notificaremos por correo electrónico o mediante un aviso en el Servicio.</P>
             <P>El uso continuado del Servicio después de la publicación de cambios constituye su aceptación de los nuevos términos.</P>
           </Section>
 
-          <Section title="10. Contacto">
+          <Section title="12. Contacto">
             <P>Si tiene preguntas sobre estos Términos, puede contactarnos en: <strong>info@resumika.com</strong></P>
           </Section>
 

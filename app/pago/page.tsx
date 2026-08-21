@@ -65,10 +65,10 @@ const PLANS = {
     badge: "Mejor valor",
     price: 399,
     period: " pago único",
-    tagline: "Una vez, para siempre — sin renovaciones jamás",
+    tagline: "Un solo pago, sin renovaciones",
     features: [
       "Todo lo de Pro incluido",
-      "Acceso de por vida sin cargo adicional",
+      "Sin vencimiento, sin cargo adicional",
       "Futuras plantillas y funciones",
       "Carta de presentación con IA",
       "Soporte VIP prioritario",
@@ -282,7 +282,7 @@ function CheckoutContent() {
 
               <p style={{ fontSize: 11, color: "var(--hint)", textAlign: "center", lineHeight: 1.6 }}>
                 {planKey === "lifetime_mxn"
-                  ? "Pago único, sin renovaciones. Acceso de por vida garantizado."
+                  ? "Pago único, sin renovaciones. Acceso Pro mientras resumika mantenga el servicio disponible."
                   : isEn ? "Cancel anytime, no questions asked." : "Cancela en cualquier momento sin penalización."}
               </p>
             </form>

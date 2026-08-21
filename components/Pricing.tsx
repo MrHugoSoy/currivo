@@ -12,19 +12,19 @@ const PRICES: Record<Currency, {
 }> = {
   MXN: {
     pro:      { amount: "$49",   original: "$99",   period: "MXN por mes",    badge: "Más popular",  founder: "🚀 Precio de lanzamiento" },
-    lifetime: { amount: "$399",  period: "pago único · para siempre" },
+    lifetime: { amount: "$399",  period: "pago único · sin renovaciones" },
     free:     { period: "siempre gratis", cta: "Comenzar gratis" },
     proCta: "Suscribirme →", lifetimeCta: "Comprar ahora",
   },
   USD: {
     pro:      { amount: "$2.99", original: "$5.99", period: "USD / month",    badge: "Most popular", founder: "🚀 Launch price" },
-    lifetime: { amount: "$22",   period: "one-time · forever" },
+    lifetime: { amount: "$22",   period: "one-time · no renewals" },
     free:     { period: "always free", cta: "Start free" },
     proCta: "Subscribe →", lifetimeCta: "Buy now",
   },
   CAD: {
     pro:      { amount: "$3.99", original: "$7.99", period: "CAD / month",    badge: "Most popular", founder: "🚀 Launch price" },
-    lifetime: { amount: "$29",   period: "one-time · forever" },
+    lifetime: { amount: "$29",   period: "one-time · no renewals" },
     free:     { period: "always free", cta: "Start free" },
     proCta: "Subscribe →", lifetimeCta: "Buy now",
   },
@@ -59,7 +59,7 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
       label: "Lifetime",
       amount: p.lifetime.amount,
       period: p.lifetime.period,
-      feats: [["✓","Todo lo de Pro"],["✓","Acceso de por vida"],["✓","Futuras plantillas"],["✓","Soporte prioritario"],["✓","Sin renovaciones"],["⏳","LinkedIn Optimizer (próximamente)"]],
+      feats: [["✓","Todo lo de Pro"],["✓","Sin vencimiento"],["✓","Futuras plantillas"],["✓","Soporte prioritario"],["✓","Sin renovaciones"],["⏳","LinkedIn Optimizer (próximamente)"]],
       cta: p.lifetimeCta,
       featured: false,
       href: "/pago?plan=lifetime_mxn",
