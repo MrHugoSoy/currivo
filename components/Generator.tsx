@@ -1230,7 +1230,7 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
           <p style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--hint)", marginBottom: 12, fontWeight: 600 }}>¿Qué quieres hacer?</p>
           <div className="actions-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
             <button onClick={handleDownload} disabled={pdfLoading || !slug}
-              style={{ background: "var(--ink)", color: "#fff", border: "none", borderRadius: 10, padding: "14px 12px", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.6 : 1, fontFamily: "inherit", textAlign: "left", display: "flex", flexDirection: "column", gap: 8, transition: "opacity .15s" }}>
+              style={{ background: "var(--surface-dark)", color: "#fff", border: "none", borderRadius: 10, padding: "14px 12px", cursor: pdfLoading || !slug ? "not-allowed" : "pointer", opacity: pdfLoading || !slug ? 0.6 : 1, fontFamily: "inherit", textAlign: "left", display: "flex", flexDirection: "column", gap: 8, transition: "opacity .15s" }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(74,144,96,.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>
                 {pdfLoading ? "⏳" : "⬇"}
               </div>

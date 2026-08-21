@@ -151,7 +151,7 @@ function CheckoutContent() {
       <div className="pago-body" style={{ flex: 1, display: "flex", minHeight: 0 }}>
 
         {/* Left — Plan summary */}
-        <div className="pago-left" style={{ width: "42%", flexShrink: 0, background: "var(--ink)", padding: "56px 64px", display: "flex", flexDirection: "column" }}>
+        <div className="pago-left" style={{ width: "42%", flexShrink: 0, background: "var(--surface-dark)", padding: "56px 64px", display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 9, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.25)", fontWeight: 500, marginBottom: 28 }}>
             Resumen del plan
           </div>

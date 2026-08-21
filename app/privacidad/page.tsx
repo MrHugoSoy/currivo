@@ -20,7 +20,7 @@ export default function PrivacidadPage() {
       </header>
 
       {/* Hero */}
-      <div style={{ background: "var(--ink)", padding: "48px 48px 40px" }}>
+      <div style={{ background: "var(--surface-dark)", padding: "48px 48px 40px" }}>
         <div style={{ maxWidth: 740, margin: "0 auto" }}>
           <p style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.3)", marginBottom: 14 }}>Legal</p>
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 42, fontWeight: 600, color: "#f8f5ef", letterSpacing: "-1px", marginBottom: 10 }}>Política de Privacidad</h1>

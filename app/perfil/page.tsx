@@ -231,7 +231,7 @@ export default function PerfilPage() {
         </header>
 
         {/* Hero strip */}
-        <div className="perfil-hero" style={{ background: "var(--ink)", padding: "32px 48px" }}>
+        <div className="perfil-hero" style={{ background: "var(--surface-dark)", padding: "32px 48px" }}>
           <div className="perfil-hero-inner" style={{ maxWidth: 1320, margin: "0 auto", display: "flex", alignItems: "center", gap: 18 }}>
             <div style={{ width: 48, height: 48, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "1.5px solid rgba(74,148,98,.4)", background: "rgba(74,148,98,.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {displayAvatar ? <img src={displayAvatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 700, color: "#7dd4a0" }}>{initial}</span>}
