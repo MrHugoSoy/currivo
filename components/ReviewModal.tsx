@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 interface ReviewModalProps {
   userId: string;
@@ -16,29 +15,29 @@ export default function ReviewModal({ userId, nombre, puesto, mercado, onClose }
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!stars || !text.trim()) return;
     setLoading(true);
+    setError(null);
     try {
-      const { error } = await supabase.from("reviews").insert({
-        user_id: userId,
-        nombre,
-        puesto,
-        mercado,
-        stars,
-        text: text.trim(),
-        approved: false,
+      const res = await fetch("/api/reviews/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, nombre, puesto, mercado, stars, text: text.trim() }),
       });
-      if (error) console.error("Review insert error:", error.message);
-    } catch (err) {
-      console.error("Review submit error:", err);
-    } finally {
-      // Mark as reviewed regardless so modal never blocks the user again
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "No se pudo guardar la reseña.");
+      }
       try { localStorage.setItem("resumika_reviewed", "true"); } catch {}
-      setLoading(false);
       setDone(true);
       setTimeout(onClose, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error de conexión. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,6 +115,12 @@ export default function ReviewModal({ userId, nombre, puesto, mercado, onClose }
             <div style={{ fontSize: 10, color: "var(--hint)", textAlign: "right", marginBottom: 16 }}>
               {text.length}/280
             </div>
+
+            {error && (
+              <p style={{ fontSize: 12, color: "#dc2626", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 6, padding: "8px 10px", marginBottom: 12 }}>
+                {error}
+              </p>
+            )}
 
             <button
               onClick={handleSubmit}
