@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { authFetch } from "@/lib/authFetch";
 import { isEffectivelyPro } from "@/lib/pro";
 import { CVCardPerfilSkeleton } from "@/components/Skeleton";
 import Logo from "@/components/Logo";
@@ -149,10 +150,10 @@ export default function PerfilPage() {
     if (!user || !giftCode.trim()) return;
     setGiftLoading(true); setGiftMsg(null);
     try {
-      const res = await fetch("/api/gift/redeem", {
+      const res = await authFetch("/api/gift/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: giftCode.trim(), userId: user.id }),
+        body: JSON.stringify({ code: giftCode.trim() }),
       });
       const data = await res.json();
       if (!res.ok) { setGiftMsg({ ok: false, text: data.error ?? "Error al canjear." }); return; }
@@ -171,10 +172,9 @@ export default function PerfilPage() {
     if (!user) return;
     setPortalLoading(true);
     try {
-      const res = await fetch("/api/stripe/portal", {
+      const res = await authFetch("/api/stripe/portal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -439,7 +439,7 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => void }) {
   async function handleDelete() {
     setDeleting(true);
     try {
-      const res = await fetch("/api/cv/delete", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: cv.id }) });
+      const res = await authFetch("/api/cv/delete", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: cv.id }) });
       if (!res.ok) { const { error } = await res.json(); throw new Error(error); }
       onDelete(cv.id);
     } catch (e) { console.error(e); alert("Error al eliminar. Intenta de nuevo."); }

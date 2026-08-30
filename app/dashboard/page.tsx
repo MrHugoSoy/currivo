@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { authFetch } from "@/lib/authFetch";
 import { CVCard, type CVCardData } from "./CVCard";
 import { CVCardSkeleton } from "@/components/Skeleton";
 import Logo from "@/components/Logo";
@@ -165,14 +166,14 @@ export default function Dashboard() {
     load();
   }, [router]);
 
-  async function loadGiftCodes(uid: string) {
-    const res = await fetch(`/api/gift/generate?userId=${uid}`);
+  async function loadGiftCodes(_uid: string) {
+    const res = await authFetch("/api/gift/generate");
     if (res.ok) { const d = await res.json(); setGiftCodes(d.codes ?? []); }
   }
 
-  async function loadReviews(uid: string) {
+  async function loadReviews(_uid: string) {
     setReviewsLoading(true);
-    const res = await fetch(`/api/admin/reviews?userId=${uid}`);
+    const res = await authFetch("/api/admin/reviews");
     if (res.ok) { const d = await res.json(); setReviews(d.reviews ?? []); }
     setReviewsLoading(false);
   }
@@ -180,10 +181,10 @@ export default function Dashboard() {
   async function handleReviewAction(id: string, action: "approve" | "reject") {
     if (!userId) return;
     setReviewActionId(id);
-    const res = await fetch("/api/admin/reviews", {
+    const res = await authFetch("/api/admin/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, id, action }),
+      body: JSON.stringify({ id, action }),
     });
     if (res.ok) {
       setReviews(prev => action === "approve"
@@ -196,10 +197,10 @@ export default function Dashboard() {
   async function handleGenerate() {
     if (!userId) return;
     setGiftLoading(true);
-    const res = await fetch("/api/gift/generate", {
+    const res = await authFetch("/api/gift/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, count: genCount, months: genMonths }),
+      body: JSON.stringify({ count: genCount, months: genMonths }),
     });
     if (res.ok) {
       const d = await res.json();

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getAccessToken } from "@/lib/authFetch";
 import { deleteCV } from "./actions";
 
 const FLAG: Record<string, string> = { mx: "🇲🇽", us: "🇺🇸", ca: "🇨🇦" };
@@ -58,7 +59,9 @@ export function CVCard({ cv, onDelete }: CVCardProps) {
   async function handleDelete() {
     setDeleting(true);
     try {
-      await deleteCV(cv.id);
+      const token = await getAccessToken();
+      if (!token) throw new Error("No autorizado");
+      await deleteCV(cv.id, token);
       onDelete(cv.id);
     } catch {
       alert("Error al eliminar. Intenta de nuevo.");

@@ -3,6 +3,7 @@ import { useState, useRef, useTransition } from "react";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/previews";
 import type { TemplateId, CVData } from "@/lib/templates/types";
 import { saveCVText } from "../actions";
+import { getAccessToken } from "@/lib/authFetch";
 import Logo from "@/components/Logo";
 
 interface Props {
@@ -40,7 +41,9 @@ export default function TextEditor({ slug, nombre, puesto, initialText, template
   function handleSave() {
     startTransition(async () => {
       try {
-        await saveCVText(slug, text);
+        const token = await getAccessToken();
+        if (!token) throw new Error("No autorizado");
+        await saveCVText(slug, text, token);
         setPreviewText(text);
         setSaveState("saved");
       } catch {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getVerifiedUserId, requireAdmin } from "@/lib/authServer";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -7,16 +8,9 @@ const supabaseAdmin = createClient(
   { auth: { persistSession: false } }
 );
 
-async function requireAdmin(userId: string | null) {
-  if (!userId) return false;
-  const { data: profile } = await supabaseAdmin
-    .from("profiles").select("is_admin").eq("user_id", userId).single();
-  return !!profile?.is_admin;
-}
-
 export async function GET(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get("userId");
-  if (!(await requireAdmin(userId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const userId = await getVerifiedUserId(req, supabaseAdmin);
+  if (!(await requireAdmin(userId, supabaseAdmin))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { data, error } = await supabaseAdmin
     .from("reviews")
@@ -29,8 +23,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId, id, action } = await req.json();
-  if (!(await requireAdmin(userId))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const userId = await getVerifiedUserId(req, supabaseAdmin);
+  if (!(await requireAdmin(userId, supabaseAdmin))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id, action } = await req.json();
   if (!id || !["approve", "reject"].includes(action)) return NextResponse.json({ error: "Datos inválidos." }, { status: 400 });
 
   if (action === "approve") {

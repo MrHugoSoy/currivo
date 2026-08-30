@@ -1,26 +1,24 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { authFetch } from "@/lib/authFetch";
 
 interface Props {
   slug: string;
   mercado: string;
   templateId: string;
-  cvUserId?: string;
 }
 
-export function CVPageActions({ slug, mercado, templateId, cvUserId }: Props) {
+export function CVPageActions({ slug, mercado, templateId }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    if (!cvUserId) return;
-    supabase.auth.getSession().then(({ data }) => {
-      const userId = data.session?.user?.id;
-      if (userId && userId === cvUserId) setIsOwner(true);
-    });
-  }, [cvUserId]);
+    authFetch(`/api/cv/owner?slug=${encodeURIComponent(slug)}`)
+      .then(res => res.json())
+      .then(data => setIsOwner(!!data.isOwner))
+      .catch(() => {});
+  }, [slug]);
 
   function shareWhatsApp() {
 

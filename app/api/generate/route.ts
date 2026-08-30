@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { generateLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 import { generateSchema } from "@/lib/validators";
 import { checkActivePro } from "@/lib/proServer";
+import { getVerifiedUserId } from "@/lib/authServer";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -592,21 +593,39 @@ export async function POST(req: NextRequest) {
     }
     const body = parseResult.data;
 
+    const verifiedUserId = await getVerifiedUserId(req, supabaseAdmin);
+    if (!verifiedUserId) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const { nombre, puesto } = body;
 
     if (!nombre || !puesto) {
       return NextResponse.json({ error: "Faltan campos obligatorios." }, { status: 400 });
     }
 
+    // ── Verificar que el CV a editar pertenece al usuario autenticado ──
+    if (body.editSlug) {
+      const { data: existing } = await supabaseAdmin
+        .from("cvs")
+        .select("user_id")
+        .eq("slug", body.editSlug)
+        .single();
+
+      if (!existing || existing.user_id !== verifiedUserId) {
+        return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+      }
+    }
+
     // ── Límite de 1 CV gratis para usuarios no Pro ──
-    if (body.userId && !body.editSlug) {
-      const { isActivePro } = await checkActivePro(supabaseAdmin, body.userId);
+    if (!body.editSlug) {
+      const { isActivePro } = await checkActivePro(supabaseAdmin, verifiedUserId);
 
       if (!isActivePro) {
         const { count } = await supabaseAdmin
           .from("cvs")
           .select("id", { count: "exact", head: true })
-          .eq("user_id", body.userId);
+          .eq("user_id", verifiedUserId);
 
         if ((count ?? 0) >= 1) {
           return NextResponse.json({ error: "LIMIT_REACHED" }, { status: 403 });
@@ -634,7 +653,7 @@ export async function POST(req: NextRequest) {
         .join("\n")
     );
 
-    const { editSlug, userId, vacante: _vacante, ...formDataToStore } = body;
+    const { editSlug, userId: _userId, vacante: _vacante, ...formDataToStore } = body;
     const savedFormData = {
       ...formDataToStore,
       languages: langStr || undefined,
@@ -650,7 +669,7 @@ export async function POST(req: NextRequest) {
         template: body.templateId || "clasico",
         cv_text: cv,
         form_data: savedFormData,
-      }).eq("slug", editSlug);
+      }).eq("slug", editSlug).eq("user_id", verifiedUserId);
       return NextResponse.json({ cv, slug: editSlug });
     }
 
@@ -663,7 +682,7 @@ export async function POST(req: NextRequest) {
       template: body.templateId || "clasico",
       cv_text: cv,
       form_data: savedFormData,
-      ...(userId ? { user_id: userId } : {}),
+      user_id: verifiedUserId,
     });
 
     return NextResponse.json({ cv, slug });

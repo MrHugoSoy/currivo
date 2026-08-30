@@ -6,6 +6,7 @@ import ReviewModal from "./ReviewModal";
 import type { TemplateId, CVData } from "@/lib/templates/types";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/previews";
 import { supabase } from "@/lib/supabase";
+import { authFetch, getAccessToken } from "@/lib/authFetch";
 import { saveCVText } from "@/app/editar/actions";
 import { isEffectivelyPro } from "@/lib/pro";
 
@@ -272,7 +273,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     }
     setError(null); setLimitReached(false); setLoading(true);
     try {
-      const res = await fetch("/api/generate", {
+      const res = await authFetch("/api/generate", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, editSlug: editSlug ?? undefined, userId }),
       });
@@ -1135,7 +1136,9 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
     if (!userId) { alert("Necesitas una cuenta para guardar cambios."); return; }
     setSaving(true);
     try {
-      await saveCVText(slug, editedText);
+      const token = await getAccessToken();
+      if (!token) throw new Error("No autorizado");
+      await saveCVText(slug, editedText, token);
       setSaved(true);
       setIsEditing(false);
       setTimeout(() => setSaved(false), 2500);

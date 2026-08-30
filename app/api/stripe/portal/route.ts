@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
+import { getVerifiedUserId } from "@/lib/authServer";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await req.json() as { userId?: string };
+    const userId = await getVerifiedUserId(req, supabaseAdmin);
 
     if (!userId) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });

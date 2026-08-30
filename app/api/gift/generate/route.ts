@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getVerifiedUserId, requireAdmin } from "@/lib/authServer";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -16,12 +17,10 @@ function randomCode(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { userId, count = 1, months = 1 } = await req.json();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = await getVerifiedUserId(req, supabaseAdmin);
+  if (!(await requireAdmin(userId, supabaseAdmin))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { data: profile } = await supabaseAdmin
-    .from("profiles").select("is_admin").eq("user_id", userId).single();
-  if (!profile?.is_admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { count = 1, months = 1 } = await req.json();
 
   const validMonths = [1, 3, 6].includes(Number(months)) ? Number(months) : 1;
   const n = Math.min(Math.max(1, Number(count)), 50);
@@ -33,12 +32,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get("userId");
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { data: profile } = await supabaseAdmin
-    .from("profiles").select("is_admin").eq("user_id", userId).single();
-  if (!profile?.is_admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const userId = await getVerifiedUserId(req, supabaseAdmin);
+  if (!(await requireAdmin(userId, supabaseAdmin))) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { data, error } = await supabaseAdmin
     .from("gift_codes")

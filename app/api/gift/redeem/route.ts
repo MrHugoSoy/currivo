@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getVerifiedUserId } from "@/lib/authServer";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -8,8 +9,11 @@ const supabaseAdmin = createClient(
 );
 
 export async function POST(req: NextRequest) {
-  const { code, userId } = await req.json();
-  if (!code || !userId) return NextResponse.json({ error: "Faltan datos." }, { status: 400 });
+  const userId = await getVerifiedUserId(req, supabaseAdmin);
+  if (!userId) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+
+  const { code } = await req.json();
+  if (!code) return NextResponse.json({ error: "Faltan datos." }, { status: 400 });
 
   const normalised = String(code).trim().toUpperCase();
 
