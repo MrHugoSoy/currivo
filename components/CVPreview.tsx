@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useEffect } from "react";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/index";
 import type { TemplateId } from "@/lib/templates/types";
 
@@ -259,10 +259,19 @@ function buildHybridText(form: LiveFormData, market: "mx" | "us" | "ca", mock: M
 export default function CVPreview({ market = "mx", photoUrl, templateId = "clasico", formData }: CVPreviewProps) {
   const Preview = PREVIEW_TEMPLATES[templateId] ?? PREVIEW_TEMPLATES.clasico;
 
-  const mock = useMemo(() => {
+  const getMock = (m: string) => {
+    const pool = MOCK_PROFILES.filter(p => p.mercado === m);
+    const source = pool.length > 0 ? pool : MOCK_PROFILES;
+    return source[0];
+  };
+
+  // Starts on a deterministic profile so server and client render the same
+  // markup on first paint, then swaps to a random one after mount.
+  const [mock, setMock] = useState(() => getMock(market));
+  useEffect(() => {
     const pool = MOCK_PROFILES.filter(p => p.mercado === market);
     const source = pool.length > 0 ? pool : MOCK_PROFILES;
-    return source[Math.floor(Math.random() * source.length)];
+    setMock(source[Math.floor(Math.random() * source.length)]);
   }, [market]);
 
   const hasUserData = !!(
