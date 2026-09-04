@@ -11,6 +11,7 @@ const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
 type GiftCode = { id: string; code: string; months?: number; is_used: boolean; used_at: string | null; created_at: string };
 type Review = { id: string; user_id: string; nombre: string; puesto: string; mercado: string; stars: number; text: string; approved: boolean; created_at: string };
+type SubAlert = { email: string; name: string | null; subscriptions: { id: string; plan: string | null; created: string }[] };
 
 type Stats = {
   totalCvs: number;
@@ -92,6 +93,9 @@ export default function Dashboard() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewActionId, setReviewActionId] = useState<string | null>(null);
+  const [subAlerts, setSubAlerts] = useState<SubAlert[]>([]);
+  const [subAlertsLoading, setSubAlertsLoading] = useState(false);
+  const [subAlertsError, setSubAlertsError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -109,6 +113,7 @@ export default function Dashboard() {
       setUserId(uid);
       loadGiftCodes(uid);
       loadReviews(uid);
+      loadSubAlerts();
 
       const { data: cvsData, error } = await supabase
         .from("cvs")
@@ -176,6 +181,21 @@ export default function Dashboard() {
     const res = await authFetch("/api/admin/reviews");
     if (res.ok) { const d = await res.json(); setReviews(d.reviews ?? []); }
     setReviewsLoading(false);
+  }
+
+  async function loadSubAlerts() {
+    setSubAlertsLoading(true);
+    setSubAlertsError(null);
+    try {
+      const res = await authFetch("/api/admin/subscription-alerts");
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Error");
+      setSubAlerts(d.alerts ?? []);
+    } catch {
+      setSubAlertsError("No se pudieron cargar las alertas de suscripción.");
+    } finally {
+      setSubAlertsLoading(false);
+    }
   }
 
   async function handleReviewAction(id: string, action: "approve" | "reject") {
@@ -277,6 +297,41 @@ export default function Dashboard() {
             {[1, 2, 3, 4, 5].map(i => (
               <div key={i} style={{ background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 10, padding: "18px 20px", height: 80, opacity: 0.5 }} />
             ))}
+          </div>
+        )}
+
+        {/* Subscription alerts */}
+        {(subAlertsLoading || subAlertsError || subAlerts.length > 0) && (
+          <div style={{ marginBottom: 40 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.5px", marginBottom: 16 }}>
+              ⚠️ Alertas de suscripción
+            </h2>
+
+            {subAlertsLoading ? (
+              <div style={{ fontSize: 12, color: "var(--hint)" }}>Revisando suscripciones en Stripe...</div>
+            ) : subAlertsError ? (
+              <div style={{ fontSize: 12, color: "#b91c1c" }}>{subAlertsError}</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {subAlerts.map(a => (
+                  <div key={a.email} style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>
+                        {a.name || a.email} — {a.subscriptions.length} suscripciones activas
+                      </div>
+                      <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{a.email}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {a.subscriptions.map(s => (
+                        <span key={s.id} title={s.id} style={{ fontSize: 10, color: "#b91c1c", background: "#fff", border: "1px solid #fecaca", borderRadius: 6, padding: "3px 8px", fontFamily: "monospace" }}>
+                          {s.id.slice(0, 14)}… · {new Date(s.created).toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
