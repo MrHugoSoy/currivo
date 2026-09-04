@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import CVPreview from "./CVPreview";
 import { AuthModal } from "./AuthModal";
 import ReviewModal from "./ReviewModal";
@@ -291,16 +291,22 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
     } finally { setLoading(false); }
   };
 
-  const samplePuestos = useMemo(() => ({
-    mx: SAMPLE_MX[Math.floor(Math.random() * SAMPLE_MX.length)],
-    us: SAMPLE_US[Math.floor(Math.random() * SAMPLE_US.length)],
-    ca: SAMPLE_CA[Math.floor(Math.random() * SAMPLE_CA.length)],
-  }), []);
-  const sampleNames = useMemo(() => ({
-    mx: SAMPLE_NAMES_MX[Math.floor(Math.random() * SAMPLE_NAMES_MX.length)],
-    us: SAMPLE_NAMES_US[Math.floor(Math.random() * SAMPLE_NAMES_US.length)],
-    ca: SAMPLE_NAMES_CA[Math.floor(Math.random() * SAMPLE_NAMES_CA.length)],
-  }), []);
+  // Starts on a deterministic sample (index 0) so server and client agree on
+  // first paint, then swaps to a random one after mount to avoid a hydration mismatch.
+  const [samplePuestos, setSamplePuestos] = useState({ mx: SAMPLE_MX[0], us: SAMPLE_US[0], ca: SAMPLE_CA[0] });
+  const [sampleNames, setSampleNames] = useState({ mx: SAMPLE_NAMES_MX[0], us: SAMPLE_NAMES_US[0], ca: SAMPLE_NAMES_CA[0] });
+  useEffect(() => {
+    setSamplePuestos({
+      mx: SAMPLE_MX[Math.floor(Math.random() * SAMPLE_MX.length)],
+      us: SAMPLE_US[Math.floor(Math.random() * SAMPLE_US.length)],
+      ca: SAMPLE_CA[Math.floor(Math.random() * SAMPLE_CA.length)],
+    });
+    setSampleNames({
+      mx: SAMPLE_NAMES_MX[Math.floor(Math.random() * SAMPLE_NAMES_MX.length)],
+      us: SAMPLE_NAMES_US[Math.floor(Math.random() * SAMPLE_NAMES_US.length)],
+      ca: SAMPLE_NAMES_CA[Math.floor(Math.random() * SAMPLE_NAMES_CA.length)],
+    });
+  }, []);
 
   const selectedMarket = MARKETS.find(m => m.id === form.mercado)!;
   const note = DIFF_NOTES[form.mercado];
@@ -904,9 +910,13 @@ function ExperienceSelector({ experiencias, onChange, market }: { experiencias: 
   const isMx = market === "mx";
   const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   const update = (i: number, field: keyof ExperienciaEntry, val: string) => onChange(experiencias.map((e, j) => j === i ? { ...e, [field]: val } : e));
-  const sampleJob = useMemo(() => {
+  const [sampleJob, setSampleJob] = useState(() => {
     const list = market === "us" ? SAMPLE_US : market === "ca" ? SAMPLE_CA : SAMPLE_MX;
-    return list[Math.floor(Math.random() * list.length)];
+    return list[0];
+  });
+  useEffect(() => {
+    const list = market === "us" ? SAMPLE_US : market === "ca" ? SAMPLE_CA : SAMPLE_MX;
+    setSampleJob(list[Math.floor(Math.random() * list.length)]);
   }, [market]);
   return (
     <div>
@@ -1271,7 +1281,6 @@ function GeneratedResult({ text, market, slug, templateId, nombre, puesto, ciuda
     </div>
     {showReview && userId && (
       <ReviewModal
-        userId={userId}
         nombre={nombre}
         puesto={puesto}
         mercado={market}

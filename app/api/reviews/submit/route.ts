@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getVerifiedUserId } from "@/lib/authServer";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -8,9 +9,10 @@ const supabaseAdmin = createClient(
 );
 
 export async function POST(req: NextRequest) {
-  const { userId, nombre, puesto, mercado, stars, text } = await req.json();
-
+  const userId = await getVerifiedUserId(req, supabaseAdmin);
   if (!userId) return NextResponse.json({ error: "No autenticado." }, { status: 401 });
+
+  const { nombre, puesto, mercado, stars, text } = await req.json();
   if (!stars || stars < 1 || stars > 5) return NextResponse.json({ error: "Calificación inválida." }, { status: 400 });
   if (!text || !String(text).trim()) return NextResponse.json({ error: "Falta el texto de la reseña." }, { status: 400 });
 

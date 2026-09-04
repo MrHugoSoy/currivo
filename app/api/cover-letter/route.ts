@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { supabase } from "@/lib/supabase";
 import { createClient } from "@supabase/supabase-js";
 import { coverLetterLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 import { checkActivePro } from "@/lib/proServer";
+import { getVerifiedUserId } from "@/lib/authServer";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
@@ -137,13 +137,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json() as Record<string, unknown>;
     const nombre  = body.nombre as string;
     const puesto  = body.puesto as string;
-    const userId  = body.userId as string | undefined;
 
     if (!nombre || !puesto) {
       return NextResponse.json({ error: "Faltan campos obligatorios." }, { status: 400 });
     }
 
     // ── Verificar Pro ──
+    const userId = await getVerifiedUserId(req, supabaseAdmin);
     if (!userId) {
       return NextResponse.json({ error: "PRO_REQUIRED" }, { status: 403 });
     }
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
     );
 
     // Save to DB (best-effort)
-    await supabase.from("cover_letters").insert({
+    await supabaseAdmin.from("cover_letters").insert({
       user_id: userId,
       nombre,
       puesto,

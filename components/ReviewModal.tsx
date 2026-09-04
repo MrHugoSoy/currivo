@@ -1,15 +1,15 @@
 "use client";
 import { useState } from "react";
+import { authFetch } from "@/lib/authFetch";
 
 interface ReviewModalProps {
-  userId: string;
   nombre: string;
   puesto: string;
   mercado: string;
   onClose: () => void;
 }
 
-export default function ReviewModal({ userId, nombre, puesto, mercado, onClose }: ReviewModalProps) {
+export default function ReviewModal({ nombre, puesto, mercado, onClose }: ReviewModalProps) {
   const [stars, setStars] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [text, setText] = useState("");
@@ -22,10 +22,10 @@ export default function ReviewModal({ userId, nombre, puesto, mercado, onClose }
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/reviews/submit", {
+      const res = await authFetch("/api/reviews/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, nombre, puesto, mercado, stars, text: text.trim() }),
+        body: JSON.stringify({ nombre, puesto, mercado, stars, text: text.trim() }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));

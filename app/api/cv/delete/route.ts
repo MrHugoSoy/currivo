@@ -26,10 +26,14 @@ export async function DELETE(req: NextRequest) {
     }
 
     const { error } = await supabaseAdmin.from("cvs").delete().eq("id", id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("CV delete error:", error);
+      return NextResponse.json({ error: "No se pudo eliminar el CV." }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    console.error("CV delete error:", e);
+    return NextResponse.json({ error: "No se pudo eliminar el CV." }, { status: 500 });
   }
 }

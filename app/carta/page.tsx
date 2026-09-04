@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { authFetch } from "@/lib/authFetch";
 import { isEffectivelyPro } from "@/lib/pro";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -106,10 +107,10 @@ export default function CartaPage() {
         ? importedData.experiencias as ExperienciaEntry[]
         : [];
 
-      const res = await fetch("/api/cover-letter", {
+      const res = await authFetch("/api/cover-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, puesto, empresa, ciudad, mercado, tono, vacante, habilidades, experiencias, userId }),
+        body: JSON.stringify({ nombre, puesto, empresa, ciudad, mercado, tono, vacante, habilidades, experiencias }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error");
