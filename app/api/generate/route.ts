@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { createClient } from "@supabase/supabase-js";
 import { generateLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 import { generateSchema } from "@/lib/validators";
 import { checkActivePro } from "@/lib/proServer";
 import { getVerifiedUserId } from "@/lib/authServer";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? "placeholder",
-  { auth: { persistSession: false } }
-);
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 

@@ -2,6 +2,7 @@
 import { useState, Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { authFetch } from "@/lib/authFetch";
 import Logo from "@/components/Logo";
 
 const PLANS = {
@@ -89,15 +90,11 @@ function CheckoutContent() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const user = data.session?.user;
-      if (user) {
-        setEmail(user.email ?? "");
-        setUserId(user.id);
-      }
+      if (user) setEmail(user.email ?? "");
     });
   }, []);
 
@@ -107,10 +104,10 @@ function CheckoutContent() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/stripe/checkout", {
+      const res = await authFetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planKey, email, userId }),
+        body: JSON.stringify({ plan: planKey, email }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al crear sesión de pago");

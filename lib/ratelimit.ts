@@ -24,6 +24,7 @@ function makeLimiter(prefix: string, requests: number): Ratelimit | null {
 export const generateLimiter     = makeLimiter("resumika:generate", 5);
 export const coverLetterLimiter  = makeLimiter("resumika:cover-letter", 5);
 export const checkoutLimiter     = makeLimiter("resumika:checkout", 10);
+export const welcomeEmailLimiter = makeLimiter("resumika:welcome-email", 10);
 
 export function getIP(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");

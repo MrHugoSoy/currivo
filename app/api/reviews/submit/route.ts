@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { getVerifiedUserId } from "@/lib/authServer";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? "placeholder",
-  { auth: { persistSession: false } }
-);
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function POST(req: NextRequest) {
   const userId = await getVerifiedUserId(req, supabaseAdmin);

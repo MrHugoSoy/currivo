@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { createClient } from "@supabase/supabase-js";
 import { getVerifiedUserId } from "@/lib/authServer";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
 // RECORDATORIO: Activar el portal de clientes en Stripe Dashboard
 // Stripe Dashboard → Settings → Billing → Customer portal → Activate
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? "placeholder",
-  { auth: { persistSession: false } }
-);
 
 export async function POST(req: NextRequest) {
   try {

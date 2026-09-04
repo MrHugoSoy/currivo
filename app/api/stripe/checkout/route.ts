@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe, STRIPE_PRICES } from "@/lib/stripe";
-import { supabase } from "@/lib/supabase";
 import { checkoutLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
+import { getVerifiedUserId } from "@/lib/authServer";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -18,15 +19,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { plan, email, userId } = await req.json() as {
+    const { plan, email } = await req.json() as {
       plan: PlanKey;
       email: string;
-      userId?: string;
     };
 
     if (!plan || !email) {
       return NextResponse.json({ error: "Faltan datos requeridos" }, { status: 400 });
     }
+
+    // Never trust a client-supplied userId for granting Pro — derive it from
+    // the caller's verified session, if any (guest checkout is still allowed;
+    // the webhook falls back to matching by email in that case).
+    const userId = await getVerifiedUserId(req, supabaseAdmin);
 
     const priceId = STRIPE_PRICES[plan];
     if (!priceId) {
