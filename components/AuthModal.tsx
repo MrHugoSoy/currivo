@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-type Tab = "register" | "login";
+type Tab = "register" | "login" | "forgot";
 
 interface AuthModalProps {
   initialTab?: Tab;
@@ -34,7 +34,13 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
     }
     setLoading(true);
     try {
-      if (tab === "register") {
+      if (tab === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/restablecer-contrasena`,
+        });
+        if (error) throw error;
+        setSuccess(true);
+      } else if (tab === "register") {
         if (username.trim()) {
           if (RESERVED.includes(username.trim().toLowerCase())) {
             setError("Ese nombre de usuario no está disponible. Elige otro.");
@@ -98,25 +104,35 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3, marginBottom: 24, background: "var(--warm)", borderRadius: 7, padding: 4 }}>
-          {(["register", "login"] as Tab[]).map(t => (
-            <button key={t} onClick={() => switchTab(t)}
-              style={{ borderRadius: 5, padding: "7px 0", border: "none", fontFamily: "inherit", fontSize: 12, cursor: "pointer", transition: "all .15s", fontWeight: tab === t ? 500 : 400, background: tab === t ? "var(--paper)" : "none", color: tab === t ? "var(--ink)" : "var(--muted)", boxShadow: tab === t ? "0 1px 3px rgba(0,0,0,.07)" : "none" }}>
-              {t === "register" ? "Registrarse" : "Iniciar sesión"}
-            </button>
-          ))}
-        </div>
+        {tab !== "forgot" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3, marginBottom: 24, background: "var(--warm)", borderRadius: 7, padding: 4 }}>
+            {(["register", "login"] as Tab[]).map(t => (
+              <button key={t} onClick={() => switchTab(t)}
+                style={{ borderRadius: 5, padding: "7px 0", border: "none", fontFamily: "inherit", fontSize: 12, cursor: "pointer", transition: "all .15s", fontWeight: tab === t ? 500 : 400, background: tab === t ? "var(--paper)" : "none", color: tab === t ? "var(--ink)" : "var(--muted)", boxShadow: tab === t ? "0 1px 3px rgba(0,0,0,.07)" : "none" }}>
+                {t === "register" ? "Registrarse" : "Iniciar sesión"}
+              </button>
+            ))}
+          </div>
+        )}
 
         {success ? (
           <div style={{ textAlign: "center", padding: "12px 0" }}>
             <div style={{ fontSize: 36, marginBottom: 14 }}>✉️</div>
             <p style={{ fontSize: 15, fontWeight: 500, color: "var(--ink)", marginBottom: 8 }}>Revisa tu correo</p>
             <p style={{ fontSize: 13, color: "var(--body)", lineHeight: 1.65 }}>
-              Enviamos un link de confirmación a <strong>{email}</strong>. Haz clic en él para activar tu cuenta.
+              {tab === "forgot"
+                ? <>Si <strong>{email}</strong> tiene una cuenta, te enviamos un link para restablecer tu contraseña.</>
+                : <>Enviamos un link de confirmación a <strong>{email}</strong>. Haz clic en él para activar tu cuenta.</>}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+            {tab === "forgot" && (
+              <p style={{ fontSize: 12, color: "var(--hint)", margin: "-8px 0 0" }}>
+                Escribe tu correo y te enviaremos un link para restablecer tu contraseña.
+              </p>
+            )}
 
             {/* Username — solo en registro */}
             {tab === "register" && (
@@ -140,11 +156,20 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
                 onChange={e => setEmail(e.target.value)} style={input} />
             </div>
 
-            <div>
-              <label style={{ display: "block", fontSize: 11, color: "var(--muted)", marginBottom: 5, fontWeight: 500 }}>Contraseña</label>
-              <input type="password" required placeholder={tab === "register" ? "Mínimo 6 caracteres" : "Tu contraseña"}
-                value={password} onChange={e => setPassword(e.target.value)} style={input} minLength={6} />
-            </div>
+            {tab !== "forgot" && (
+              <div>
+                <label style={{ display: "block", fontSize: 11, color: "var(--muted)", marginBottom: 5, fontWeight: 500 }}>Contraseña</label>
+                <input type="password" required placeholder={tab === "register" ? "Mínimo 6 caracteres" : "Tu contraseña"}
+                  value={password} onChange={e => setPassword(e.target.value)} style={input} minLength={6} />
+              </div>
+            )}
+
+            {tab === "login" && (
+              <button type="button" onClick={() => { setTab("forgot"); setError(null); setSuccess(false); }}
+                style={{ background: "none", border: "none", color: "var(--hint)", fontSize: 12, cursor: "pointer", fontFamily: "inherit", padding: 0, textAlign: "right", marginTop: -6 }}>
+                ¿Olvidaste tu contraseña?
+              </button>
+            )}
 
             {error && (
               <p style={{ fontSize: 12, color: "#b91c1c", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 5, padding: "8px 12px", margin: 0 }}>
@@ -154,7 +179,7 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
 
             <button type="submit" disabled={loading}
               style={{ background: "var(--green)", color: "#fff", border: "none", borderRadius: 6, padding: "12px 0", fontSize: 13, fontWeight: 500, fontFamily: "inherit", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, marginTop: 4 }}>
-              {loading ? "..." : tab === "register" ? "Crear cuenta gratis" : "Entrar"}
+              {loading ? "..." : tab === "register" ? "Crear cuenta gratis" : tab === "forgot" ? "Enviar link" : "Entrar"}
             </button>
 
             {tab === "login" && (
@@ -163,6 +188,15 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
                 <button type="button" onClick={() => switchTab("register")}
                   style={{ background: "none", border: "none", color: "var(--green)", fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: 500, padding: 0 }}>
                   Regístrate gratis
+                </button>
+              </p>
+            )}
+
+            {tab === "forgot" && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "var(--hint)", margin: 0 }}>
+                <button type="button" onClick={() => switchTab("login")}
+                  style={{ background: "none", border: "none", color: "var(--green)", fontSize: 12, cursor: "pointer", fontFamily: "inherit", fontWeight: 500, padding: 0 }}>
+                  ← Volver a iniciar sesión
                 </button>
               </p>
             )}
