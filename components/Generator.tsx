@@ -411,18 +411,29 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
           {/* ── ADAPTADOR POR VACANTE — más visual ── */}
           <div style={{ marginBottom: 24 }}>
             <button onClick={() => setShowVacante(v => !v)}
+              className={showVacante ? undefined : "vacante-cta-glow"}
               style={{
                 display: "flex", alignItems: "center", gap: 12, width: "100%",
-                background: showVacante ? "rgba(42,82,54,.18)" : "rgba(255,255,255,.02)",
-                border: `1px solid ${showVacante ? "rgba(74,144,96,.45)" : "rgba(255,255,255,.08)"}`,
+                background: showVacante ? "rgba(42,82,54,.18)" : "linear-gradient(135deg, rgba(74,144,96,.16), rgba(125,212,160,.05))",
+                border: `1px solid ${showVacante ? "rgba(74,144,96,.45)" : "rgba(125,212,160,.4)"}`,
                 borderRadius: 10, padding: "14px 18px", cursor: "pointer", fontFamily: "inherit", transition: "all .2s",
+                position: "relative",
               }}>
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: "rgba(74,144,96,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>🎯</div>
+              {!showVacante && (
+                <span style={{
+                  position: "absolute", top: -8, left: 14, fontSize: 9, fontWeight: 700, letterSpacing: ".5px",
+                  padding: "2px 8px", borderRadius: 20, background: "#7dd4a0", color: "#0f2417",
+                  textTransform: "uppercase",
+                }}>
+                  {isMx ? "✨ Recomendado" : "✨ Recommended"}
+                </span>
+              )}
+              <div className="vacante-cta-icon" style={{ width: 38, height: 38, borderRadius: 9, background: "rgba(125,212,160,.22)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🎯</div>
               <div style={{ textAlign: "left", flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: showVacante ? "#7dd4a0" : "rgba(255,255,255,.75)" }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: showVacante ? "#7dd4a0" : "#a8ebc4" }}>
                   {isMx ? "Adaptar a una vacante específica" : "Tailor to a specific job posting"}
                 </div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginTop: 2 }}>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.4)", marginTop: 2 }}>
                   {isMx ? "Pega la descripción y la IA optimiza tu CV con las keywords exactas" : "Paste the job description and AI optimizes your CV with exact keywords"}
                 </div>
               </div>

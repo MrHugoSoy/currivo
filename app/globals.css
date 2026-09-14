@@ -66,6 +66,14 @@ body {
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }
 }
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(125,212,160,.35); }
+  50%      { box-shadow: 0 0 0 7px rgba(125,212,160,0); }
+}
+@keyframes bounceIcon {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.12) rotate(-6deg); }
+}
 
 .animate-fade-up   { animation: fadeUp .65s ease both; }
 .animate-fade-up-2 { animation: fadeUp .65s ease .1s both; }
@@ -73,6 +81,8 @@ body {
 .animate-fade-up-4 { animation: fadeUp .65s ease .3s both; }
 .animate-spin-slow { animation: spin .65s linear infinite; }
 .animate-glow      { animation: glow 2.5s ease infinite; }
+.vacante-cta-glow  { animation: pulseGreen 2.2s ease infinite; }
+.vacante-cta-glow .vacante-cta-icon { animation: bounceIcon 2.2s ease infinite; }
 
 .skeleton {
   background: linear-gradient(90deg, var(--border) 25%, var(--warm) 50%, var(--border) 75%);
