@@ -12,13 +12,63 @@ import { isEffectivelyPro } from "@/lib/pro";
 
 const ADMIN_EMAILS = ["hugoivanrf@gmail.com"];
 
-const SAMPLE_MX = ["Diseñadora Gráfica","Contador Público","Ingeniero de Software","Enfermera Especialista","Arquitecta","Maestra de Primaria","Desarrollador Web","Chef Ejecutivo","Psicóloga Clínica","Abogada Corporativa","Médica General","Gerente de Marketing","Analista Financiero","Ingeniero Civil","Administradora de Empresas","Técnico en Mantenimiento","Coordinadora de RRHH","Fotógrafo Profesional"];
-const SAMPLE_US = ["Graphic Designer","Software Engineer","Marketing Manager","Data Analyst","Project Manager","UX Designer","Financial Analyst","Sales Representative","HR Specialist","Operations Manager","Full Stack Developer","Product Manager","Business Analyst","Registered Nurse","Civil Engineer"];
-const SAMPLE_CA = ["Software Developer","Project Manager","Registered Nurse","Financial Analyst","Marketing Coordinator","Civil Engineer","HR Manager","UX Designer","Data Scientist","Accountant","Bilingual Customer Service","Supply Chain Analyst","Environmental Engineer"];
+// Name + puesto travel together so the sample never mismatches (e.g. a
+// masculine name paired with a feminine-coded Spanish job title).
+interface SampleProfile { name: string; puesto: string; }
 
-const SAMPLE_NAMES_MX = ["María García López","Carlos Hernández Ruiz","Ana Martínez Soto","Jorge Ramírez Torres","Sofía López Mendoza","Diego Flores Castillo","Valentina Cruz Jiménez","Luis Morales Vega","Fernanda Reyes Guzmán","Alejandro Vargas Núñez","Daniela Romero Peña","Iván Sánchez Ríos","Paola Ortiz Delgado","Roberto Navarro Luna","Camila Aguilar Ramos"];
-const SAMPLE_NAMES_US = ["James Wilson","Emily Johnson","Michael Brown","Sarah Davis","David Martinez","Jessica Taylor","Christopher Anderson","Amanda Thomas","Daniel Jackson","Ashley White","Joshua Harris","Megan Clark","Matthew Lewis","Brittany Robinson","Ryan Walker"];
-const SAMPLE_NAMES_CA = ["Liam Chen","Emma Tremblay","Noah Patel","Olivia Dubois","Ethan Kim","Sophia Nguyen","Lucas Okafor","Isabella Singh","Mason Lavoie","Ava Kowalski","Aiden Fernandez","Mia Johansson","Carter Williams","Zoe Lefebvre","Owen Sharma"];
+const SAMPLES_MX: SampleProfile[] = [
+  { name: "María García López",      puesto: "Diseñadora Gráfica" },
+  { name: "Carlos Hernández Ruiz",   puesto: "Contador Público" },
+  { name: "Ana Martínez Soto",       puesto: "Enfermera Especialista" },
+  { name: "Jorge Ramírez Torres",    puesto: "Ingeniero de Software" },
+  { name: "Sofía López Mendoza",     puesto: "Arquitecta" },
+  { name: "Diego Flores Castillo",   puesto: "Desarrollador Web" },
+  { name: "Valentina Cruz Jiménez",  puesto: "Psicóloga Clínica" },
+  { name: "Luis Morales Vega",       puesto: "Chef Ejecutivo" },
+  { name: "Fernanda Reyes Guzmán",   puesto: "Abogada Corporativa" },
+  { name: "Alejandro Vargas Núñez",  puesto: "Gerente de Marketing" },
+  { name: "Daniela Romero Peña",     puesto: "Médica General" },
+  { name: "Iván Sánchez Ríos",       puesto: "Analista Financiero" },
+  { name: "Paola Ortiz Delgado",     puesto: "Coordinadora de RRHH" },
+  { name: "Roberto Navarro Luna",    puesto: "Ingeniero Civil" },
+  { name: "Camila Aguilar Ramos",    puesto: "Administradora de Empresas" },
+];
+
+const SAMPLES_US: SampleProfile[] = [
+  { name: "James Wilson",        puesto: "Graphic Designer" },
+  { name: "Emily Johnson",       puesto: "Software Engineer" },
+  { name: "Michael Brown",       puesto: "Marketing Manager" },
+  { name: "Sarah Davis",         puesto: "Data Analyst" },
+  { name: "David Martinez",      puesto: "Project Manager" },
+  { name: "Jessica Taylor",      puesto: "UX Designer" },
+  { name: "Christopher Anderson",puesto: "Financial Analyst" },
+  { name: "Amanda Thomas",       puesto: "Sales Representative" },
+  { name: "Daniel Jackson",      puesto: "HR Specialist" },
+  { name: "Ashley White",        puesto: "Operations Manager" },
+  { name: "Joshua Harris",       puesto: "Full Stack Developer" },
+  { name: "Megan Clark",         puesto: "Product Manager" },
+  { name: "Matthew Lewis",       puesto: "Business Analyst" },
+  { name: "Brittany Robinson",   puesto: "Registered Nurse" },
+  { name: "Ryan Walker",         puesto: "Civil Engineer" },
+];
+
+const SAMPLES_CA: SampleProfile[] = [
+  { name: "Liam Chen",           puesto: "Software Developer" },
+  { name: "Emma Tremblay",       puesto: "Project Manager" },
+  { name: "Noah Patel",          puesto: "Registered Nurse" },
+  { name: "Olivia Dubois",       puesto: "Financial Analyst" },
+  { name: "Ethan Kim",           puesto: "Marketing Coordinator" },
+  { name: "Sophia Nguyen",       puesto: "Civil Engineer" },
+  { name: "Lucas Okafor",        puesto: "HR Manager" },
+  { name: "Isabella Singh",      puesto: "UX Designer" },
+  { name: "Mason Lavoie",        puesto: "Data Scientist" },
+  { name: "Ava Kowalski",        puesto: "Accountant" },
+  { name: "Aiden Fernandez",     puesto: "Bilingual Customer Service" },
+  { name: "Mia Johansson",       puesto: "Supply Chain Analyst" },
+  { name: "Carter Williams",     puesto: "Environmental Engineer" },
+  { name: "Zoe Lefebvre",        puesto: "Digital Marketing Specialist" },
+  { name: "Owen Sharma",         puesto: "Warehouse Supervisor" },
+];
 const TONES = ["Profesional", "Creativo", "Formal", "Moderno"];
 const INDUSTRIES = ["Diseño", "Tecnología", "Marketing", "Educación", "Salud", "Finanzas", "Construcción", "Manufactura", "Logística", "Ventas", "Recursos Humanos", "Legal", "Gastronomía", "Turismo", "Medios"];
 const DISPONIBILIDAD_OPTIONS = ["Inmediata", "15 días", "1 mes", "2 meses", "A convenir"];
@@ -293,20 +343,20 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
 
   // Starts on a deterministic sample (index 0) so server and client agree on
   // first paint, then swaps to a random one after mount to avoid a hydration mismatch.
-  const [samplePuestos, setSamplePuestos] = useState({ mx: SAMPLE_MX[0], us: SAMPLE_US[0], ca: SAMPLE_CA[0] });
-  const [sampleNames, setSampleNames] = useState({ mx: SAMPLE_NAMES_MX[0], us: SAMPLE_NAMES_US[0], ca: SAMPLE_NAMES_CA[0] });
+  // Name + puesto are picked as a pair (see SampleProfile) so they always agree.
+  const [sampleProfiles, setSampleProfiles] = useState({ mx: SAMPLES_MX[0], us: SAMPLES_US[0], ca: SAMPLES_CA[0] });
   useEffect(() => {
-    setSamplePuestos({
-      mx: SAMPLE_MX[Math.floor(Math.random() * SAMPLE_MX.length)],
-      us: SAMPLE_US[Math.floor(Math.random() * SAMPLE_US.length)],
-      ca: SAMPLE_CA[Math.floor(Math.random() * SAMPLE_CA.length)],
-    });
-    setSampleNames({
-      mx: SAMPLE_NAMES_MX[Math.floor(Math.random() * SAMPLE_NAMES_MX.length)],
-      us: SAMPLE_NAMES_US[Math.floor(Math.random() * SAMPLE_NAMES_US.length)],
-      ca: SAMPLE_NAMES_CA[Math.floor(Math.random() * SAMPLE_NAMES_CA.length)],
+    setSampleProfiles({
+      mx: SAMPLES_MX[Math.floor(Math.random() * SAMPLES_MX.length)],
+      us: SAMPLES_US[Math.floor(Math.random() * SAMPLES_US.length)],
+      ca: SAMPLES_CA[Math.floor(Math.random() * SAMPLES_CA.length)],
     });
   }, []);
+  const sampleNames = { mx: sampleProfiles.mx.name, us: sampleProfiles.us.name, ca: sampleProfiles.ca.name };
+  const samplePuestos = { mx: sampleProfiles.mx.puesto, us: sampleProfiles.us.puesto, ca: sampleProfiles.ca.puesto };
+  const sampleEmail = `${sampleProfiles[form.mercado].name.split(" ")[0]
+    .toLowerCase()
+    .normalize("NFD").replace(/\p{Mn}/gu, "")}@${form.mercado === "mx" ? "correo.com" : "email.com"}`;
 
   const selectedMarket = MARKETS.find(m => m.id === form.mercado)!;
   const note = DIFF_NOTES[form.mercado];
@@ -473,7 +523,7 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                 </FR>
                 <FR>
                   <F label={isMx ? "Ciudad" : isUs ? "City, State" : "City, Province"} placeholder={isMx ? "León, Gto." : isUs ? "Austin, TX" : "Toronto, ON"} value={form.ciudad} onChange={set("ciudad")} />
-                  <F label="Email" placeholder="maria@correo.com" value={form.email} onChange={set("email")} />
+                  <F label="Email" placeholder={sampleEmail} value={form.email} onChange={set("email")} />
                 </FR>
                 <FR>
                   <F label={isMx ? "Teléfono" : isUs ? "Phone" : "Phone / Téléphone"} placeholder={isMx ? "+52 477 123 4567" : isUs ? "+1 (555) 123-4567" : "+1 (416) 123-4567"} value={form.telefono ?? ""} onChange={set("telefono")} />
@@ -784,8 +834,12 @@ function FB({ title, children, step, total, icon, iconBg }: {
         <div style={{ width: 26, height: 26, borderRadius: 7, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, flexShrink: 0 }}>
           {icon}
         </div>
-        <div style={{ fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,.28)", fontWeight: 500, flex: 1 }}>{title}</div>
-        <div style={{ fontSize: 9, color: "rgba(255,255,255,.18)", fontVariantNumeric: "tabular-nums" }}>{step}/{total}</div>
+        <div style={{ fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", color: "rgba(255,255,255,.75)", fontWeight: 600, flex: 1 }}>{title}</div>
+        <div style={{
+          fontSize: 10, fontWeight: 600, color: "#7dd4a0", fontVariantNumeric: "tabular-nums",
+          background: "rgba(74,144,96,.18)", border: "1px solid rgba(74,144,96,.3)",
+          borderRadius: 20, padding: "2px 8px", flexShrink: 0,
+        }}>{step}/{total}</div>
       </div>
       {children}
     </div>
@@ -922,12 +976,12 @@ function ExperienceSelector({ experiencias, onChange, market }: { experiencias: 
   const base: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "9px 12px", fontFamily: "inherit", fontSize: 12, color: "rgba(248,245,239,.9)", outline: "none" };
   const update = (i: number, field: keyof ExperienciaEntry, val: string) => onChange(experiencias.map((e, j) => j === i ? { ...e, [field]: val } : e));
   const [sampleJob, setSampleJob] = useState(() => {
-    const list = market === "us" ? SAMPLE_US : market === "ca" ? SAMPLE_CA : SAMPLE_MX;
-    return list[0];
+    const list = market === "us" ? SAMPLES_US : market === "ca" ? SAMPLES_CA : SAMPLES_MX;
+    return list[0].puesto;
   });
   useEffect(() => {
-    const list = market === "us" ? SAMPLE_US : market === "ca" ? SAMPLE_CA : SAMPLE_MX;
-    setSampleJob(list[Math.floor(Math.random() * list.length)]);
+    const list = market === "us" ? SAMPLES_US : market === "ca" ? SAMPLES_CA : SAMPLES_MX;
+    setSampleJob(list[Math.floor(Math.random() * list.length)].puesto);
   }, [market]);
   return (
     <div>
