@@ -54,7 +54,7 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
             return;
           }
         }
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -63,11 +63,17 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
           },
         });
         if (error) throw error;
-        fetch("/api/email/welcome", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, nombre: username.trim() || undefined, type: "register" }),
-        }).then(() => {}, () => {});
+        // Only fires when Supabase returns a session immediately (no email
+        // confirmation step) — the route now derives the recipient from this
+        // token instead of trusting a client-supplied email.
+        const accessToken = signUpData.session?.access_token;
+        if (accessToken) {
+          fetch("/api/email/welcome", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+            body: JSON.stringify({ type: "register" }),
+          }).then(() => {}, () => {});
+        }
         setSuccess(true);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });

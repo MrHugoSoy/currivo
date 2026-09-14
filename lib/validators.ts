@@ -65,3 +65,25 @@ export const generateSchema = z.object({
 });
 
 export type GenerateInput = z.infer<typeof generateSchema>;
+
+export const coverLetterSchema = z.object({
+  nombre:    z.string().min(2).max(MAX_SHORT).transform(sanitize),
+  puesto:    z.string().min(2).max(MAX_SHORT).transform(sanitize),
+  empresa:   z.string().max(MAX_SHORT).optional().transform(v => v ? sanitize(v) : v),
+  ciudad:    z.string().max(MAX_SHORT).optional().transform(v => v ? sanitize(v) : v),
+  mercado:   z.enum(["mx", "us", "ca"]),
+  tono:      z.string().max(50).optional(),
+  vacante:   z.string().max(MAX_VACANTE).optional().transform(v => v ? sanitize(v) : v),
+  habilidades: z.union([
+    z.array(z.string().max(50).transform(sanitize)).max(30),
+    z.string().max(500).transform(sanitize),
+  ]).optional(),
+  experiencias: z.array(z.object({
+    puesto:      z.string().max(MAX_SHORT).transform(sanitize),
+    empresa:     z.string().max(MAX_SHORT).transform(sanitize),
+    periodo:     z.string().max(50).optional(),
+    descripcion: z.string().max(MAX_LONG).transform(sanitize),
+  })).max(10).optional(),
+});
+
+export type CoverLetterInput = z.infer<typeof coverLetterSchema>;

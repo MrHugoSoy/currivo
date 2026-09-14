@@ -3,8 +3,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { generateLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 import { generateSchema } from "@/lib/validators";
 import { checkActivePro } from "@/lib/proServer";
-import { getVerifiedUserId } from "@/lib/authServer";
+import { getVerifiedUserId, requireAdmin } from "@/lib/authServer";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { TEMPLATES } from "@/lib/templates/types";
 
 export const dynamic = "force-dynamic";
 
@@ -611,21 +612,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const { isActivePro } = await checkActivePro(supabaseAdmin, verifiedUserId);
+    const isAdmin = await requireAdmin(verifiedUserId, supabaseAdmin);
+    const hasPremiumAccess = isActivePro || isAdmin;
+
     // ── Límite de 1 CV gratis para usuarios no Pro ──
-    if (!body.editSlug) {
-      const { isActivePro } = await checkActivePro(supabaseAdmin, verifiedUserId);
+    if (!body.editSlug && !hasPremiumAccess) {
+      const { count } = await supabaseAdmin
+        .from("cvs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", verifiedUserId);
 
-      if (!isActivePro) {
-        const { count } = await supabaseAdmin
-          .from("cvs")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", verifiedUserId);
-
-        if ((count ?? 0) >= 1) {
-          return NextResponse.json({ error: "LIMIT_REACHED" }, { status: 403 });
-        }
+      if ((count ?? 0) >= 1) {
+        return NextResponse.json({ error: "LIMIT_REACHED" }, { status: 403 });
       }
     }
+
+    // ── No confiar en el templateId del cliente para plantillas Pro ──
+    const requestedTemplate = TEMPLATES.find(t => t.id === body.templateId);
+    const resolvedTemplateId = requestedTemplate && (requestedTemplate.libre || hasPremiumAccess)
+      ? requestedTemplate.id
+      : "clasico";
 
     const rawLangs = body.languages;
     const langStr: string = Array.isArray(rawLangs) && rawLangs.length > 0
@@ -660,7 +667,7 @@ export async function POST(req: NextRequest) {
         ciudad: body.ciudad || null,
         email: body.email || null,
         mercado: body.mercado,
-        template: body.templateId || "clasico",
+        template: resolvedTemplateId,
         cv_text: cv,
         form_data: savedFormData,
       }).eq("slug", editSlug).eq("user_id", verifiedUserId);
@@ -673,7 +680,7 @@ export async function POST(req: NextRequest) {
       ciudad: body.ciudad || null,
       email: body.email || null,
       mercado: body.mercado,
-      template: body.templateId || "clasico",
+      template: resolvedTemplateId,
       cv_text: cv,
       form_data: savedFormData,
       user_id: verifiedUserId,

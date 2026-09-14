@@ -4,6 +4,7 @@ import { coverLetterLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
 import { checkActivePro } from "@/lib/proServer";
 import { getVerifiedUserId } from "@/lib/authServer";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { coverLetterSchema } from "@/lib/validators";
 
 export const dynamic = "force-dynamic";
 
@@ -128,13 +129,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json() as Record<string, unknown>;
-    const nombre  = body.nombre as string;
-    const puesto  = body.puesto as string;
-
-    if (!nombre || !puesto) {
-      return NextResponse.json({ error: "Faltan campos obligatorios." }, { status: 400 });
+    const rawBody = await req.json();
+    const parseResult = coverLetterSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      return NextResponse.json({ error: "Datos inválidos. Verifica los campos e intenta de nuevo." }, { status: 400 });
     }
+    const body = parseResult.data;
+    const { nombre, puesto } = body;
 
     // ── Verificar Pro ──
     const userId = await getVerifiedUserId(req, supabaseAdmin);
@@ -148,7 +149,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "PRO_REQUIRED" }, { status: 403 });
     }
 
-    const prompt = buildPrompt(body);
+    const prompt = buildPrompt(body as Record<string, unknown>);
 
     const message = await client.messages.create({
       model: "claude-sonnet-4-5",
@@ -169,7 +170,7 @@ export async function POST(req: NextRequest) {
       nombre,
       puesto,
       empresa: body.empresa || null,
-      mercado: body.mercado || "mx",
+      mercado: body.mercado,
       cover_letter_text: coverLetter,
     }).then(() => {}, () => {});
 

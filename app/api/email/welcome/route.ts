@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendWelcomeEmail, sendProEmail } from "@/lib/emails";
 import { welcomeEmailLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
+
+function getBearerToken(req: NextRequest): string | null {
+  const header = req.headers.get("authorization");
+  const match = header?.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1] : null;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,17 +21,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, nombre, type } = await req.json() as {
-      email: string;
-      nombre?: string;
-      type: "register" | "pro";
-    };
+    // Never trust a client-supplied email/nombre for who receives the email —
+    // always derive the recipient from the caller's verified Supabase session,
+    // otherwise this endpoint could be used to spam/phish arbitrary addresses
+    // from the app's sending domain.
+    const token = getBearerToken(req);
+    if (!token) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-    if (!email || !type) {
-      return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
+    const { data, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !data.user?.email) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const name = nombre || email;
+    const email = data.user.email;
+    const name = (data.user.user_metadata?.username as string | undefined) || email;
+
+    const { type } = await req.json() as { type?: "register" | "pro" };
+    if (type !== "register" && type !== "pro") {
+      return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
+    }
 
     if (type === "register") {
       await sendWelcomeEmail(email, name);

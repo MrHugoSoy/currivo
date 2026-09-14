@@ -3,6 +3,15 @@ import { resend } from "./resend";
 const FROM = "resumika <info@resumika.com>";
 const BASE_URL = "https://resumika.com";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function baseLayout(content: string): string {
   return `<!DOCTYPE html>
 <html lang="es">
@@ -45,7 +54,7 @@ function baseLayout(content: string): string {
 }
 
 export async function sendWelcomeEmail(email: string, nombre: string) {
-  const displayName = nombre && nombre !== email ? nombre : "allí";
+  const displayName = escapeHtml(nombre && nombre !== email ? nombre : "allí");
 
   const content = `
     <tr>
@@ -103,7 +112,7 @@ export async function sendWelcomeEmail(email: string, nombre: string) {
 }
 
 export async function sendProEmail(email: string, nombre: string) {
-  const displayName = nombre && nombre !== email ? nombre : "allí";
+  const displayName = escapeHtml(nombre && nombre !== email ? nombre : "allí");
 
   const benefits = [
     ["🔁", "CVs ilimitados", "México, USA y Canadá sin restricciones"],

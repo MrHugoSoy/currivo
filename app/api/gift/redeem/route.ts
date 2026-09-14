@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getVerifiedUserId } from "@/lib/authServer";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { giftRedeemLimiter, getIP, isRateLimited } from "@/lib/ratelimit";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const { blocked, limit, remaining } = await isRateLimited(giftRedeemLimiter, getIP(req));
+  if (blocked) {
+    return NextResponse.json(
+      { error: "Demasiadas solicitudes. Espera un momento e intenta de nuevo." },
+      { status: 429, headers: { "X-RateLimit-Limit": limit.toString(), "X-RateLimit-Remaining": remaining.toString() } },
+    );
+  }
+
   const userId = await getVerifiedUserId(req, supabaseAdmin);
   if (!userId) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
