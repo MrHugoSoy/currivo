@@ -450,7 +450,10 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
                       Activo
                     </span>
                   )}
-                  <div style={{ fontSize: 24, marginBottom: 8 }}>{m.flag}</div>
+                  {/* Explicit color — this panel is always dark regardless of site
+                      theme, but var(--ink) equals var(--surface-dark) in light mode,
+                      which made the flag invisible without an override. */}
+                  <div style={{ fontSize: 24, marginBottom: 8, color: "rgba(255,255,255,.9)" }}>{m.flag}</div>
                   <div style={{ fontSize: 13, fontWeight: 500, color: form.mercado === m.id ? "#7dd4a0" : "rgba(255,255,255,.8)", fontFamily: "inherit", marginBottom: 3 }}>{m.label}</div>
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", fontFamily: "inherit", lineHeight: 1.4 }}>{m.hint}</div>
                 </button>
