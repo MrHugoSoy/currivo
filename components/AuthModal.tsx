@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Logo from "./Logo";
 
 type Tab = "register" | "login" | "forgot";
 
@@ -106,8 +107,8 @@ export function AuthModal({ initialTab = "register", onClose }: AuthModalProps) 
       >
         <button onClick={onClose} style={{ position: "absolute", top: 12, right: 16, background: "none", border: "none", fontSize: 22, color: "var(--hint)", cursor: "pointer", lineHeight: 1 }}>×</button>
 
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 21, fontWeight: 600, fontStyle: "italic", color: "var(--ink)", marginBottom: 22, letterSpacing: "-0.3px" }}>
-          resumi<span style={{ color: "var(--green)" }}>ka</span>
+        <div style={{ color: "var(--ink)", marginBottom: 22 }}>
+          <Logo height={26} />
         </div>
 
         {/* Tabs */}
