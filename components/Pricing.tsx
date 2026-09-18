@@ -32,6 +32,17 @@ const PRICES: Record<Currency, {
 
 export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
   const p = PRICES[currency];
+  const isMx = currency === "MXN";
+
+  // Pro has a real Stripe price for MXN and for USD — CAD has no price of
+  // its own, so CAD visitors are shown and billed in USD (never a CAD
+  // number that doesn't match what Stripe actually charges). Lifetime only
+  // exists as an MXN price, so it's always shown/charged in MXN regardless
+  // of the visitor's detected currency — showing a fake USD/CAD number here
+  // previously meant the price on screen never matched checkout.
+  const pro = isMx ? PRICES.MXN.pro : PRICES.USD.pro;
+  const proHref = isMx ? "/pago?plan=pro_mxn_founder" : "/pago?plan=pro_usd";
+  const lifetime = PRICES.MXN.lifetime;
 
   const plans = [
     {
@@ -45,20 +56,20 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
     },
     {
       label: "Pro",
-      badge: p.pro.badge,
-      amount: p.pro.amount,
-      originalAmount: p.pro.original,
-      founderBadge: p.pro.founder,
-      period: p.pro.period,
+      badge: pro.badge,
+      amount: pro.amount,
+      originalAmount: pro.original,
+      founderBadge: pro.founder,
+      period: pro.period,
       feats: [["✓","CV adaptado a cada vacante"],["✓","CVs ilimitados"],["✓","Todas las plantillas"],["✓","Carta de presentación IA"],["✓","Edición en línea"],["✓","Descarga en PDF"],["⏳","Exportar a Word (próximamente)"]],
       cta: p.proCta,
       featured: true,
-      href: "/pago?plan=pro_mxn_founder",
+      href: proHref,
     },
     {
       label: "Lifetime",
-      amount: p.lifetime.amount,
-      period: p.lifetime.period,
+      amount: lifetime.amount,
+      period: isMx ? lifetime.period : `${lifetime.period} (MXN)`,
       feats: [["✓","Todo lo de Pro"],["✓","Sin vencimiento"],["✓","Futuras plantillas"],["✓","Soporte prioritario"],["✓","Sin renovaciones"],["⏳","LinkedIn Optimizer (próximamente)"]],
       cta: p.lifetimeCta,
       featured: false,
@@ -96,9 +107,11 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
         <div className="pricing-cards">
           {plans.map(plan => <PlanCard key={plan.label} plan={plan} />)}
         </div>
-        {currency !== "MXN" && (
+        {!isMx && (
           <p style={{ fontSize: 11, color: "var(--hint)", textAlign: "center", marginTop: 20 }}>
-            * Prices shown are approximate. Checkout is processed in MXN (Mexican Peso).
+            {currency === "CAD"
+              ? "* Pro is billed in USD (no separate CAD price yet). Lifetime is billed in MXN (Mexican Peso)."
+              : "* Lifetime is billed in MXN (Mexican Peso)."}
           </p>
         )}
       </div>
