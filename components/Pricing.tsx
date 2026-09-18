@@ -41,7 +41,7 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
   // of the visitor's detected currency — showing a fake USD/CAD number here
   // previously meant the price on screen never matched checkout.
   const pro = isMx ? PRICES.MXN.pro : PRICES.USD.pro;
-  const proHref = isMx ? "/pago?plan=pro_mxn_founder" : "/pago?plan=pro_usd";
+  const proHref = isMx ? "/pago?plan=pro_mxn_founder" : "/pago?plan=pro_usd_founder";
   const lifetime = PRICES.MXN.lifetime;
 
   const plans = [

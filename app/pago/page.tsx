@@ -43,6 +43,25 @@ const PLANS = {
     color: "#4a9060",
     isFounder: false,
   },
+  pro_usd_founder: {
+    label: "Pro — Launch Price",
+    badge: "🚀 Launch offer",
+    price: 2.99,
+    originalPrice: 5.99,
+    period: "/month",
+    tagline: "Special price during launch",
+    features: [
+      "Unlimited CVs for Mexico, USA and Canada",
+      "All templates (including premium)",
+      "AI Cover Letter",
+      "Unlimited online editing",
+      "PDF Download",
+      "Job-specific CV optimizer",
+      "Priority support",
+    ],
+    color: "#4a9060",
+    isFounder: true,
+  },
   pro_usd: {
     label: "Pro",
     badge: "USA & Canada",
@@ -80,7 +99,7 @@ const PLANS = {
 };
 
 type PlanKey = keyof typeof PLANS;
-const currency = (plan: PlanKey) => plan === "pro_usd" ? "USD" : "MXN";
+const currency = (plan: PlanKey) => plan === "pro_usd" || plan === "pro_usd_founder" ? "USD" : "MXN";
 
 function CheckoutContent() {
   const params = useSearchParams();
@@ -120,7 +139,7 @@ function CheckoutContent() {
   }
 
   const curr = currency(planKey);
-  const isEn = planKey === "pro_usd";
+  const isEn = planKey === "pro_usd" || planKey === "pro_usd_founder";
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -181,7 +200,7 @@ function CheckoutContent() {
 
           {"isFounder" in plan && plan.isFounder && (
             <div style={{ fontSize: 11, color: "#7dd4a0", background: "rgba(74,148,96,.12)", border: "1px solid rgba(74,148,96,.25)", borderRadius: 5, padding: "5px 10px", marginBottom: 24, display: "inline-block" }}>
-              ⏳ Precio de fundador — disponible por tiempo limitado
+              {isEn ? "⏳ Founder price — available for a limited time" : "⏳ Precio de fundador — disponible por tiempo limitado"}
             </div>
           )}
 

@@ -6,7 +6,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
-type PlanKey = "pro_mxn_founder" | "pro_mxn" | "pro_usd" | "lifetime_mxn";
+type PlanKey = "pro_mxn_founder" | "pro_mxn" | "pro_usd_founder" | "pro_usd" | "lifetime_mxn";
 
 export async function POST(req: NextRequest) {
   try {
