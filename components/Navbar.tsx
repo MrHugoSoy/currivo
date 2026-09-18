@@ -68,11 +68,13 @@ export default function Navbar() {
         .nav-btn-register:hover { opacity: .82; }
         .nav-btn-admin { font-size: 13px; color: var(--green); text-decoration: none; border: 1px solid rgba(45,90,61,.35); border-radius: 8px; padding: 9px 18px; background: var(--green-bg); font-weight: 500; transition: background .15s; white-space: nowrap; }
         .nav-btn-admin:hover { background: var(--green2); color: #fff; border-color: transparent; }
-        @media (max-width: 900px) {
-          .nav-inner { padding: 0 24px !important; }
-          .nav-links { gap: 20px !important; }
-        }
-        @media (max-width: 768px) {
+        /* Below this, the nav links + CTAs no longer fit on one line and
+           wrap/overlap (e.g. "Cómo funciona" breaking into two lines and
+           colliding with "Iniciar sesión") — this range covers common
+           tablet widths (iPad portrait is 768-834px), not just narrow
+           desktop windows. Switch to the hamburger menu instead of trying
+           to squeeze the full nav in. */
+        @media (max-width: 1024px) {
           .nav-inner { padding: 0 20px !important; }
           .nav-links { display: none !important; }
           .nav-ctas  { display: none !important; }
