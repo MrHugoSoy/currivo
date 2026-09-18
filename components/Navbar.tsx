@@ -29,6 +29,21 @@ export default function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // /login and /registro redirect here with ?auth=login|register so those
+  // URLs (typed from memory, old links, ad sitelinks) open the modal
+  // instead of landing on a dead page. Reads location.search directly
+  // (rather than useSearchParams) so Navbar doesn't need a Suspense
+  // boundary — it's rendered directly on every page.
+  useEffect(() => {
+    const auth = new URLSearchParams(window.location.search).get("auth");
+    if (auth === "login" || auth === "register") {
+      setModal(auth);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("auth");
+      window.history.replaceState({}, "", url);
+    }
+  }, []);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setMobileOpen(false);
