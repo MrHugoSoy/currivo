@@ -115,55 +115,15 @@ export default function Dashboard() {
       loadReviews(uid);
       loadSubAlerts();
 
-      const { data: cvsData, error } = await supabase
-        .from("cvs")
-        .select("id, slug, nombre, puesto, mercado, template, created_at, user_id")
-        .order("created_at", { ascending: false });
-
-      if (!error && cvsData) {
-        setCvs(cvsData as CVCardData[]);
-
-        const uniqueUsers = new Set(cvsData.map((c: { user_id: string }) => c.user_id)).size;
-        const byTemplate: Record<string, number> = {};
-        const byMarket: Record<string, number> = {};
-        for (const cv of cvsData) {
-          const t = (cv as { template: string }).template ?? "unknown";
-          const m = (cv as { mercado: string }).mercado ?? "unknown";
-          byTemplate[t] = (byTemplate[t] ?? 0) + 1;
-          byMarket[m] = (byMarket[m] ?? 0) + 1;
-        }
-
-        const { count: proCount } = await supabase
-          .from("profiles")
-          .select("*", { count: "exact", head: true })
-          .eq("is_pro", true)
-          .neq("pro_plan", "gift");
-
-        const { count: giftCount } = await supabase
-          .from("profiles")
-          .select("*", { count: "exact", head: true })
-          .eq("is_pro", true)
-          .eq("pro_plan", "gift");
-
-        const { count: giftTotal } = await supabase
-          .from("gift_codes")
-          .select("*", { count: "exact", head: true });
-
-        const { count: giftUsed } = await supabase
-          .from("gift_codes")
-          .select("*", { count: "exact", head: true })
-          .eq("is_used", true);
-
-        setStats({
-          totalCvs: cvsData.length,
-          uniqueUsers,
-          proUsers: proCount ?? 0,
-          giftUsers: giftCount ?? 0,
-          byTemplate,
-          byMarket,
-          giftTotal: giftTotal ?? 0,
-          giftUsed: giftUsed ?? 0,
-        });
+      // Fetched server-side via /api/admin/stats (requireAdmin + service
+      // role) — never queried directly with the anon key, since that would
+      // depend entirely on RLS to keep other users' CV data out of reach of
+      // any authenticated (non-admin) caller.
+      const res = await authFetch("/api/admin/stats");
+      if (res.ok) {
+        const d = await res.json();
+        setCvs(d.cvs ?? []);
+        setStats(d.stats ?? null);
       }
 
       setLoading(false);
