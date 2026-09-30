@@ -72,7 +72,7 @@ const jsonLd = {
       "@id": "https://resumika.com/#org",
       "name": "resumika",
       "url": "https://resumika.com",
-      "logo": "https://resumika.com/logo.png",
+      "logo": "https://resumika.com/logo.svg",
     },
   ],
 };

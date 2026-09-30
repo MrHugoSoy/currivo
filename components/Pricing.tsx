@@ -30,7 +30,7 @@ const PRICES: Record<Currency, {
   },
 };
 
-export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
+export default function Pricing({ currency = "MXN", asPageTitle = false }: { currency?: Currency; asPageTitle?: boolean }) {
   const p = PRICES[currency];
   const isMx = currency === "MXN";
 
@@ -96,10 +96,20 @@ export default function Pricing({ currency = "MXN" }: { currency?: Currency }) {
       <div className="pricing-inner">
         <SectionLabel>Precios</SectionLabel>
         <div className="pricing-header">
+          {/* /precios has no other page-level heading, so it needs this as
+              an actual <h1> — everywhere else (e.g. the homepage, which
+              already has its own <h1> in Hero) it stays an <h2>. */}
+          {asPageTitle ? (
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(34px, 3.8vw, 52px)", fontWeight: 600, color: "var(--ink)", letterSpacing: "-1.2px", lineHeight: 1.08 }}>
+              Invierte en<br />
+              <em style={{ color: "var(--green)", fontStyle: "italic" }}>tu carrera</em>
+            </h1>
+          ) : (
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(34px, 3.8vw, 52px)", fontWeight: 600, color: "var(--ink)", letterSpacing: "-1.2px", lineHeight: 1.08 }}>
             Invierte en<br />
             <em style={{ color: "var(--green)", fontStyle: "italic" }}>tu carrera</em>
           </h2>
+          )}
           <p style={{ fontSize: 15, color: "var(--body)", lineHeight: 1.75, paddingBottom: 4 }}>
             ¿Encontraste una vacante? Con Pro pegas la descripción y adaptas tu CV con IA a cada una, sin límite. Empieza gratis y escala cuando lo necesites — sin contratos, cancela cuando quieras.
           </p>

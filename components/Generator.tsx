@@ -408,12 +408,14 @@ export default function Generator({ initialData, editSlug }: GeneratorProps = {}
       <section id="generador" className="gen-section" style={{ background: "var(--surface-dark)", padding: "88px 0" }}>
         <div className="gen-wrap" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 40px" }}>
 
-          {/* Label */}
-          <div style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.2)", fontWeight: 500, marginBottom: 32, display: "flex", alignItems: "center", gap: 12 }}>
-            {editSlug ? "Editar CV" : "Generador"}
+          {/* This is the page's only heading (/crear has no h1 otherwise) —
+              kept at the same small eyebrow-label size, just semantically
+              an <h1> instead of a <div>. */}
+          <h1 style={{ fontSize: 10, letterSpacing: "2.5px", textTransform: "uppercase", color: "rgba(255,255,255,.2)", fontWeight: 500, marginBottom: 32, display: "flex", alignItems: "center", gap: 12 }}>
+            {editSlug ? "Editar CV" : "Generador de CV con IA"}
             <span style={{ flex: 1, height: 1, background: "rgba(255,255,255,.07)", display: "block" }} />
             {editSlug && <span style={{ fontSize: 10, color: "rgba(255,255,255,.3)", letterSpacing: 0 }}>Editando · tus datos están precargados</span>}
-          </div>
+          </h1>
 
           {/* ── DRAFT BANNER ── */}
           {draftBanner && draftData?._savedAt && !result && (
