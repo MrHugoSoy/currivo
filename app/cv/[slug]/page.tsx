@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { CVPageActions } from "./CVPageActions";
 import { PREVIEW_TEMPLATES } from "@/lib/templates/index";
 import type { TemplateId, CVData } from "@/lib/templates/types";
@@ -10,7 +10,7 @@ type PageProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from("cvs")
     .select("nombre, puesto, ciudad")
     .eq("slug", slug)
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CVPage({ params }: PageProps) {
   const { slug } = await params;
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("cvs")
     .select("nombre, puesto, ciudad, email, mercado, cv_text, template, form_data, created_at")
     .eq("slug", slug)

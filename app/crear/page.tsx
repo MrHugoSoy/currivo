@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Generator from "@/components/Generator";
 import Footer from "@/components/Footer";
 import type { Metadata } from "next";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const metadata: Metadata = {
   title: "Crear CV · resumika",
@@ -16,7 +16,7 @@ export default async function CrearPage({ searchParams }: Props) {
   let initialData: Record<string, unknown> | undefined;
 
   if (edit) {
-    const { data } = await supabase
+    const { data } = await supabaseAdmin
       .from("cvs")
       .select("form_data")
       .eq("slug", edit)

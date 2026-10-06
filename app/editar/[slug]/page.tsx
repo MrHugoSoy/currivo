@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import TextEditor from "./TextEditor";
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ type PageProps = { params: Promise<{ slug: string }> };
 
 export default async function EditarPage({ params }: PageProps) {
   const { slug } = await params;
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("cvs")
     .select("nombre, puesto, cv_text, template, mercado")
     .eq("slug", slug)
