@@ -10,6 +10,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/precios`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/carta`,   lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/guias`,   lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${base}/plantillas`,  lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/comparacion`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/nosotros`,    lastModified: new Date(), changeFrequency: "yearly",  priority: 0.4 },
   ];
 
   const guias = getAllGuias();
