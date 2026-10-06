@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { authFetch } from "@/lib/authFetch";
 import { AuthModal } from "./AuthModal";
 import Logo from "./Logo";
 import type { User } from "@supabase/supabase-js";
@@ -22,9 +23,25 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    // Links a Pro plan bought as a guest (profile keyed by email only) to
+    // this account. Once per browser session so it isn't fired on every page.
+    const claimProfile = (u: User | null | undefined) => {
+      if (!u) return;
+      try {
+        const key = `profile-claim:${u.id}`;
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, "1");
+      } catch { /* storage blocked: just try anyway */ }
+      authFetch("/api/profile/claim", { method: "POST" }).catch(() => {});
+    };
+
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+      claimProfile(data.session?.user);
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
+      claimProfile(session?.user);
     });
     return () => subscription.unsubscribe();
   }, []);

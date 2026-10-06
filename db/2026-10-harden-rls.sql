@@ -55,3 +55,29 @@ drop policy if exists "CVs públicos legibles" on public.cvs;
 -- CVs antiguos sin user_id, que es lo que consulta /perfil).
 create policy cvs_select_own on public.cvs for select to authenticated
   using (auth.uid() = user_id or lower(email) = lower(auth.jwt() ->> 'email'));
+
+
+-- ------------------------------------------------------------
+-- PASO C — EJECUTAR AHORA (arregla el registro de quien pago como invitado)
+-- ------------------------------------------------------------
+-- profiles tiene UNIQUE(email) y el trigger usaba ON CONFLICT (user_id), que NO
+-- cubre el choque por email. Resultado: si alguien pagaba sin cuenta (perfil con
+-- user_id null) y luego intentaba registrarse con ese correo, el alta fallaba
+-- ("Database error saving new user"). Ahora el trigger no falla; el vinculo del
+-- plan Pro con la cuenta lo hace /api/profile/claim al iniciar sesion, solo con
+-- correo confirmado (hacerlo aqui permitiria reclamar el plan de otra persona
+-- registrandose con su correo sin confirmar).
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  insert into public.profiles (user_id, email, is_pro, created_at)
+  values (new.id, new.email, false, now())
+  on conflict do nothing;
+  return new;
+end;
+$$;
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
