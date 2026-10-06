@@ -17,18 +17,26 @@ async function activatePro(email: string, userId: string, plan: string, customer
     pro_activated_at: new Date().toISOString(),
   };
 
+  // onConflict must name the unique column. Without it PostgREST conflicts on
+  // the primary key (id), which is never in the payload, so for any user that
+  // already has a profile row (all of them, via the signup trigger) the insert
+  // hit the user_id unique constraint and the plan was silently never granted.
+  // Errors are thrown so the handler returns 500 and Stripe retries.
   if (userId) {
-    await supabaseAdmin.from("profiles").upsert({ user_id: userId, ...update });
+    const { error } = await supabaseAdmin.from("profiles").upsert({ user_id: userId, ...update }, { onConflict: "user_id" });
+    if (error) throw new Error(`activatePro(user_id) failed: ${error.message}`);
   } else if (email) {
-    await supabaseAdmin.from("profiles").upsert({ email, ...update });
+    const { error } = await supabaseAdmin.from("profiles").upsert({ email, ...update }, { onConflict: "email" });
+    if (error) throw new Error(`activatePro(email) failed: ${error.message}`);
   }
 }
 
 async function deactivatePro(customerId: string) {
-  await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from("profiles")
     .update({ is_pro: false, pro_expires_at: new Date().toISOString() })
     .eq("stripe_customer_id", customerId);
+  if (error) throw new Error(`deactivatePro failed: ${error.message}`);
 }
 
 export async function POST(req: NextRequest) {
